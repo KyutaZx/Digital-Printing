@@ -40,7 +40,7 @@ func (r *auditRepository) Create(ctx context.Context, a *audit.AuditLog) error {
 		a.UserID,
 		a.Role,
 		a.Action,
-		a.Entity, // Value ini akan masuk ke kolom entity_type
+		a.EntityType, // Value ini akan masuk ke kolom entity_type
 		a.EntityID,
 		a.IPAddress,
 		a.UserAgent,

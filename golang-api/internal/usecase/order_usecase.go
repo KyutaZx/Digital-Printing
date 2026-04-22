@@ -25,9 +25,6 @@ func NewOrderUsecase(repo order.Repository, auditRepo audit.Repository) *OrderUs
 // =========================================================================
 // CREATE ORDER (MANUAL/OPTIONAL)
 // =========================================================================
-// =========================================================================
-// CREATE ORDER (MANUAL/OPTIONAL)
-// =========================================================================
 func (u *OrderUsecase) Create(ctx context.Context, userID int, items []order.OrderItem, ip, ua string) error {
 	if len(items) == 0 {
 		return errors.New("pesanan harus memiliki setidaknya satu item")
@@ -50,7 +47,7 @@ func (u *OrderUsecase) Create(ctx context.Context, userID int, items []order.Ord
 		UserID:    userID,
 		Role:      "customer",
 		Action:    audit.ActionCreateOrder,
-		Entity:    "orders",
+		EntityType:"orders",
 		EntityID:  o.ID,
 		IPAddress: ip,
 		UserAgent: ua,
@@ -74,7 +71,7 @@ func (u *OrderUsecase) Checkout(ctx context.Context, userID int, ip, ua string) 
 		UserID:    userID,
 		Role:      "customer",
 		Action:    audit.ActionCheckout,
-		Entity:    "orders",
+		EntityType:"orders",
 		EntityID:  orderID,
 		IPAddress: ip,
 		UserAgent: ua,
@@ -114,7 +111,7 @@ func (u *OrderUsecase) Cancel(ctx context.Context, orderID int, userID int, ip, 
 		UserID:    userID,
 		Role:      "customer",
 		Action:    "CANCEL_ORDER",
-		Entity:    "orders",
+		EntityType:"orders",
 		EntityID:  orderID,
 		IPAddress: ip,
 		UserAgent: ua,

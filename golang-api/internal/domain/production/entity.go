@@ -9,5 +9,6 @@ type ProductionLog struct {
 	StaffID   int        `json:"staff_id"`
 	StartTime time.Time  `json:"start_time"`
 	EndTime   *time.Time `json:"end_time"` // Pakai pointer karena bisa bernilai NULL saat baru dimulai
-	Notes     string     `json:"notes"`
+	Notes     *string    `json:"notes"`
+	CreatedAt time.Time  `json:"created_at"`
 }
