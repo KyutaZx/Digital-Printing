@@ -15,6 +15,7 @@ func SetupRoutes(
 	cartHandler *handler.CartHandler,
 	paymentHandler *handler.PaymentHandler,
 	productionHandler *handler.ProductionHandler, // 🔥 TAMBAHAN UNTUK PRODUKSI
+	materialHandler *handler.MaterialHandler, // 🔥 TAMBAHAN UNTUK INVENTORI
 ) {
 
 	// ========================
@@ -93,6 +94,11 @@ func SetupRoutes(
 			admin.POST("/products", productHandler.Create)
 			admin.PUT("/products/:id", productHandler.Update)
 			admin.DELETE("/products/:id", productHandler.Delete)
+
+			// 🔥 Material / Inventory Management (Admin/Owner)
+			admin.GET("/materials", materialHandler.GetAll)
+			admin.POST("/materials", materialHandler.Create)
+			admin.POST("/materials/:id/adjust", materialHandler.AdjustStock)
 		}
 
 		// ========================

@@ -48,8 +48,9 @@ func main() {
 	paymentRepo := postgresRepo.NewPaymentRepository(dbConn)
 	auditRepo := postgresRepo.NewAuditRepository(dbConn) // Wajib ada untuk logging
 
-	// 🔥 TAMBAHAN: Inisialisasi Production Repository
+	// 🔥 TAMBAHAN: Inisialisasi Production & Material Repository
 	productionRepo := postgresRepo.NewProductionRepository(dbConn)
+	materialRepo := postgresRepo.NewMaterialRepository(dbConn)
 
 	// =========================================================================
 	// 4. USECASE INITIALIZATION (Dependency Injection)
@@ -60,8 +61,9 @@ func main() {
 	cartUsecase := usecase.NewCartUsecase(cartRepo)
 	paymentUsecase := usecase.NewPaymentUsecase(paymentRepo, orderRepo, auditRepo)
 
-	// 🔥 TAMBAHAN: Inisialisasi Production Usecase (dengan Audit)
+	// 🔥 TAMBAHAN: Inisialisasi Production & Material Usecase
 	productionUsecase := usecase.NewProductionUsecase(productionRepo, auditRepo)
+	materialUsecase := usecase.NewMaterialUsecase(materialRepo, auditRepo)
 
 	// =========================================================================
 	// 5. HANDLER INITIALIZATION
@@ -72,8 +74,9 @@ func main() {
 	cartHandler := handler.NewCartHandler(cartUsecase)
 	paymentHandler := handler.NewPaymentHandler(paymentUsecase)
 
-	// 🔥 TAMBAHAN: Inisialisasi Production Handler
+	// 🔥 TAMBAHAN: Inisialisasi Production & Material Handler
 	productionHandler := handler.NewProductionHandler(productionUsecase)
+	materialHandler := handler.NewMaterialHandler(materialUsecase)
 
 	// =========================================================================
 	// 6. ROUTER & SERVER SETUP
@@ -94,6 +97,7 @@ func main() {
 		cartHandler,
 		paymentHandler,
 		productionHandler, // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
+		materialHandler,   // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 	)
 
 	// RUN SERVER

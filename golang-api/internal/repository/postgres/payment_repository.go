@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"golang-api/internal/domain/payment"
 )
@@ -78,7 +79,59 @@ func (r *paymentRepository) UpdateStatus(ctx context.Context, id int, status str
 		return err
 	}
 
-	// Commit jika kedua update berhasil
+	// 3. LOGIKA OTOMATIS POTONG STOK JIKA APPROVED (paid)
+	if orderStatus == "paid" {
+		// Ambil semua item pesanan dan cek material usagenya
+		queryUsage := `
+			SELECT oi.quantity, pv.material_id, pv.material_usage 
+			FROM order_items oi
+			JOIN product_variants pv ON oi.variant_id = pv.id
+			WHERE oi.order_id = $1 AND pv.material_id IS NOT NULL AND pv.material_usage > 0
+		`
+		rows, err := tx.QueryContext(ctx, queryUsage, orderID)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		
+		type usageData struct {
+			Qty           int
+			MaterialID    int
+			MaterialUsage float64
+		}
+		var usages []usageData
+		for rows.Next() {
+			var u usageData
+			if err := rows.Scan(&u.Qty, &u.MaterialID, &u.MaterialUsage); err != nil {
+				rows.Close()
+				tx.Rollback()
+				return err
+			}
+			usages = append(usages, u)
+		}
+		rows.Close()
+
+		for _, u := range usages {
+			totalUsage := float64(u.Qty) * u.MaterialUsage
+			
+			// Kurangi stok
+			_, err = tx.ExecContext(ctx, "UPDATE materials SET stock = stock - $1 WHERE id = $2", totalUsage, u.MaterialID)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			// Catat ke log
+			ref := fmt.Sprintf("Order Paid #%d", orderID)
+			_, err = tx.ExecContext(ctx, "INSERT INTO material_stock_logs (material_id, change_type, quantity, reference, created_at) VALUES ($1, 'out', $2, $3, NOW())", u.MaterialID, totalUsage, ref)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	// Commit jika semua update berhasil
 	return tx.Commit()
 }
 

@@ -213,13 +213,66 @@ func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) e
 	}
 
 	// 3. Lakukan pembatalan
-	query := `UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1`
-	_, err = r.db.ExecContext(ctx, query, orderID)
-	
-	// Catatan: Logika pengembalian stok (Refund Stock) untuk status 'paid' 
-	// akan ditambahkan di sini saat implementasi Domain Material.
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	return err
+	query := `UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1`
+	_, err = tx.ExecContext(ctx, query, orderID)
+	if err != nil {
+		return err
+	}
+	
+	// 4. Logika pengembalian stok (Refund Stock) untuk status 'paid' 
+	if currentStatus == "paid" {
+		queryUsage := `
+			SELECT oi.quantity, pv.material_id, pv.material_usage 
+			FROM order_items oi
+			JOIN product_variants pv ON oi.variant_id = pv.id
+			WHERE oi.order_id = $1 AND pv.material_id IS NOT NULL AND pv.material_usage > 0
+		`
+		rows, err := tx.QueryContext(ctx, queryUsage, orderID)
+		if err != nil {
+			return err
+		}
+		
+		type usageData struct {
+			Qty           int
+			MaterialID    int
+			MaterialUsage float64
+		}
+		var usages []usageData
+		for rows.Next() {
+			var u usageData
+			if err := rows.Scan(&u.Qty, &u.MaterialID, &u.MaterialUsage); err != nil {
+				rows.Close()
+				return err
+			}
+			usages = append(usages, u)
+		}
+		rows.Close()
+
+		for _, u := range usages {
+			totalUsage := float64(u.Qty) * u.MaterialUsage
+			
+			// Kembalikan stok
+			_, err = tx.ExecContext(ctx, "UPDATE materials SET stock = stock + $1 WHERE id = $2", totalUsage, u.MaterialID)
+			if err != nil {
+				return err
+			}
+
+			// Catat ke log
+			ref := fmt.Sprintf("Order Cancelled #%d (Refund)", orderID)
+			_, err = tx.ExecContext(ctx, "INSERT INTO material_stock_logs (material_id, change_type, quantity, reference, created_at) VALUES ($1, 'in', $2, $3, NOW())", u.MaterialID, totalUsage, ref)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return tx.Commit()
 }
 
 // =========================================================================
