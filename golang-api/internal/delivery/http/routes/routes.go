@@ -16,6 +16,7 @@ func SetupRoutes(
 	paymentHandler *handler.PaymentHandler,
 	productionHandler *handler.ProductionHandler, // 🔥 TAMBAHAN UNTUK PRODUKSI
 	materialHandler *handler.MaterialHandler, // 🔥 TAMBAHAN UNTUK INVENTORI
+	designHandler *handler.DesignHandler, // 🔥 TAMBAHAN UNTUK DESAIN
 ) {
 
 	// ========================
@@ -24,6 +25,11 @@ func SetupRoutes(
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+
+	// ========================
+	// STATIC FILES (UPLOADS)
+	// ========================
+	r.Static("/uploads", "./uploads")
 
 	// ========================
 	// AUTH (PUBLIC)
@@ -66,11 +72,15 @@ func SetupRoutes(
 		api.DELETE("/cart", cartHandler.Delete)
 
 		// ========================
-		// ORDER
+		// ORDER & DESIGNS
 		// ========================
 		api.POST("/orders", orderHandler.Create)
 		api.POST("/checkout", orderHandler.Checkout)
 		api.PUT("/orders/:id/cancel", orderHandler.Cancel)
+		
+		// Customer Upload & View Designs
+		api.POST("/orders/items/:id/design", designHandler.UploadDesign)
+		api.GET("/orders/items/:id/designs", designHandler.GetDesignsByOrderItemID)
 
 		// ========================
 		// PAYMENT (CUSTOMER)
@@ -102,7 +112,7 @@ func SetupRoutes(
 		}
 
 		// ========================
-		// STAFF ROUTES (PRODUCTION)
+		// STAFF ROUTES (PRODUCTION & DESIGN)
 		// ========================
 		staff := api.Group("/staff")
 		// Catatan: Validasi role staff/admin sudah kita lakukan di dalam handler,
@@ -110,6 +120,9 @@ func SetupRoutes(
 		{
 			staff.PUT("/production/:id/start", productionHandler.Start)
 			staff.PUT("/production/:id/finish", productionHandler.Finish)
+			
+			// Staff Review Design
+			staff.POST("/designs/:id/review", designHandler.AddReview)
 		}
 	}
 }

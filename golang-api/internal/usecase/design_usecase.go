@@ -1,0 +1,100 @@
+package usecase
+
+import (
+	"context"
+	"errors"
+
+	"golang-api/internal/domain/audit"
+	"golang-api/internal/domain/design"
+)
+
+type DesignUsecase struct {
+	designRepo design.Repository
+	auditRepo  audit.Repository
+}
+
+func NewDesignUsecase(designRepo design.Repository, auditRepo audit.Repository) *DesignUsecase {
+	return &DesignUsecase{
+		designRepo: designRepo,
+		auditRepo:  auditRepo,
+	}
+}
+
+// UploadDesign memproses penyimpanan data file desain dan mengatur versinya
+func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, filePath string, uploadedBy int, ip, ua string) (*design.DesignFile, error) {
+	// 1. Cari tahu versi terakhir untuk order item ini
+	latestVersion, err := u.designRepo.GetLatestVersion(ctx, orderItemID)
+	if err != nil {
+		return nil, err
+	}
+
+	newVersion := latestVersion + 1
+
+	d := &design.DesignFile{
+		OrderItemID: orderItemID,
+		FilePath:    filePath,
+		Version:     newVersion,
+		UploadedBy:  uploadedBy,
+	}
+
+	// 2. Simpan ke database
+	err = u.designRepo.UploadDesign(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Catat log audit
+	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
+		UserID:     uploadedBy,
+		Role:       "customer", // asumsi role
+		Action:     "upload_design",
+		EntityType: "design_files",
+		EntityID:   d.ID,
+		IPAddress:  ip,
+		UserAgent:  ua,
+	})
+
+	return d, nil
+}
+
+// GetDesignsByOrderItemID mendapatkan seluruh riwayat desain untuk item pesanan tertentu
+func (u *DesignUsecase) GetDesignsByOrderItemID(ctx context.Context, orderItemID int) ([]design.DesignFile, error) {
+	return u.designRepo.GetDesignsByOrderItemID(ctx, orderItemID)
+}
+
+// AddReview menambahkan review dari staf untuk sebuah file desain
+func (u *DesignUsecase) AddReview(ctx context.Context, designID int, req design.DesignReviewRequest, reviewerID int, ip, ua string) error {
+	// Cek apakah desain ada
+	d, err := u.designRepo.GetDesignByID(ctx, designID)
+	if err != nil {
+		return err
+	}
+	if d == nil {
+		return errors.New("file desain tidak ditemukan")
+	}
+
+	review := &design.DesignReview{
+		DesignFileID: designID,
+		ReviewedBy:   reviewerID,
+		Status:       req.Status,
+		Notes:        req.Notes,
+	}
+
+	err = u.designRepo.AddReview(ctx, review)
+	if err != nil {
+		return err
+	}
+
+	// Catat log audit
+	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
+		UserID:     reviewerID,
+		Role:       "admin/owner", // asumsi staff/admin
+		Action:     "review_design_" + req.Status,
+		EntityType: "design_reviews",
+		EntityID:   review.ID,
+		IPAddress:  ip,
+		UserAgent:  ua,
+	})
+
+	return nil
+}
