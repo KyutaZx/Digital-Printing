@@ -88,6 +88,11 @@ func SetupRoutes(
 			admin.PUT("/payments/:id/approve", paymentHandler.Approve)
 			admin.PUT("/payments/:id/reject", paymentHandler.Reject)
 			// admin.GET("/reports", reportHandler.GetReports)
+
+			// 🔥 Product Management (Admin/Owner)
+			admin.POST("/products", productHandler.Create)
+			admin.PUT("/products/:id", productHandler.Update)
+			admin.DELETE("/products/:id", productHandler.Delete)
 		}
 
 		// ========================

@@ -197,17 +197,29 @@ func (r *orderRepository) FindByID(ctx context.Context, orderID int) (*order.Ord
 // CANCEL ORDER
 // =========================================================================
 func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) error {
-	query := `UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1 AND user_id = $2`
-	res, err := r.db.ExecContext(ctx, query, orderID, userID)
+	// 1. Cek status order saat ini
+	var currentStatus string
+	err := r.db.QueryRowContext(ctx, "SELECT status FROM orders WHERE id = $1 AND user_id = $2", orderID, userID).Scan(&currentStatus)
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("pesanan tidak ditemukan atau akses ditolak")
+	}
 	if err != nil {
 		return err
 	}
 
-	rows, _ := res.RowsAffected()
-	if rows == 0 {
-		return fmt.Errorf("pesanan tidak ditemukan atau akses ditolak")
+	// 2. Cegah pembatalan jika order sudah masuk tahap produksi atau selesai
+	if currentStatus == "printing" || currentStatus == "ready" || currentStatus == "completed" || currentStatus == "cancelled" {
+		return fmt.Errorf("tidak dapat membatalkan pesanan karena status saat ini adalah: %s", currentStatus)
 	}
-	return nil
+
+	// 3. Lakukan pembatalan
+	query := `UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1`
+	_, err = r.db.ExecContext(ctx, query, orderID)
+	
+	// Catatan: Logika pengembalian stok (Refund Stock) untuk status 'paid' 
+	// akan ditambahkan di sini saat implementasi Domain Material.
+
+	return err
 }
 
 // =========================================================================

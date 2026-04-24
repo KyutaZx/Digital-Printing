@@ -31,3 +31,26 @@ type Product struct {
 	UpdatedAt     *time.Time       `json:"updated_at,omitempty"`
 	DeletedAt     *time.Time       `json:"deleted_at,omitempty"` // Digunakan untuk soft delete [cite: 1259 16548]
 }
+
+// ProductVariantRequest DTO untuk input varian
+type ProductVariantRequest struct {
+	ID            int     `json:"id"` // Jika > 0 berarti update varian lama, jika 0 berarti varian baru
+	SKU           string  `json:"sku" binding:"required"`
+	VariantName   string  `json:"variant_name" binding:"required"`
+	Price         float64 `json:"price" binding:"required"`
+	Stock         int     `json:"stock"`
+	IsActive      *bool   `json:"is_active" binding:"required"`
+	MaterialID    *int    `json:"material_id"`
+	MaterialUsage float64 `json:"material_usage"`
+}
+
+// ProductRequest DTO untuk input produk (Create/Update)
+type ProductRequest struct {
+	CategoryID    *int                    `json:"category_id"`
+	Name          string                  `json:"name" binding:"required"`
+	Description   string                  `json:"description"`
+	BasePrice     float64                 `json:"base_price" binding:"required"`
+	EstimatedDays int                     `json:"estimated_days"`
+	IsActive      *bool                   `json:"is_active" binding:"required"`
+	Variants      []ProductVariantRequest `json:"variants" binding:"required,dive"`
+}
