@@ -10,15 +10,6 @@ import (
 
 var SECRET_KEY = []byte("secret")
 
-// ========================
-// CUSTOM CLAIMS
-// ========================
-type CustomClaims struct {
-	UserID int    `json:"user_id"`
-	Role   string `json:"role"`
-	jwt.RegisteredClaims
-}
-
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -29,17 +20,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// ========================
-		// FORMAT: Bearer TOKEN
-		// ========================
 		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
-		// ========================
-		// PARSE TOKEN WITH CLAIMS
-		// ========================
-		claims := &CustomClaims{}
-
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		// Parse pakai MapClaims (sesuai cara GenerateToken memakai jwt.MapClaims)
+		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 			return SECRET_KEY, nil
 		})
 
@@ -49,11 +33,27 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// ========================
-		// SET KE CONTEXT
-		// ========================
-		c.Set("user_id", claims.UserID)
-		c.Set("role", claims.Role)
+		// Ekstrak claims dari MapClaims
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		// Ambil user_id (disimpan sebagai float64 di MapClaims JSON)
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid token: user_id not found"})
+			c.Abort()
+			return
+		}
+
+		role, _ := claims["role"].(string)
+
+		// Set ke context agar bisa diakses handler
+		c.Set("user_id", int(userIDFloat))
+		c.Set("role", role)
 
 		c.Next()
 	}
