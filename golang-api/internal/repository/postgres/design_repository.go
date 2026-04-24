@@ -140,3 +140,20 @@ func (r *designRepository) AddReview(ctx context.Context, review *design.DesignR
 	err = r.db.QueryRowContext(ctx, query, review.DesignFileID, review.ReviewedBy, review.Status, notes).Scan(&review.ID, &review.CreatedAt)
 	return err
 }
+
+// VerifyOrderItemOwnership mengecek apakah order_item milik user tersebut
+// dengan JOIN order_items -> orders -> user_id
+func (r *designRepository) VerifyOrderItemOwnership(ctx context.Context, orderItemID int, userID int) (bool, error) {
+	query := `
+		SELECT COUNT(1) 
+		FROM order_items oi
+		JOIN orders o ON o.id = oi.order_id
+		WHERE oi.id = $1 AND o.user_id = $2
+	`
+	var count int
+	err := r.db.QueryRowContext(ctx, query, orderItemID, userID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

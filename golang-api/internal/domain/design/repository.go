@@ -8,4 +8,6 @@ type Repository interface {
 	GetLatestVersion(ctx context.Context, orderItemID int) (int, error)
 	GetDesignByID(ctx context.Context, designID int) (*DesignFile, error)
 	AddReview(ctx context.Context, review *DesignReview) error
+	// VerifyOrderItemOwnership memastikan order_item milik user tersebut
+	VerifyOrderItemOwnership(ctx context.Context, orderItemID int, userID int) (bool, error)
 }

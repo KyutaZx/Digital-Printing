@@ -80,8 +80,17 @@ func (h *DesignHandler) GetDesignsByOrderItemID(c *gin.Context) {
 		return
 	}
 
-	designs, err := h.designUsecase.GetDesignsByOrderItemID(c.Request.Context(), orderItemID)
+	// Ambil identitas user dari JWT (di-set oleh AuthMiddleware)
+	userID := c.GetInt("user_id")
+	role := c.GetString("role")
+
+	designs, err := h.designUsecase.GetDesignsByOrderItemID(c.Request.Context(), orderItemID, userID, role)
 	if err != nil {
+		// Kembalikan 403 jika error adalah masalah kepemilikan/akses
+		if err.Error() == "akses ditolak: Anda tidak memiliki izin untuk melihat desain pesanan ini" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

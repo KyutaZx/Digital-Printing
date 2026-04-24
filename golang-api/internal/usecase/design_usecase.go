@@ -57,8 +57,21 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 	return d, nil
 }
 
-// GetDesignsByOrderItemID mendapatkan seluruh riwayat desain untuk item pesanan tertentu
-func (u *DesignUsecase) GetDesignsByOrderItemID(ctx context.Context, orderItemID int) ([]design.DesignFile, error) {
+// GetDesignsByOrderItemID mendapatkan riwayat desain.
+// Jika role == "customer", hanya boleh lihat desain milik pesanannya sendiri.
+// Jika role == "admin" atau "staff", bebas lihat semua.
+func (u *DesignUsecase) GetDesignsByOrderItemID(ctx context.Context, orderItemID int, userID int, role string) ([]design.DesignFile, error) {
+	// Validasi kepemilikan hanya untuk Customer
+	if role == "customer" {
+		isOwner, err := u.designRepo.VerifyOrderItemOwnership(ctx, orderItemID, userID)
+		if err != nil {
+			return nil, err
+		}
+		if !isOwner {
+			return nil, errors.New("akses ditolak: Anda tidak memiliki izin untuk melihat desain pesanan ini")
+		}
+	}
+
 	return u.designRepo.GetDesignsByOrderItemID(ctx, orderItemID)
 }
 
