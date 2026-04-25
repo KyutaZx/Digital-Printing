@@ -17,6 +17,7 @@ func SetupRoutes(
 	productionHandler *handler.ProductionHandler, // 🔥 TAMBAHAN UNTUK PRODUKSI
 	materialHandler *handler.MaterialHandler, // 🔥 TAMBAHAN UNTUK INVENTORI
 	designHandler *handler.DesignHandler, // 🔥 TAMBAHAN UNTUK DESAIN
+	reportHandler *handler.ReportHandler, // 🔥 TAMBAHAN UNTUK DASHBOARD OWNER
 ) {
 
 	// ========================
@@ -105,6 +106,13 @@ func SetupRoutes(
 			admin.POST("/products", productHandler.Create)
 			admin.PUT("/products/:id", productHandler.Update)
 			admin.DELETE("/products/:id", productHandler.Delete)
+
+			// 🔥 Reports & Monitoring (Owner Only)
+			admin.GET("/reports/revenue", reportHandler.GetRevenueReport)
+			admin.GET("/reports/products", reportHandler.GetTopProducts)
+			admin.GET("/logs/audit", reportHandler.GetAuditLogs)
+			admin.GET("/logs/login", reportHandler.GetLoginLogs)
+			admin.GET("/logs/production", reportHandler.GetProductionLogs)
 
 			// 🔥 Material / Inventory Management (Admin/Owner)
 			admin.GET("/materials", materialHandler.GetAll)

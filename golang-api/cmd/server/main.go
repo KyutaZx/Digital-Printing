@@ -52,6 +52,7 @@ func main() {
 	productionRepo := postgresRepo.NewProductionRepository(dbConn)
 	materialRepo := postgresRepo.NewMaterialRepository(dbConn)
 	designRepo := postgresRepo.NewDesignRepository(dbConn)
+	reportRepo := postgresRepo.NewReportRepository(dbConn)
 
 	// =========================================================================
 	// 4. USECASE INITIALIZATION (Dependency Injection)
@@ -66,6 +67,7 @@ func main() {
 	productionUsecase := usecase.NewProductionUsecase(productionRepo, auditRepo)
 	materialUsecase := usecase.NewMaterialUsecase(materialRepo, auditRepo)
 	designUsecase := usecase.NewDesignUsecase(designRepo, auditRepo)
+	reportUsecase := usecase.NewReportUsecase(reportRepo)
 
 	// =========================================================================
 	// 5. HANDLER INITIALIZATION
@@ -80,6 +82,7 @@ func main() {
 	productionHandler := handler.NewProductionHandler(productionUsecase)
 	materialHandler := handler.NewMaterialHandler(materialUsecase)
 	designHandler := handler.NewDesignHandler(designUsecase)
+	reportHandler := handler.NewReportHandler(reportUsecase)
 
 	// =========================================================================
 	// 6. ROUTER & SERVER SETUP
@@ -102,6 +105,7 @@ func main() {
 		productionHandler, // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		materialHandler,   // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		designHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
+		reportHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 	)
 
 	// RUN SERVER
