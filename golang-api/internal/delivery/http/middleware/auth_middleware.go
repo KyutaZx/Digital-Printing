@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-)
 
-var SECRET_KEY = []byte("secret")
+	jwtpkg "golang-api/internal/infrastructure/jwt"
+)
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -22,9 +22,9 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
-		// Parse pakai MapClaims (sesuai cara GenerateToken memakai jwt.MapClaims)
+		// Parse pakai MapClaims — secret diambil dari satu sumber (package jwt)
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-			return SECRET_KEY, nil
+			return jwtpkg.GetJWTSecret(), nil
 		})
 
 		if err != nil || !token.Valid {

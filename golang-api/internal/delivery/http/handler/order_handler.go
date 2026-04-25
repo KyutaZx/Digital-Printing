@@ -127,3 +127,63 @@ func (h *OrderHandler) Cancel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Pesanan berhasil dibatalkan"})
 }
+
+// =========================================================================
+// GET MY ORDERS (Customer — melihat daftar pesanannya sendiri)
+// =========================================================================
+func (h *OrderHandler) GetMyOrders(c *gin.Context) {
+	userID := c.MustGet("user_id").(int)
+
+	orders, err := h.usecase.GetMyOrders(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Daftar pesanan Anda",
+		"total":   len(orders),
+		"data":    orders,
+	})
+}
+
+// =========================================================================
+// GET ALL ORDERS (Owner/Admin Dashboard)
+// =========================================================================
+func (h *OrderHandler) GetAllOrders(c *gin.Context) {
+	orders, err := h.usecase.GetAllOrders(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Semua pesanan",
+		"total":   len(orders),
+		"data":    orders,
+	})
+}
+
+// =========================================================================
+// COMPLETE ORDER (Customer mengonfirmasi barang telah diterima)
+// =========================================================================
+func (h *OrderHandler) CompleteOrder(c *gin.Context) {
+	userID := c.MustGet("user_id").(int)
+	orderIDStr := c.Param("id")
+	orderID, err := strconv.Atoi(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID pesanan tidak valid"})
+		return
+	}
+
+	ip := c.ClientIP()
+	ua := c.GetHeader("User-Agent")
+
+	err = h.usecase.CompleteOrder(c.Request.Context(), orderID, userID, ip, ua)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Pesanan berhasil diselesaikan. Terima kasih!"})
+}

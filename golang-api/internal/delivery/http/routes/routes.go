@@ -75,8 +75,10 @@ func SetupRoutes(
 		// ORDER & DESIGNS
 		// ========================
 		api.POST("/orders", orderHandler.Create)
+		api.GET("/orders", orderHandler.GetMyOrders) // 🔥 FIX #4: Customer lihat pesanannya
 		api.POST("/checkout", orderHandler.Checkout)
 		api.PUT("/orders/:id/cancel", orderHandler.Cancel)
+		api.PUT("/orders/:id/complete", orderHandler.CompleteOrder) // 🔥 Customer konfirmasi selesai
 		
 		// Customer Upload & View Designs
 		api.POST("/orders/items/:id/design", designHandler.UploadDesign)
@@ -96,10 +98,6 @@ func SetupRoutes(
 			// 🔥 Pendaftaran Staf Khusus Owner
 			admin.POST("/staff", authHandler.RegisterStaff)
 
-			admin.PUT("/payments/:id/approve", paymentHandler.Approve)
-			admin.PUT("/payments/:id/reject", paymentHandler.Reject)
-			// admin.GET("/reports", reportHandler.GetReports)
-
 			// 🔥 Product Management (Admin/Owner)
 			admin.POST("/products", productHandler.Create)
 			admin.PUT("/products/:id", productHandler.Update)
@@ -109,18 +107,27 @@ func SetupRoutes(
 			admin.GET("/materials", materialHandler.GetAll)
 			admin.POST("/materials", materialHandler.Create)
 			admin.POST("/materials/:id/adjust", materialHandler.AdjustStock)
+
+			// 🔥 FIX #7: Dashboard Owner — lihat semua pesanan
+			admin.GET("/orders", orderHandler.GetAllOrders)
 		}
 
 		// ========================
-		// STAFF ROUTES (PRODUCTION & DESIGN)
+		// STAFF ROUTES (PRODUCTION, DESIGN, & VERIFICATION)
 		// ========================
 		staff := api.Group("/staff")
-		// Catatan: Validasi role staff/admin sudah kita lakukan di dalam handler,
-		// jadi middleware.StaffOnly() opsional jika belum dibuat.
+		staff.Use(middleware.StaffOnly()) // 🔥 FIX #5: RBAC — hanya staff/admin/owner
 		{
+			// 🔥 Payment Verification (Staff/Admin)
+			staff.PUT("/payments/:id/approve", paymentHandler.Approve)
+			staff.PUT("/payments/:id/reject", paymentHandler.Reject)
+
+			// 🔥 Order Monitoring (Staff/Admin)
+			staff.GET("/orders", orderHandler.GetAllOrders)
+
 			staff.PUT("/production/:id/start", productionHandler.Start)
 			staff.PUT("/production/:id/finish", productionHandler.Finish)
-			
+
 			// Staff Review Design
 			staff.POST("/designs/:id/review", designHandler.AddReview)
 		}

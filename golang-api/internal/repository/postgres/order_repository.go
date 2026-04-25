@@ -291,3 +291,71 @@ func (r *orderRepository) UpdateStatus(ctx context.Context, orderID int, status 
 	}
 	return nil
 }
+
+// =========================================================================
+// GET ORDERS BY USER ID (Customer Dashboard)
+// =========================================================================
+func (r *orderRepository) GetOrdersByUserID(ctx context.Context, userID int) ([]order.Order, error) {
+	query := `
+		SELECT id, user_id, order_code, total_price, status, created_at
+		FROM orders
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+	`
+	return r.scanOrders(ctx, query, userID)
+}
+
+// =========================================================================
+// GET ALL ORDERS (Owner/Admin Dashboard)
+// =========================================================================
+func (r *orderRepository) GetAllOrders(ctx context.Context) ([]order.Order, error) {
+	query := `
+		SELECT id, user_id, order_code, total_price, status, created_at
+		FROM orders
+		ORDER BY created_at DESC
+	`
+	return r.scanOrders(ctx, query)
+}
+
+// scanOrders adalah helper internal untuk scan rows orders dengan args variadic
+func (r *orderRepository) scanOrders(ctx context.Context, query string, args ...interface{}) ([]order.Order, error) {
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []order.Order
+	for rows.Next() {
+		var o order.Order
+		if err := rows.Scan(&o.ID, &o.UserID, &o.OrderCode, &o.TotalPrice, &o.Status, &o.CreatedAt); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+// =========================================================================
+// COMPLETE ORDER (Customer mengonfirmasi barang diterima)
+// =========================================================================
+func (r *orderRepository) CompleteOrder(ctx context.Context, orderID int, userID int) error {
+	query := `
+		UPDATE orders 
+		SET status = 'completed', updated_at = NOW() 
+		WHERE id = $1 AND user_id = $2 AND status = 'ready'
+	`
+	res, err := r.db.ExecContext(ctx, query, orderID, userID)
+	if err != nil {
+		return err
+	}
+
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("pesanan tidak ditemukan, bukan milik anda, atau statusnya bukan 'ready'")
+	}
+	return nil
+}

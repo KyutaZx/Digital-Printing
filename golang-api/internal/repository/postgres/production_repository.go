@@ -27,6 +27,28 @@ func (r *productionRepository) StartProduction(ctx context.Context, orderID int,
 	}
 	defer tx.Rollback()
 
+	// ✅ FIX #6: Validasi semua order_items harus punya approved design
+	// Cari order_items yang BELUM punya design_reviews dengan status 'approved'
+	var unapprovedCount int
+	err = tx.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM order_items oi
+		WHERE oi.order_id = $1
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM design_files df
+			JOIN design_reviews dr ON dr.design_file_id = df.id
+			WHERE df.order_item_id = oi.id
+			  AND dr.status = 'approved'
+		  )
+	`, orderID).Scan(&unapprovedCount)
+	if err != nil {
+		return err
+	}
+	if unapprovedCount > 0 {
+		return errors.New("produksi tidak dapat dimulai: masih ada item pesanan yang desainnya belum disetujui oleh staf")
+	}
+
 	// 1. Update status order menjadi 'printing' (Hanya bisa jika status 'paid')
 	res, err := tx.ExecContext(ctx, `
 		UPDATE orders 

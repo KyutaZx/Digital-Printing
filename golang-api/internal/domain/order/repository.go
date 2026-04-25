@@ -24,4 +24,16 @@ type Repository interface {
 
 	// Baris 86 di usecase kamu akan sembuh setelah menambahkan ctx di sini [cite: 1259 16666]
 	UpdateStatus(ctx context.Context, orderID int, status string) error
+
+	// ========================
+	// QUERY FOR CUSTOMER & OWNER
+	// ========================
+	// GetOrdersByUserID mengembalikan semua pesanan milik satu customer
+	GetOrdersByUserID(ctx context.Context, userID int) ([]Order, error)
+
+	// GetAllOrders mengembalikan semua pesanan (untuk dashboard owner/admin)
+	GetAllOrders(ctx context.Context) ([]Order, error)
+
+	// CompleteOrder menandai pesanan selesai (hanya jika statusnya ready)
+	CompleteOrder(ctx context.Context, orderID int, userID int) error
 }

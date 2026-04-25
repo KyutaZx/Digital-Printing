@@ -20,8 +20,18 @@ func NewDesignUsecase(designRepo design.Repository, auditRepo audit.Repository) 
 	}
 }
 
-// UploadDesign memproses penyimpanan data file desain dan mengatur versinya
+// UploadDesign memproses penyimpanan data file desain dan mengatur versinya.
+// Validasi kepemilikan order_item dilakukan SEBELUM file disimpan ke DB.
 func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, filePath string, uploadedBy int, ip, ua string) (*design.DesignFile, error) {
+	// ✅ FIX #1: Validasi kepemilikan — customer hanya boleh upload ke pesanannya sendiri
+	isOwner, err := u.designRepo.VerifyOrderItemOwnership(ctx, orderItemID, uploadedBy)
+	if err != nil {
+		return nil, err
+	}
+	if !isOwner {
+		return nil, errors.New("akses ditolak: order item ini bukan milik Anda")
+	}
+
 	// 1. Cari tahu versi terakhir untuk order item ini
 	latestVersion, err := u.designRepo.GetLatestVersion(ctx, orderItemID)
 	if err != nil {
@@ -43,10 +53,10 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 		return nil, err
 	}
 
-	// 3. Catat log audit
+	// 3. Catat log audit (role diambil dari context JWT, disini kita gunakan "customer")
 	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
 		UserID:     uploadedBy,
-		Role:       "customer", // asumsi role
+		Role:       "customer",
 		Action:     "upload_design",
 		EntityType: "design_files",
 		EntityID:   d.ID,
@@ -59,7 +69,7 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 
 // GetDesignsByOrderItemID mendapatkan riwayat desain.
 // Jika role == "customer", hanya boleh lihat desain milik pesanannya sendiri.
-// Jika role == "admin" atau "staff", bebas lihat semua.
+// Jika role == "admin", "owner", atau "staff", bebas lihat semua.
 func (u *DesignUsecase) GetDesignsByOrderItemID(ctx context.Context, orderItemID int, userID int, role string) ([]design.DesignFile, error) {
 	// Validasi kepemilikan hanya untuk Customer
 	if role == "customer" {
@@ -101,7 +111,7 @@ func (u *DesignUsecase) AddReview(ctx context.Context, designID int, req design.
 	// Catat log audit
 	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
 		UserID:     reviewerID,
-		Role:       "admin/owner", // asumsi staff/admin
+		Role:       "admin/owner",
 		Action:     "review_design_" + req.Status,
 		EntityType: "design_reviews",
 		EntityID:   review.ID,

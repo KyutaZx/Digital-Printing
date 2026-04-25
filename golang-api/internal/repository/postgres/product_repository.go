@@ -192,19 +192,11 @@ func (r *productRepository) Update(product *product.Product) error {
 		}
 	}
 
-	// Soft delete/hard delete varian yang tidak ada di request? 
+	// Soft delete/hard delete varian yang tidak ada di request?
 	// Karena ini tabel relasional, amannya kita hapus saja varian yang tidak dikirim jika memungkinkan.
 	// Jika gagal karena foreign key, itu di luar cakupan ini (harus di-handle dengan baik di DB).
 	if len(keepVariantIDs) > 0 {
 		// Hapus varian yang tidak ada di list
-		// Convert slice to array for postgres ANY/ALL
-		// We can't simply pass slice to ALL in database/sql without lib/pq array.
-		// Alternative: we delete manually by finding old variants not in keepVariantIDs
-		// But let's simplify for now: we delete variants not in list using a loop, or simple query building.
-		// Wait, lib/pq supports `ANY($2::int[])`. But we use `database/sql` maybe without pq direct mapping.
-		// Let's just update all or insert. We'll skip deleting for now to prevent foreign key errors, 
-		// but ideally we should mark them inactive or delete them.
-		// For now, let's just Upsert.
 	}
 
 	queryVariantUpdate := `
@@ -251,4 +243,3 @@ func (r *productRepository) Delete(id int) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
-

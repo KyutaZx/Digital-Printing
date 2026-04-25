@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,18 @@ import (
 	"golang-api/internal/domain/design"
 	"golang-api/internal/usecase"
 )
+
+// allowedFileExtensions adalah whitelist ekstensi file desain yang diizinkan.
+// Ekstensi di luar daftar ini akan ditolak untuk mencegah upload file berbahaya.
+var allowedFileExtensions = map[string]bool{
+	".jpg":  true,
+	".jpeg": true,
+	".png":  true,
+	".pdf":  true,
+	".ai":   true,
+	".psd":  true,
+	".cdr":  true,
+}
 
 type DesignHandler struct {
 	designUsecase *usecase.DesignUsecase
@@ -37,7 +50,19 @@ func (h *DesignHandler) UploadDesign(c *gin.Context) {
 		return
 	}
 
-	// Validasi ukuran file (contoh: max 10MB)
+	// ✅ FIX #2: Validasi ekstensi file — tolak file berbahaya (.exe, .php, dll.)
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if !allowedFileExtensions[ext] {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf(
+				"Tipe file '%s' tidak diizinkan. Gunakan: jpg, jpeg, png, pdf, ai, psd, atau cdr",
+				ext,
+			),
+		})
+		return
+	}
+
+	// Validasi ukuran file (max 10MB)
 	if file.Size > 10*1024*1024 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ukuran file terlalu besar, maksimal 10MB"})
 		return
@@ -58,9 +83,14 @@ func (h *DesignHandler) UploadDesign(c *gin.Context) {
 	ip := c.ClientIP()
 	ua := c.Request.UserAgent()
 
-	// Proses ke usecase
+	// Proses ke usecase (validasi kepemilikan ada di dalam usecase)
 	designFile, err := h.designUsecase.UploadDesign(c.Request.Context(), orderItemID, dbPath, customerID, ip, ua)
 	if err != nil {
+		// ✅ Kembalikan 403 jika error adalah masalah kepemilikan
+		if err.Error() == "akses ditolak: order item ini bukan milik Anda" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

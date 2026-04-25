@@ -119,3 +119,41 @@ func (u *OrderUsecase) Cancel(ctx context.Context, orderID int, userID int, ip, 
 
 	return nil
 }
+
+// =========================================================================
+// GET MY ORDERS (Customer — hanya pesanan miliknya)
+// =========================================================================
+func (u *OrderUsecase) GetMyOrders(ctx context.Context, userID int) ([]order.Order, error) {
+	return u.repo.GetOrdersByUserID(ctx, userID)
+}
+
+// =========================================================================
+// GET ALL ORDERS (Owner/Admin Dashboard)
+// =========================================================================
+func (u *OrderUsecase) GetAllOrders(ctx context.Context) ([]order.Order, error) {
+	return u.repo.GetAllOrders(ctx)
+}
+
+// =========================================================================
+// COMPLETE ORDER (Customer)
+// =========================================================================
+func (u *OrderUsecase) CompleteOrder(ctx context.Context, orderID int, userID int, ip string, ua string) error {
+	// Panggil repository untuk update status menjadi completed
+	err := u.repo.CompleteOrder(ctx, orderID, userID)
+	if err != nil {
+		return err
+	}
+
+	// Catat Audit Log
+	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
+		UserID:     userID,
+		Role:       "customer",
+		Action:     "COMPLETE_ORDER",
+		EntityType: "orders",
+		EntityID:   orderID,
+		IPAddress:  ip,
+		UserAgent:  ua,
+	})
+
+	return nil
+}
