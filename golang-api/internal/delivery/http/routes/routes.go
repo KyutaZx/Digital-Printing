@@ -3,6 +3,7 @@ package routes
 import (
 	"golang-api/internal/delivery/http/handler"
 	"golang-api/internal/delivery/http/middleware"
+	"golang-api/internal/domain/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,10 +15,12 @@ func SetupRoutes(
 	orderHandler *handler.OrderHandler,
 	cartHandler *handler.CartHandler,
 	paymentHandler *handler.PaymentHandler,
-	productionHandler *handler.ProductionHandler, // 🔥 TAMBAHAN UNTUK PRODUKSI
-	materialHandler *handler.MaterialHandler, // 🔥 TAMBAHAN UNTUK INVENTORI
-	designHandler *handler.DesignHandler, // 🔥 TAMBAHAN UNTUK DESAIN
-	reportHandler *handler.ReportHandler, // 🔥 TAMBAHAN UNTUK DASHBOARD OWNER
+	productionHandler *handler.ProductionHandler,
+	materialHandler *handler.MaterialHandler,
+	designHandler *handler.DesignHandler,
+	reportHandler *handler.ReportHandler,
+	userHandler *handler.UserHandler,
+	userRepo user.Repository,
 ) {
 
 	// ========================
@@ -47,7 +50,7 @@ func SetupRoutes(
 	// PROTECTED ROUTES (JWT REQUIRED)
 	// ========================
 	api := r.Group("/api")
-	api.Use(middleware.AuthMiddleware())
+	api.Use(middleware.AuthMiddleware(userRepo))
 	{
 
 		// ========================
@@ -63,6 +66,7 @@ func SetupRoutes(
 				"role":    role,
 			})
 		})
+		api.PUT("/profile", userHandler.UpdateProfile) // 🔥 Update profil (Nama & No HP)
 
 		// 🔥 LOGOUT (Pencatatan aktivitas)
 		api.POST("/logout", authHandler.Logout)
@@ -121,6 +125,10 @@ func SetupRoutes(
 
 			// 🔥 FIX #7: Dashboard Owner — lihat semua pesanan
 			admin.GET("/orders", orderHandler.GetAllOrders)
+
+			// 🔥 User Management (Owner Only)
+			admin.GET("/users", userHandler.GetAllUsers)
+			admin.PUT("/users/:id/status", userHandler.UpdateUserStatus)
 		}
 
 		// ========================

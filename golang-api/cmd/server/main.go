@@ -68,6 +68,7 @@ func main() {
 	materialUsecase := usecase.NewMaterialUsecase(materialRepo, auditRepo)
 	designUsecase := usecase.NewDesignUsecase(designRepo, auditRepo)
 	reportUsecase := usecase.NewReportUsecase(reportRepo)
+	userUsecase := usecase.NewUserUsecase(userRepo, auditRepo)
 
 	// =========================================================================
 	// 5. HANDLER INITIALIZATION
@@ -83,6 +84,7 @@ func main() {
 	materialHandler := handler.NewMaterialHandler(materialUsecase)
 	designHandler := handler.NewDesignHandler(designUsecase)
 	reportHandler := handler.NewReportHandler(reportUsecase)
+	userHandler := handler.NewUserHandler(userUsecase)
 
 	// =========================================================================
 	// 6. ROUTER & SERVER SETUP
@@ -106,6 +108,8 @@ func main() {
 		materialHandler,   // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		designHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		reportHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
+		userHandler,       // 🔥 TAMBAHAN UNTUK USER MANAGEMENT
+		userRepo,          // 🔥 TAMBAHAN UNTUK MIDDLEWARE
 	)
 
 	// RUN SERVER

@@ -7,10 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
+	"golang-api/internal/domain/user"
 	jwtpkg "golang-api/internal/infrastructure/jwt"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(userRepo user.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		authHeader := c.GetHeader("Authorization")
@@ -49,10 +50,25 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		userID := int(userIDFloat)
+
+		// 🔥 FIX: Cek status is_active ke Database secara real-time
+		u, err := userRepo.FindByID(c.Request.Context(), userID)
+		if err != nil || u == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "user tidak ditemukan"})
+			c.Abort()
+			return
+		}
+		if !u.IsActive {
+			c.JSON(http.StatusForbidden, gin.H{"message": "Akun anda telah dinonaktifkan (Banned)"})
+			c.Abort()
+			return
+		}
+
 		role, _ := claims["role"].(string)
 
 		// Set ke context agar bisa diakses handler
-		c.Set("user_id", int(userIDFloat))
+		c.Set("user_id", userID)
 		c.Set("role", role)
 
 		c.Next()
