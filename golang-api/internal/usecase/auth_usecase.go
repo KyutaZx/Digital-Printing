@@ -69,7 +69,30 @@ func (u *AuthUsecase) Login(ctx context.Context, email, password, ip, ua string)
 		UserAgent: ua,
 	})
 
+	// 6. Catat ke tabel login_logs (activity_type = 'login')
+	_ = u.userRepo.CreateLoginLog(ctx, uData.ID, "login", ip, ua)
+
 	return token, nil
+}
+
+// =========================================================================
+// LOGOUT (Pencatatan aktivitas)
+// =========================================================================
+func (u *AuthUsecase) Logout(ctx context.Context, userID int, ip, ua string) error {
+	// Catat ke tabel login_logs (activity_type = 'logout')
+	_ = u.userRepo.CreateLoginLog(ctx, userID, "logout", ip, ua)
+	
+	// Catat Audit Log
+	_ = u.auditRepo.Create(ctx, &audit.AuditLog{
+		UserID:     userID,
+		Role:       "", // Role bisa didapat jika dikirim, opsional untuk audit logout
+		Action:     "LOGOUT",
+		EntityType: "users",
+		EntityID:   userID,
+		IPAddress:  ip,
+		UserAgent:  ua,
+	})
+	return nil
 }
 
 // =========================================================================

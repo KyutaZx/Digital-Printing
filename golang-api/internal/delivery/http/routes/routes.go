@@ -63,6 +63,9 @@ func SetupRoutes(
 			})
 		})
 
+		// 🔥 LOGOUT (Pencatatan aktivitas)
+		api.POST("/logout", authHandler.Logout)
+
 		// ========================
 		// CART
 		// ========================

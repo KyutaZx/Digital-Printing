@@ -11,4 +11,7 @@ type Repository interface {
 
 	// Tambahkan FindByID untuk kebutuhan middleware atau profil user nantinya
 	FindByID(ctx context.Context, id int) (*User, error)
+
+	// CreateLoginLog mencatat aktivitas login atau logout ke tabel login_logs
+	CreateLoginLog(ctx context.Context, userID int, activityType string, ip string, ua string) error
 }

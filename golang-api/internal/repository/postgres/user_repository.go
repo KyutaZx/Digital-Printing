@@ -90,3 +90,19 @@ func (r *userRepository) FindByID(ctx context.Context, id int) (*user.User, erro
 	}
 	return &u, err
 }
+
+// =========================================================================
+// CREATE LOGIN LOG (Catat login/logout)
+// =========================================================================
+func (r *userRepository) CreateLoginLog(ctx context.Context, userID int, activityType string, ip string, ua string) error {
+	query := `
+		INSERT INTO public.login_logs (user_id, activity_type, ip_address, user_agent, created_at)
+		VALUES ($1, $2, $3, $4, NOW())
+	`
+	_, err := r.db.ExecContext(ctx, query, userID, activityType, ip, ua)
+	if err != nil {
+		log.Println("🔥 QUERY ERROR (CreateLoginLog):", err)
+		return err
+	}
+	return nil
+}

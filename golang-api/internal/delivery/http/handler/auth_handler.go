@@ -140,3 +140,26 @@ func (h *AuthHandler) RegisterStaff(c *gin.Context) {
 		"message": "Staf baru berhasil didaftarkan oleh Owner",
 	})
 }
+
+// =========================================================================
+// LOGOUT (Pencatatan Log)
+// =========================================================================
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// Ambil ID user dari JWT middleware
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	ip := c.ClientIP()
+	ua := c.Request.UserAgent()
+
+	// Eksekusi Usecase (Hanya pencatatan)
+	_ = h.authUsecase.Logout(c.Request.Context(), userID.(int), ip, ua)
+
+	// Beri tahu client untuk menghapus token
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logout berhasil. Silakan hapus token di aplikasi Anda.",
+	})
+}
