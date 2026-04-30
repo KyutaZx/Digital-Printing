@@ -20,6 +20,9 @@ type Repository interface {
 	// Fungsi ini dipanggil di usecase payment, wajib pakai context [cite: 1259 16666]
 	FindByID(ctx context.Context, orderID int) (*Order, error)
 
+	// FindDetailByID mengambil detail lengkap 1 pesanan untuk ditampilkan sebagai invoice
+	FindDetailByID(ctx context.Context, orderID int) (*OrderDetail, error)
+
 	Cancel(ctx context.Context, orderID int, userID int) error
 
 	// Baris 86 di usecase kamu akan sembuh setelah menambahkan ctx di sini [cite: 1259 16666]

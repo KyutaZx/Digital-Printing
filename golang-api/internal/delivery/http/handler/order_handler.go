@@ -148,6 +148,40 @@ func (h *OrderHandler) GetMyOrders(c *gin.Context) {
 }
 
 // =========================================================================
+// GET ORDER DETAIL / INVOICE
+// =========================================================================
+func (h *OrderHandler) GetOrderDetail(c *gin.Context) {
+	orderIDStr := c.Param("id")
+	orderID, err := strconv.Atoi(orderIDStr)
+	if err != nil || orderID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID pesanan tidak valid"})
+		return
+	}
+
+	userID := c.MustGet("user_id").(int)
+	role := c.MustGet("role").(string)
+
+	detail, err := h.usecase.GetOrderDetail(c.Request.Context(), orderID, userID, role)
+	if err != nil {
+		if err.Error() == "akses ditolak: pesanan ini bukan milik Anda" {
+			c.JSON(http.StatusForbidden, gin.H{"message": err.Error()})
+			return
+		}
+		if err.Error() == "pesanan tidak ditemukan" {
+			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Detail pesanan",
+		"data":    detail,
+	})
+}
+
+// =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
 func (h *OrderHandler) GetAllOrders(c *gin.Context) {

@@ -128,6 +128,26 @@ func (u *OrderUsecase) GetMyOrders(ctx context.Context, userID int) ([]order.Ord
 }
 
 // =========================================================================
+// GET ORDER DETAIL / INVOICE
+// =========================================================================
+func (u *OrderUsecase) GetOrderDetail(ctx context.Context, orderID int, userID int, role string) (*order.OrderDetail, error) {
+	detail, err := u.repo.FindDetailByID(ctx, orderID)
+	if err != nil {
+		return nil, err
+	}
+	if detail == nil {
+		return nil, errors.New("pesanan tidak ditemukan")
+	}
+
+	// Validasi kepemilikan: customer hanya boleh lihat pesanannya sendiri
+	if role == "customer" && detail.CustomerID != userID {
+		return nil, errors.New("akses ditolak: pesanan ini bukan milik Anda")
+	}
+
+	return detail, nil
+}
+
+// =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
 func (u *OrderUsecase) GetAllOrders(ctx context.Context) ([]order.Order, error) {

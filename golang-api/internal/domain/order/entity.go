@@ -25,3 +25,58 @@ type OrderItem struct {
 	Price     float64 `json:"price"`
 	Notes     string  `json:"notes"`
 }
+
+// =========================================================================
+// INVOICE / ORDER DETAIL DTO
+// =========================================================================
+
+// OrderItemDetail adalah item pesanan yang sudah dilengkapi nama produk & variant
+type OrderItemDetail struct {
+	ID          int     `json:"id"`
+	ProductID   int     `json:"product_id"`
+	ProductName string  `json:"product_name"`  // JOIN dari tabel products
+	VariantID   int     `json:"variant_id"`
+	VariantName string  `json:"variant_name"`  // JOIN dari tabel product_variants (nama finishing)
+	SKU         string  `json:"sku"`
+	Quantity    int     `json:"quantity"`
+	UnitPrice   float64 `json:"unit_price"`    // Harga per satuan
+	Subtotal    float64 `json:"subtotal"`      // unit_price * quantity
+	Notes       string  `json:"notes"`         // Catatan cetak dari customer
+}
+
+// PaymentInfo adalah info pembayaran yang melekat pada invoice
+type PaymentInfo struct {
+	ID              int        `json:"id"`
+	MethodID        int        `json:"payment_method_id"`
+	TransactionCode string     `json:"transaction_code"`
+	Amount          float64    `json:"amount"`
+	Proof           string     `json:"payment_proof"`
+	Status          string     `json:"payment_status"`
+	VerifiedBy      *int       `json:"verified_by"`
+	VerifiedAt      *time.Time `json:"verified_at"`
+	CreatedAt       time.Time  `json:"created_at"`
+}
+
+// OrderDetail adalah response lengkap untuk endpoint invoice
+type OrderDetail struct {
+	// Header Pesanan
+	ID                  int              `json:"id"`
+	OrderCode           string           `json:"order_code"`
+	Status              string           `json:"status"`
+	TotalPrice          float64          `json:"total_price"`
+	EstimatedFinishDate *time.Time       `json:"estimated_finish_date"`
+	CreatedAt           time.Time        `json:"created_at"`
+	UpdatedAt           *time.Time       `json:"updated_at,omitempty"`
+
+	// Info Customer
+	CustomerID    int    `json:"customer_id"`
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
+	CustomerPhone string `json:"customer_phone"`
+
+	// Item Pesanan (dengan nama produk & variant)
+	Items []OrderItemDetail `json:"items"`
+
+	// Info Pembayaran (bisa nil jika belum bayar)
+	Payment *PaymentInfo `json:"payment"`
+}

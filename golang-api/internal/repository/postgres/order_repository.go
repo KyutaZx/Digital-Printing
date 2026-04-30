@@ -194,6 +194,98 @@ func (r *orderRepository) FindByID(ctx context.Context, orderID int) (*order.Ord
 }
 
 // =========================================================================
+// FIND DETAIL BY ID (Invoice)
+// =========================================================================
+func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*order.OrderDetail, error) {
+	// 1. Query header order + info customer + items (multi-join)
+	queryDetail := `
+		SELECT
+			o.id, o.order_code, o.status, o.total_price,
+			o.estimated_finish_date, o.created_at, o.updated_at,
+			u.id as customer_id, u.name as customer_name,
+			u.email as customer_email, COALESCE(u.phone, '') as customer_phone,
+			oi.id as item_id, oi.product_id,
+			p.name as product_name,
+			COALESCE(oi.variant_id, 0) as variant_id,
+			COALESCE(pv.variant_name, '-') as variant_name,
+			COALESCE(pv.sku, '-') as sku,
+			oi.quantity, oi.price as unit_price,
+			(oi.quantity * oi.price) as subtotal,
+			COALESCE(oi.notes, '') as notes
+		FROM orders o
+		JOIN users u ON u.id = o.user_id
+		JOIN order_items oi ON oi.order_id = o.id
+		JOIN products p ON p.id = oi.product_id
+		LEFT JOIN product_variants pv ON pv.id = oi.variant_id
+		WHERE o.id = $1
+		ORDER BY oi.id ASC
+	`
+
+	rows, err := r.db.QueryContext(ctx, queryDetail, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var detail *order.OrderDetail
+
+	for rows.Next() {
+		var item order.OrderItemDetail
+		var d order.OrderDetail
+
+		err := rows.Scan(
+			&d.ID, &d.OrderCode, &d.Status, &d.TotalPrice,
+			&d.EstimatedFinishDate, &d.CreatedAt, &d.UpdatedAt,
+			&d.CustomerID, &d.CustomerName, &d.CustomerEmail, &d.CustomerPhone,
+			&item.ID, &item.ProductID, &item.ProductName,
+			&item.VariantID, &item.VariantName, &item.SKU,
+			&item.Quantity, &item.UnitPrice, &item.Subtotal, &item.Notes,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if detail == nil {
+			detail = &d
+		}
+		detail.Items = append(detail.Items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if detail == nil {
+		return nil, nil // Pesanan tidak ditemukan
+	}
+
+	// 2. Query info pembayaran dari tabel payment_transactions (opsional, bisa nil)
+	queryPayment := `
+		SELECT id, payment_method_id, COALESCE(transaction_code, ''),
+			amount, payment_proof, payment_status,
+			verified_by, verified_at, created_at
+		FROM payment_transactions
+		WHERE order_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1
+	`
+	var pay order.PaymentInfo
+	err = r.db.QueryRowContext(ctx, queryPayment, orderID).Scan(
+		&pay.ID, &pay.MethodID, &pay.TransactionCode,
+		&pay.Amount, &pay.Proof, &pay.Status,
+		&pay.VerifiedBy, &pay.VerifiedAt, &pay.CreatedAt,
+	)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	if err == nil {
+		detail.Payment = &pay
+	}
+
+	return detail, nil
+}
+
+// =========================================================================
 // CANCEL ORDER
 // =========================================================================
 func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) error {

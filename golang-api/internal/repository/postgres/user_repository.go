@@ -24,7 +24,7 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*user.U
 	var u user.User
 
 	query := `
-		SELECT id, role_id, name, email, password, COALESCE(phone_number, ''), COALESCE(is_active, true)
+		SELECT id, role_id, name, email, password, COALESCE(phone, ''), COALESCE(is_active, true)
 		FROM public.users
 		WHERE email = $1
 		LIMIT 1
@@ -84,7 +84,7 @@ func (r *userRepository) Create(ctx context.Context, u *user.User) error {
 // =========================================================================
 func (r *userRepository) FindByID(ctx context.Context, id int) (*user.User, error) {
 	var u user.User
-	query := `SELECT id, name, email, role_id, COALESCE(phone_number, ''), COALESCE(is_active, true) FROM public.users WHERE id = $1`
+	query := `SELECT id, name, email, role_id, COALESCE(phone, ''), COALESCE(is_active, true) FROM public.users WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&u.ID, &u.Name, &u.Email, &u.RoleID, &u.Phone, &u.IsActive)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -113,7 +113,7 @@ func (r *userRepository) CreateLoginLog(ctx context.Context, userID int, activit
 // UPDATE PROFILE (Customer/Staff)
 // =========================================================================
 func (r *userRepository) UpdateProfile(ctx context.Context, id int, name, phone string) error {
-	query := `UPDATE public.users SET name = $1, phone_number = $2, updated_at = NOW() WHERE id = $3`
+	query := `UPDATE public.users SET name = $1, phone = $2, updated_at = NOW() WHERE id = $3`
 	_, err := r.db.ExecContext(ctx, query, name, phone, id)
 	return err
 }
@@ -123,7 +123,7 @@ func (r *userRepository) UpdateProfile(ctx context.Context, id int, name, phone 
 // =========================================================================
 func (r *userRepository) GetAllUsers(ctx context.Context, roleID *int) ([]user.User, error) {
 	query := `
-		SELECT id, name, email, role_id, COALESCE(phone_number, ''), COALESCE(is_active, true), created_at
+		SELECT id, name, email, role_id, COALESCE(phone, ''), COALESCE(is_active, true), created_at
 		FROM public.users
 	`
 	var args []interface{}

@@ -83,7 +83,8 @@ func SetupRoutes(
 		// ORDER & DESIGNS
 		// ========================
 		api.POST("/orders", orderHandler.Create)
-		api.GET("/orders", orderHandler.GetMyOrders) // 🔥 FIX #4: Customer lihat pesanannya
+		api.GET("/orders", orderHandler.GetMyOrders)          // Customer lihat daftar pesanannya
+		api.GET("/orders/:id", orderHandler.GetOrderDetail)   // 🔥 Detail pesanan / Invoice
 		api.POST("/checkout", orderHandler.Checkout)
 		api.PUT("/orders/:id/cancel", orderHandler.Cancel)
 		api.PUT("/orders/:id/complete", orderHandler.CompleteOrder) // 🔥 Customer konfirmasi selesai
