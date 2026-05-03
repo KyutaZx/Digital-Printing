@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"golang-api/internal/delivery/websocket"
 	"golang-api/internal/domain/audit"
 	"golang-api/internal/domain/order"
 	"golang-api/internal/domain/payment"
@@ -133,6 +134,17 @@ func (u *PaymentUsecase) Approve(ctx context.Context, id int, adminID int, ip st
 		IPAddress: ip,
 		UserAgent: ua,
 	})
+
+	// 4. Kirim Notifikasi Real-Time (WebSocket) ke Customer
+	if o, _ := u.orderRepo.FindByID(ctx, p.OrderID); o != nil {
+		websocket.GlobalHub.BroadcastToUser(o.UserID, map[string]interface{}{
+			"type":       "ORDER_STATUS_UPDATE",
+			"order_id":   o.ID,
+			"order_code": o.OrderCode,
+			"new_status": "paid",
+			"message":    "Pembayaran Anda berhasil diverifikasi. Pesanan akan segera diproses!",
+		})
+	}
 
 	return nil
 }

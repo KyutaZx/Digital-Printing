@@ -79,26 +79,26 @@ func (r *productionRepository) StartProduction(ctx context.Context, orderID int,
 // =========================================================================
 // FINISH PRODUCTION (Selesai Cetak)
 // =========================================================================
-func (r *productionRepository) FinishProduction(ctx context.Context, orderID int, staffID int, notes string) error {
+func (r *productionRepository) FinishProduction(ctx context.Context, orderID int, staffID int, notes string) (int, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer tx.Rollback()
 
 	// 1. Update status order menjadi 'ready' (Hanya bisa jika status 'printing')
-	res, err := tx.ExecContext(ctx, `
+	var userID int
+	err = tx.QueryRowContext(ctx, `
 		UPDATE orders 
 		SET status = 'ready', updated_at = $1 
-		WHERE id = $2 AND status = 'printing'`,
-		time.Now(), orderID)
+		WHERE id = $2 AND status = 'printing'
+		RETURNING user_id`,
+		time.Now(), orderID).Scan(&userID)
 	if err != nil {
-		return err
-	}
-
-	affected, _ := res.RowsAffected()
-	if affected == 0 {
-		return errors.New("pesanan tidak ditemukan atau belum dicetak")
+		if err == sql.ErrNoRows {
+			return 0, errors.New("pesanan tidak ditemukan atau belum dicetak")
+		}
+		return 0, err
 	}
 
 	// 2. Update waktu selesai di tabel production_logs
@@ -108,8 +108,8 @@ func (r *productionRepository) FinishProduction(ctx context.Context, orderID int
 		WHERE order_id = $3 AND end_time IS NULL`,
 		time.Now(), notes, orderID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return tx.Commit()
+	return userID, tx.Commit()
 }

@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -8,6 +10,7 @@ import (
 	"golang-api/internal/usecase"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-pdf/fpdf"
 )
 
 type OrderHandler struct {
@@ -237,4 +240,68 @@ func (h *OrderHandler) CompleteOrder(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Pesanan berhasil diselesaikan. Terima kasih!"})
+}
+
+// =========================================================================
+// DOWNLOAD INVOICE PDF
+// =========================================================================
+func (h *OrderHandler) DownloadInvoicePDF(c *gin.Context) {
+	orderIDStr := c.Param("id")
+	orderID, err := strconv.Atoi(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID pesanan tidak valid"})
+		return
+	}
+
+	userID := c.MustGet("user_id").(int)
+	role := c.MustGet("role").(string)
+
+	// Ambil detail pesanan
+	o, err := h.usecase.GetOrderDetail(c.Request.Context(), orderID, userID, role)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Buat Dokumen PDF
+	pdf := fpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "INVOICE DIGITAL PRINTING")
+	pdf.Ln(10)
+
+	pdf.SetFont("Arial", "", 12)
+	pdf.Cell(40, 10, fmt.Sprintf("Kode Pesanan: %s", o.OrderCode))
+	pdf.Ln(8)
+	pdf.Cell(40, 10, fmt.Sprintf("Status: %s", o.Status))
+	pdf.Ln(8)
+	pdf.Cell(40, 10, fmt.Sprintf("Total Harga: Rp %.2f", o.TotalPrice))
+	pdf.Ln(15)
+
+	// Header Tabel
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(80, 10, "Nama Produk", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(30, 10, "Qty", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 10, "Harga", "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
+
+	// Isi Tabel
+	pdf.SetFont("Arial", "", 12)
+	for _, item := range o.Items {
+		pdf.CellFormat(80, 10, item.ProductName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(30, 10, fmt.Sprintf("%d", item.Quantity), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, 10, fmt.Sprintf("Rp %.2f", item.UnitPrice), "1", 0, "R", false, 0, "")
+		pdf.Ln(-1)
+	}
+
+	// Tulis PDF ke buffer memory
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal membuat PDF"})
+		return
+	}
+
+	// Kirim langsung sebagai file download
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=Invoice_%s.pdf", o.OrderCode))
+	c.Data(http.StatusOK, "application/pdf", buf.Bytes())
 }

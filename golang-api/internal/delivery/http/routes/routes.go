@@ -38,8 +38,12 @@ func SetupRoutes(
 	// ========================
 	// AUTH (PUBLIC)
 	// ========================
-	r.POST("/login", authHandler.Login)
-	r.POST("/register", authHandler.Register)
+	// Inisialisasi Rate Limiter: 5 request per detik, maksimal 10 burst
+	limiter := middleware.NewIPRateLimiter(5, 10)
+	rateLimiterMiddleware := middleware.RateLimitMiddleware(limiter)
+
+	r.POST("/login", rateLimiterMiddleware, authHandler.Login)
+	r.POST("/register", rateLimiterMiddleware, authHandler.Register)
 
 	// ========================
 	// PUBLIC ROUTES
@@ -52,6 +56,12 @@ func SetupRoutes(
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware(userRepo))
 	{
+
+		// ========================
+		// WEBSOCKET (REAL-TIME NOTIFICATIONS)
+		// ========================
+		wsHandler := handler.NewWebsocketHandler()
+		api.GET("/ws", wsHandler.Connect)
 
 		// ========================
 		// USER PROFILE
@@ -85,6 +95,7 @@ func SetupRoutes(
 		api.POST("/orders", orderHandler.Create)
 		api.GET("/orders", orderHandler.GetMyOrders)          // Customer lihat daftar pesanannya
 		api.GET("/orders/:id", orderHandler.GetOrderDetail)   // 🔥 Detail pesanan / Invoice
+		api.GET("/orders/:id/invoice/pdf", orderHandler.DownloadInvoicePDF) // 🔥 Download Invoice PDF
 		api.POST("/checkout", orderHandler.Checkout)
 		api.PUT("/orders/:id/cancel", orderHandler.Cancel)
 		api.PUT("/orders/:id/complete", orderHandler.CompleteOrder) // 🔥 Customer konfirmasi selesai
