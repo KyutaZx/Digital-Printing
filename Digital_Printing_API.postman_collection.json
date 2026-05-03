@@ -1,0 +1,747 @@
+{
+  "info": {
+    "name": "Digital Printing API - Flow Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token_customer",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzc4ODU4NDgsInJvbGUiOiJjdXN0b21lciIsInVzZXJfaWQiOjF9.unSDVAxYSxMIC3eWCfS46NW1vgKSny2qMWFfgtPezTE"
+    },
+    {
+      "key": "token_admin",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzc4MDYyMDksInJvbGUiOiJvd25lciIsInVzZXJfaWQiOjJ9.S8dDHUzUG8dQ_TWznATxoxOaewuZE2c0s0xosjvdMio"
+    },
+    {
+      "key": "token_staff",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzc4ODgxNTEsInJvbGUiOiJzdGFmZiIsInVzZXJfaWQiOjl9.TQ5108v1yHOEaJo_Teo5irpUdIaXaNnNeyI89uyDWhY"
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    },
+    {
+      "key": "order_item_id",
+      "value": ""
+    },
+    {
+      "key": "payment_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "FLOW - Alur Lengkap Customer",
+      "description": "Ikuti urutan 1-12 untuk test end-to-end flow",
+      "item": [
+        {
+          "name": "STEP 1 - Customer Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('token_customer', res.token);",
+                  "  console.log('✅ Token customer tersimpan');",
+                  "} else {",
+                  "  console.log('❌ Login gagal:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"email\": \"customer@gmail.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login"
+            }
+          }
+        },
+        {
+          "name": "STEP 2 - Lihat Katalog Produk",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products"
+            }
+          }
+        },
+        {
+          "name": "STEP 3 - Tambah Banner ke Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2,\n  \"variant_id\": 1,\n  \"notes\": \"Cetak banner ukuran 2x1 meter, bahan outdoor\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart"
+            }
+          }
+        },
+        {
+          "name": "STEP 4 - Tambah Poster ke Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"product_id\": 2,\n  \"quantity\": 10,\n  \"variant_id\": 2,\n  \"notes\": \"Poster A3 untuk promosi toko\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart"
+            }
+          }
+        },
+        {
+          "name": "STEP 5 - Lihat Isi Cart",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart"
+            }
+          }
+        },
+        {
+          "name": "STEP 6 - Checkout (Buat Order dari Cart)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.order && res.order.id) {",
+                  "  pm.collectionVariables.set('order_id', res.order.id);",
+                  "  console.log('✅ Order ID tersimpan:', res.order.id);",
+                  "} else if (res.id) {",
+                  "  pm.collectionVariables.set('order_id', res.id);",
+                  "  console.log('✅ Order ID tersimpan:', res.id);",
+                  "} else {",
+                  "  console.log('Response:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/checkout"
+            }
+          }
+        },
+        {
+          "name": "STEP 7 - Lihat Daftar Order Saya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders"
+            }
+          }
+        },
+        {
+          "name": "STEP 8 - Lihat Detail Order (ganti ID di URL jika perlu)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{order_id}}"
+            }
+          }
+        },
+        {
+          "name": "STEP 9 - Upload Desain (Order Item ID: 1, ganti jika perlu)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Pilih file desain JPG/PNG/PDF"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/items/1/design"
+            }
+          }
+        },
+        {
+          "name": "STEP 10 - Upload Bukti Pembayaran",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.payment && res.payment.id) {",
+                  "  pm.collectionVariables.set('payment_id', res.payment.id);",
+                  "  console.log('✅ Payment ID tersimpan:', res.payment.id);",
+                  "} else if (res.id) {",
+                  "  pm.collectionVariables.set('payment_id', res.id);",
+                  "} else {",
+                  "  console.log('Response:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "order_id",
+                  "value": "{{order_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "payment_method_id",
+                  "value": "1",
+                  "type": "text",
+                  "description": "1=BCA, 2=Mandiri, 3=QRIS"
+                },
+                {
+                  "key": "amount",
+                  "value": "250000",
+                  "type": "text",
+                  "description": "2 Banner x50000 + 10 Poster x15000"
+                },
+                {
+                  "key": "transaction_code",
+                  "value": "TF-BCA-20260502-001",
+                  "type": "text"
+                },
+                {
+                  "key": "payment_proof",
+                  "type": "file",
+                  "src": "",
+                  "description": "Screenshot bukti transfer"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments"
+            }
+          }
+        },
+        {
+          "name": "STEP 11 - Staff Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('token_staff', res.token);",
+                  "  console.log('✅ Token staff tersimpan');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"email\": \"budi@jayamandiri.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login"
+            }
+          }
+        },
+        {
+          "name": "STEP 12 - Staff Lihat Semua Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_staff}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/staff/orders"
+            }
+          }
+        },
+        {
+          "name": "STEP 13 - Staff Review Desain - Approve (Design ID: 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_staff}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"status\": \"approved\",\n  \"notes\": \"Desain sudah oke, resolusi bagus, siap cetak!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/staff/designs/1/review"
+            }
+          }
+        },
+        {
+          "name": "STEP 14 - Staff Approve Pembayaran (ganti payment ID)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_staff}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/staff/payments/{{payment_id}}/approve"
+            }
+          }
+        },
+        {
+          "name": "STEP 15 - Staff Mulai Produksi",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_staff}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"notes\": \"Mulai cetak di Mesin Epson A, target selesai hari ini\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/staff/production/{{order_id}}/start"
+            }
+          }
+        },
+        {
+          "name": "STEP 16 - Staff Selesai Produksi",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_staff}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"notes\": \"Hasil cetak tajam, sudah dilaminasi doff. Siap dijemput!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/staff/production/{{order_id}}/finish"
+            }
+          }
+        },
+        {
+          "name": "STEP 17 - Customer Konfirmasi Order Selesai",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_customer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{order_id}}/complete"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ADMIN - Cek Hasil & Laporan",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('token_admin', res.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login"
+            }
+          }
+        },
+        {
+          "name": "Lihat Semua Order (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/orders"
+            }
+          }
+        },
+        {
+          "name": "Laporan Pendapatan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reports/revenue"
+            }
+          }
+        },
+        {
+          "name": "Produk Terlaris",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/reports/products"
+            }
+          }
+        },
+        {
+          "name": "Log Audit",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/logs/audit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ADMIN - Manajemen Data",
+      "item": [
+        {
+          "name": "Buat Produk Baru (dengan Variants)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Sticker Vinyl\",\n  \"description\": \"Cetak sticker bahan vinyl waterproof tahan cuaca\",\n  \"base_price\": 25000,\n  \"estimated_days\": 1,\n  \"is_active\": true,\n  \"variants\": [\n    {\n      \"sku\": \"STK-A3-GLS\",\n      \"variant_name\": \"A3 Glossy\",\n      \"price\": 25000,\n      \"stock\": 100,\n      \"is_active\": true,\n      \"material_id\": 1,\n      \"material_usage\": 0.5\n    },\n    {\n      \"sku\": \"STK-A2-GLS\",\n      \"variant_name\": \"A2 Glossy\",\n      \"price\": 45000,\n      \"stock\": 50,\n      \"is_active\": true,\n      \"material_id\": 1,\n      \"material_usage\": 1.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/products"
+            }
+          }
+        },
+        {
+          "name": "Edit Produk Banner (ID: 1)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"name\": \"Banner Outdoor Premium\",\n  \"description\": \"Cetak banner outdoor bahan flexi korea\",\n  \"base_price\": 10000,\n  \"estimated_days\": 1,\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/products/1"
+            }
+          }
+        },
+        {
+          "name": "Lihat Semua Material",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/materials"
+            }
+          }
+        },
+        {
+          "name": "Restock Material Kertas Glossy (ID: 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"change_type\": \"in\",\n  \"quantity\": 50,\n  \"reference\": \"Restock Mei 2026 - Supplier Kertas Jaya\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/materials/1/adjust"
+            }
+          }
+        },
+        {
+          "name": "Lihat Semua User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users"
+            }
+          }
+        },
+        {
+          "name": "Daftarkan Staff Baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"name\": \"Rina Staff Kasir\",\n  \"email\": \"rina@jayamandiri.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/staff"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

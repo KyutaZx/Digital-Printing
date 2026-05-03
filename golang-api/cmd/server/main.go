@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+
+	"github.com/robfig/cron/v3"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -111,6 +114,24 @@ func main() {
 		userHandler,       // 🔥 TAMBAHAN UNTUK USER MANAGEMENT
 		userRepo,          // 🔥 TAMBAHAN UNTUK MIDDLEWARE
 	)
+
+	// =========================================================================
+	// 6. SETUP CRON JOBS (BACKGROUND TASKS)
+	// =========================================================================
+	c := cron.New()
+	_, err = c.AddFunc("@hourly", func() {
+		log.Println("⏰ Menjalankan Auto-Cancel Unpaid Orders...")
+		ctx := context.Background()
+		if err := orderUsecase.AutoCancelUnpaidOrders(ctx); err != nil {
+			log.Println("❌ Gagal menjalankan Auto-Cancel:", err)
+		} else {
+			log.Println("✅ Auto-Cancel Unpaid Orders selesai.")
+		}
+	})
+	if err != nil {
+		log.Println("⚠️ Gagal mendaftarkan Cron Job:", err)
+	}
+	c.Start()
 
 	// RUN SERVER
 	port := os.Getenv("APP_PORT")

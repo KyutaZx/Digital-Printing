@@ -27,3 +27,4 @@ go.work.sum
 node_modules/
 dist/
 build/
+uploads/

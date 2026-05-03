@@ -185,7 +185,22 @@ func (h *OrderHandler) GetOrderDetail(c *gin.Context) {
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
 func (h *OrderHandler) GetAllOrders(c *gin.Context) {
-	orders, err := h.usecase.GetAllOrders(c.Request.Context())
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	
+	offset := (page - 1) * limit
+
+	orders, err := h.usecase.GetAllOrders(c.Request.Context(), limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -193,6 +208,8 @@ func (h *OrderHandler) GetAllOrders(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Semua pesanan",
+		"page":    page,
+		"limit":   limit,
 		"total":   len(orders),
 		"data":    orders,
 	})

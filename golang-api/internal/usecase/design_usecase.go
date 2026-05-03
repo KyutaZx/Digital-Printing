@@ -38,6 +38,11 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 		return nil, err
 	}
 
+	// Batas maksimal upload adalah 3 kali (Versi 1, 2, 3)
+	if latestVersion >= 3 {
+		return nil, errors.New("batas maksimal revisi desain (total 3 kali upload) telah tercapai")
+	}
+
 	newVersion := latestVersion + 1
 
 	d := &design.DesignFile{

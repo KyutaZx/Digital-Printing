@@ -21,8 +21,8 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 
 	query := `
 		SELECT 
-			p.id, p.name, p.description, p.base_price,
-			v.id as v_id, v.sku as v_sku, v.variant_name as v_name, v.price as v_price, v.stock as v_stock, v.is_active as v_is_active, v.material_id, v.material_usage
+			p.id, p.category_id, p.name, p.description, p.base_price, p.estimated_days, p.is_active, p.created_at,
+			v.id as v_id, v.sku as v_sku, v.variant_name as v_name, v.price as v_price, v.stock as v_stock, v.is_active as v_is_active, v.material_id, v.material_usage, v.created_at as v_created_at
 		FROM products p
 		LEFT JOIN product_variants v ON v.product_id = p.id
 		WHERE p.is_active = TRUE
@@ -39,6 +39,7 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 
 	for rows.Next() {
 		var p product.Product
+		var pCatID sql.NullInt64
 		var vID sql.NullInt64
 		var vSku, vName sql.NullString
 		var vPrice sql.NullFloat64
@@ -46,13 +47,19 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 		var vIsActive sql.NullBool
 		var vMaterialID sql.NullInt64
 		var vMaterialUsage sql.NullFloat64
+		var vCreatedAt sql.NullTime
 
 		err := rows.Scan(
-			&p.ID, &p.Name, &p.Description, &p.BasePrice,
-			&vID, &vSku, &vName, &vPrice, &vStock, &vIsActive, &vMaterialID, &vMaterialUsage,
+			&p.ID, &pCatID, &p.Name, &p.Description, &p.BasePrice, &p.EstimatedDays, &p.IsActive, &p.CreatedAt,
+			&vID, &vSku, &vName, &vPrice, &vStock, &vIsActive, &vMaterialID, &vMaterialUsage, &vCreatedAt,
 		)
 		if err != nil {
 			return nil, err
+		}
+
+		if pCatID.Valid {
+			catID := int(pCatID.Int64)
+			p.CategoryID = &catID
 		}
 
 		if _, exists := productMap[p.ID]; !exists {
@@ -69,6 +76,9 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 				Price:       vPrice.Float64,
 				Stock:       int(vStock.Int64),
 				IsActive:    vIsActive.Bool,
+			}
+			if vCreatedAt.Valid {
+				variant.CreatedAt = vCreatedAt.Time
 			}
 			if vMaterialID.Valid {
 				matID := int(vMaterialID.Int64)

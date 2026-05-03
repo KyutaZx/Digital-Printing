@@ -150,8 +150,38 @@ func (u *OrderUsecase) GetOrderDetail(ctx context.Context, orderID int, userID i
 // =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
-func (u *OrderUsecase) GetAllOrders(ctx context.Context) ([]order.Order, error) {
-	return u.repo.GetAllOrders(ctx)
+func (u *OrderUsecase) GetAllOrders(ctx context.Context, limit int, offset int) ([]order.Order, error) {
+	return u.repo.GetAllOrders(ctx, limit, offset)
+}
+
+// =========================================================================
+// AUTO CANCEL UNPAID ORDERS (CRON)
+// =========================================================================
+func (u *OrderUsecase) AutoCancelUnpaidOrders(ctx context.Context) error {
+	// Ambil order yang sudah expired (contoh: 24 jam)
+	orderIDs, err := u.repo.FindUnpaidOrdersOlderThan(ctx, "24 HOURS")
+	if err != nil {
+		return err
+	}
+
+	for _, id := range orderIDs {
+		// Cancel order. UserID = 0 menandakan pembatalan oleh sistem
+		err := u.repo.Cancel(ctx, id, 0)
+		if err == nil {
+			// Catat Audit Log
+			_ = u.auditRepo.Create(ctx, &audit.AuditLog{
+				UserID:     0,
+				Role:       "system",
+				Action:     "AUTO_CANCEL_ORDER",
+				EntityType: "orders",
+				EntityID:   id,
+				IPAddress:  "127.0.0.1",
+				UserAgent:  "cron-job",
+			})
+		}
+	}
+
+	return nil
 }
 
 // =========================================================================

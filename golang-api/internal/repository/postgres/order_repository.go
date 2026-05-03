@@ -99,7 +99,7 @@ func (r *orderRepository) Checkout(ctx context.Context, userID int) (int, string
 	// 2. Ambil Item Keranjang Beserta Detail Spesifikasi Cetak
 	rows, err := tx.QueryContext(ctx, `
 		SELECT ci.product_id, ci.quantity, pv.price, 
-		       ci.variant_id, ci.notes
+		       ci.variant_id, ci.notes, pv.material_id, pv.material_usage
 		FROM cart_items ci
 		JOIN product_variants pv ON pv.id = ci.variant_id
 		WHERE ci.cart_id = $1
@@ -110,24 +110,51 @@ func (r *orderRepository) Checkout(ctx context.Context, userID int) (int, string
 	defer rows.Close()
 
 	type item struct {
-		productID   int
-		quantity    int
-		price       float64
-		variantID   int
-		notes       string
+		productID     int
+		quantity      int
+		price         float64
+		variantID     int
+		notes         sql.NullString
+		materialID    sql.NullInt64
+		materialUsage sql.NullFloat64
 	}
 
 	var items []item
 	var total float64
+	materialUsages := make(map[int]float64)
 
 	for rows.Next() {
 		var i item
-		err = rows.Scan(&i.productID, &i.quantity, &i.price, &i.variantID, &i.notes)
+		err = rows.Scan(&i.productID, &i.quantity, &i.price, &i.variantID, &i.notes, &i.materialID, &i.materialUsage)
 		if err != nil {
 			return 0, "", 0, err
 		}
 		total += i.price * float64(i.quantity)
+		
+		if i.materialID.Valid && i.materialUsage.Valid {
+			materialUsages[int(i.materialID.Int64)] += i.materialUsage.Float64 * float64(i.quantity)
+		}
+		
 		items = append(items, i)
+	}
+	rows.Close() // Pastikan ditutup sebelum mengeksekusi query lain di transaksi ini
+
+	// 2.5. ROW-LEVEL LOCKING & POTONG STOK
+	for matID, usage := range materialUsages {
+		var stock float64
+		// Gunakan FOR UPDATE untuk mengunci baris bahan baku ini dari transaksi lain
+		err = tx.QueryRowContext(ctx, "SELECT stock FROM materials WHERE id = $1 FOR UPDATE", matID).Scan(&stock)
+		if err != nil {
+			return 0, "", 0, fmt.Errorf("gagal mengecek stok material ID %d: %v", matID, err)
+		}
+		if stock < usage {
+			return 0, "", 0, fmt.Errorf("stok bahan baku tidak mencukupi, sisa: %.2f, butuh: %.2f", stock, usage)
+		}
+		// Potong stok langsung di keranjang
+		_, err = tx.ExecContext(ctx, "UPDATE materials SET stock = stock - $1 WHERE id = $2", usage, matID)
+		if err != nil {
+			return 0, "", 0, err
+		}
 	}
 
 	if len(items) == 0 {
@@ -291,7 +318,13 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) error {
 	// 1. Cek status order saat ini
 	var currentStatus string
-	err := r.db.QueryRowContext(ctx, "SELECT status FROM orders WHERE id = $1 AND user_id = $2", orderID, userID).Scan(&currentStatus)
+	var err error
+	if userID > 0 {
+		err = r.db.QueryRowContext(ctx, "SELECT status FROM orders WHERE id = $1 AND user_id = $2", orderID, userID).Scan(&currentStatus)
+	} else {
+		err = r.db.QueryRowContext(ctx, "SELECT status FROM orders WHERE id = $1", orderID).Scan(&currentStatus)
+	}
+	
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("pesanan tidak ditemukan atau akses ditolak")
 	}
@@ -311,14 +344,14 @@ func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) e
 	}
 	defer tx.Rollback()
 
-	query := `UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1`
-	_, err = tx.ExecContext(ctx, query, orderID)
+	_, err = tx.ExecContext(ctx, "UPDATE orders SET status = 'cancelled', updated_at = NOW() WHERE id = $1", orderID)
 	if err != nil {
 		return err
 	}
 	
-	// 4. Logika pengembalian stok (Refund Stock) untuk status 'paid' 
-	if currentStatus == "paid" {
+	// 4. Logika pengembalian stok (Refund Stock) untuk status 'paid' dan 'waiting_payment'
+	// (karena stok sudah dipotong sejak Checkout)
+	if currentStatus == "paid" || currentStatus == "waiting_payment" {
 		queryUsage := `
 			SELECT oi.quantity, pv.material_id, pv.material_usage 
 			FROM order_items oi
@@ -400,13 +433,42 @@ func (r *orderRepository) GetOrdersByUserID(ctx context.Context, userID int) ([]
 // =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
-func (r *orderRepository) GetAllOrders(ctx context.Context) ([]order.Order, error) {
+func (r *orderRepository) GetAllOrders(ctx context.Context, limit int, offset int) ([]order.Order, error) {
 	query := `
 		SELECT id, user_id, order_code, total_price, status, created_at
 		FROM orders
 		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2
 	`
-	return r.scanOrders(ctx, query)
+	return r.scanOrders(ctx, query, limit, offset)
+}
+
+// =========================================================================
+// CRON: FIND UNPAID ORDERS
+// =========================================================================
+func (r *orderRepository) FindUnpaidOrdersOlderThan(ctx context.Context, duration string) ([]int, error) {
+	// duration format contoh: '24 HOURS'
+	query := fmt.Sprintf(`
+		SELECT id FROM orders 
+		WHERE status = 'waiting_payment' 
+		AND created_at < NOW() - INTERVAL '%s'
+	`, duration)
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
 }
 
 // scanOrders adalah helper internal untuk scan rows orders dengan args variadic

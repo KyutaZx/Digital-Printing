@@ -34,9 +34,12 @@ type Repository interface {
 	// GetOrdersByUserID mengembalikan semua pesanan milik satu customer
 	GetOrdersByUserID(ctx context.Context, userID int) ([]Order, error)
 
-	// GetAllOrders mengembalikan semua pesanan (untuk dashboard owner/admin)
-	GetAllOrders(ctx context.Context) ([]Order, error)
+	// GetAllOrders mengembalikan semua pesanan (untuk dashboard owner/admin) dengan pagination
+	GetAllOrders(ctx context.Context, limit int, offset int) ([]Order, error)
 
 	// CompleteOrder menandai pesanan selesai (hanya jika statusnya ready)
 	CompleteOrder(ctx context.Context, orderID int, userID int) error
+
+	// FindUnpaidOrdersOlderThan mencari ID pesanan yang sudah lebih dari batas waktu (contoh interval: '24 HOURS')
+	FindUnpaidOrdersOlderThan(ctx context.Context, duration string) ([]int, error)
 }

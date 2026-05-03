@@ -89,7 +89,8 @@ func (r *cartRepository) GetByUserID(ctx context.Context, userID int) ([]map[str
 	var items []map[string]interface{}
 	for rows.Next() {
 		var id, productID, qty int
-		var name, variantName, notes string
+		var name, variantName string
+		var notes sql.NullString
 		var price float64
 
 		if err := rows.Scan(&id, &productID, &name, &qty, &price, &variantName, &notes); err != nil {
@@ -103,7 +104,7 @@ func (r *cartRepository) GetByUserID(ctx context.Context, userID int) ([]map[str
 			"quantity":     qty,
 			"price":        price,
 			"variant_name": variantName,
-			"notes":        notes,
+			"notes":        notes.String,
 			"subtotal":     float64(qty) * price,
 		})
 	}

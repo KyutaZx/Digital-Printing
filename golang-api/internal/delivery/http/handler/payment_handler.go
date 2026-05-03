@@ -1,8 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"golang-api/internal/usecase"
 
@@ -18,27 +23,84 @@ func NewPaymentHandler(u *usecase.PaymentUsecase) *PaymentHandler {
 }
 
 // =========================================================================
-// REQUEST STRUCT
+// REQUEST STRUCT (tidak dipakai lagi untuk Upload karena form-data, tapi dibiarkan sbg dokumentasi)
 // =========================================================================
 type UploadPaymentRequest struct {
 	OrderID         int     `json:"order_id" binding:"required"`
-	MethodID        int     `json:"payment_method_id" binding:"required"` // Diubah agar sesuai curl
-	TransactionCode string  `json:"transaction_code"`                  // Kode referensi dari bank/user
+	MethodID        int     `json:"payment_method_id" binding:"required"`
+	TransactionCode string  `json:"transaction_code"`
 	Amount          float64 `json:"amount" binding:"required"`
-	Proof           string  `json:"payment_proof" binding:"required"` // Diubah agar sesuai curl
+	Proof           string  `json:"payment_proof" binding:"required"`
 }
 
 // =========================================================================
 // UPLOAD PAYMENT (CUSTOMER)
 // =========================================================================
 func (h *PaymentHandler) Upload(c *gin.Context) {
-	var req UploadPaymentRequest
+	// Ambil data dari form-data
+	orderIDStr := c.PostForm("order_id")
+	methodIDStr := c.PostForm("payment_method_id")
+	amountStr := c.PostForm("amount")
+	transactionCode := c.PostForm("transaction_code")
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// Konversi tipe data
+	orderID, err := strconv.Atoi(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "order_id harus berupa angka valid"})
+		return
+	}
+
+	methodID, err := strconv.Atoi(methodIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payment_method_id harus berupa angka valid"})
+		return
+	}
+
+	amount, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "amount harus berupa angka valid"})
+		return
+	}
+
+	// Tangani upload file bukti pembayaran
+	file, err := c.FormFile("payment_proof")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File bukti pembayaran (payment_proof) tidak ditemukan pada form-data"})
+		return
+	}
+
+	// Validasi Ekstensi File
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowedExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".pdf":  true,
+	}
+	if !allowedExtensions[ext] {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Data request tidak valid",
-			"error":   err.Error(),
+			"error": fmt.Sprintf("Tipe file '%s' tidak diizinkan. Gunakan: jpg, jpeg, png, atau pdf", ext),
 		})
+		return
+	}
+
+	// Validasi Ukuran File (Max 10MB)
+	if file.Size > 10*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ukuran file terlalu besar, maksimal 10MB"})
+		return
+	}
+
+	// Pastikan direktori ada
+	dir := filepath.Join("uploads", "payments")
+	os.MkdirAll(dir, os.ModePerm)
+
+	// Simpan file
+	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
+	savePath := filepath.Join(dir, filename)
+	dbPath := "/uploads/payments/" + filename
+
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan file: " + err.Error()})
 		return
 	}
 
@@ -49,15 +111,15 @@ func (h *PaymentHandler) Upload(c *gin.Context) {
 	ip := c.ClientIP()
 	ua := c.Request.UserAgent()
 
-	// PERBAIKAN: Masukkan req.TransactionCode ke dalam argumen [Penting!]
+	// Eksekusi usecase
 	paymentID, err := h.usecase.UploadProof(
 		c.Request.Context(),
 		userID,
-		req.OrderID,
-		req.MethodID,
-		req.TransactionCode, // Parameter ini harus dikirim
-		req.Amount,
-		req.Proof,
+		orderID,
+		methodID,
+		transactionCode,
+		amount,
+		dbPath,
 		ip,
 		ua,
 	)
