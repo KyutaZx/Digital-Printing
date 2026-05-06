@@ -2,106 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Material;
-use App\Models\MaterialStockLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MaterialController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Display All Materials
-    |--------------------------------------------------------------------------
-    */
+    protected $apiUrl;
+    public function __construct() { $this->apiUrl = config('app.golang_api_url', 'http://localhost:8080'); }
 
     public function index()
     {
-        $materials = Material::orderBy('name')->paginate(15);
-
-        return view('materials.index', compact('materials'));
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}/api/materials");
+            $materials = $r->successful() ? ($r->json('data') ?? $r->json() ?? []) : [];
+        } catch (\Exception $e) { $materials = []; }
+        return view('manager.material', compact('materials'));
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Store New Material
-    |--------------------------------------------------------------------------
-    */
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'stock' => 'required|numeric|min:0',
-            'unit' => 'required|string'
-        ]);
-
-        Material::create([
-            'name' => $request->name,
-            'stock' => $request->stock,
-            'unit' => $request->unit
-        ]);
-
-        return redirect()->back()->with('success', 'Material created');
+        $request->validate(['name' => 'required|string', 'unit' => 'required|string', 'stock' => 'required|numeric']);
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/materials", $request->all());
+            if ($r->successful()) return back()->with('success', 'Material berhasil ditambahkan.');
+            return back()->with('error', $r->json('message') ?? 'Gagal menambahkan material.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update Material
-    |--------------------------------------------------------------------------
-    */
-
-    public function update(Request $request, Material $material)
+    public function update(Request $request, int $id)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'unit' => 'required|string'
-        ]);
-
-        $material->update([
-            'name' => $request->name,
-            'unit' => $request->unit
-        ]);
-
-        return redirect()->back()->with('success', 'Material updated');
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/materials/{$id}", $request->all());
+            if ($r->successful()) return back()->with('success', 'Material berhasil diperbarui.');
+            return back()->with('error', $r->json('message') ?? 'Gagal memperbarui.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Restock Material
-    |--------------------------------------------------------------------------
-    */
-
-    public function restock(Request $request, Material $material)
+    public function restock(Request $request, int $id)
     {
-        $request->validate([
-            'quantity' => 'required|numeric|min:1'
-        ]);
-
-        $material->increment('stock', $request->quantity);
-
-        MaterialStockLog::create([
-            'material_id' => $material->id,
-            'change_amount' => $request->quantity,
-            'type' => 'restock',
-            'notes' => 'Material restocked'
-        ]);
-
-        return redirect()->back()->with('success', 'Material restocked');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Material Stock History
-    |--------------------------------------------------------------------------
-    */
-
-    public function history(Material $material)
-    {
-        $logs = MaterialStockLog::where('material_id', $material->id)
-            ->latest()
-            ->paginate(20);
-
-        return view('materials.history', compact('material', 'logs'));
+        $request->validate(['quantity' => 'required|numeric|min:1']);
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/materials/{$id}/restock", ['quantity' => $request->quantity]);
+            if ($r->successful()) return back()->with('success', 'Stok berhasil ditambahkan.');
+            return back()->with('error', $r->json('message') ?? 'Gagal restock.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 }

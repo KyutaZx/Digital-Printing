@@ -2,96 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\DesignReview;
-use App\Models\DesignRevision;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class DesignController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Staff Review Design
-    |--------------------------------------------------------------------------
-    */
+    protected $apiUrl;
+    public function __construct() { $this->apiUrl = config('app.golang_api_url', 'http://localhost:8080'); }
 
-    public function review(Order $order)
+    public function index(int $orderItemId)
     {
-        $review = DesignReview::create([
-            'order_id' => $order->id,
-            'review_status' => 'pending',
-            'reviewed_by' => Auth::id()
-        ]);
-
-        return redirect()->back()->with('success', 'Design review started');
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}/api/designs/{$orderItemId}");
+            $designs = $r->successful() ? ($r->json('data') ?? $r->json() ?? []) : [];
+        } catch (\Exception $e) { $designs = []; }
+        return view('designs.index', compact('designs', 'orderItemId'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Request Design Revision
-    |--------------------------------------------------------------------------
-    */
-
-    public function requestRevision(Request $request, DesignReview $review)
+    public function upload(Request $request, int $orderItemId)
     {
-        $request->validate([
-            'notes' => 'required|string'
-        ]);
+        $request->validate(['file' => 'required|file|mimes:jpg,jpeg,png,pdf,ai,psd,cdr|max:10240']);
+        try {
+            $file = $request->file('file');
+            $r = Http::timeout(30)
+                ->withToken(session('token'))
+                ->attach('file', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                ->post("{$this->apiUrl}/api/designs/{$orderItemId}");
 
-        $review->update([
-            'review_status' => 'revision',
-            'notes' => $request->notes,
-            'reviewed_by' => Auth::id()
-        ]);
-
-        return redirect()->back()->with('success', 'Revision requested');
+            if ($r->successful()) return back()->with('success', 'File desain berhasil diunggah!');
+            return back()->with('error', $r->json('error') ?? $r->json('message') ?? 'Upload desain gagal.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Customer Upload Revision
-    |--------------------------------------------------------------------------
-    */
-
-    public function uploadRevision(Request $request, DesignReview $review)
+    public function addReview(Request $request, int $designId)
     {
-        $request->validate([
-            'file' => 'required|file|max:4096'
-        ]);
-
-        $filePath = $request->file('file')->store('design_revisions', 'public');
-
-        $revisionNumber = DesignRevision::where('design_review_id', $review->id)->count() + 1;
-
-        DesignRevision::create([
-            'design_review_id' => $review->id,
-            'revision_number' => $revisionNumber,
-            'file_path' => $filePath,
-            'notes' => $request->notes
-        ]);
-
-        return redirect()->back()->with('success', 'Revision uploaded');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Approve Design
-    |--------------------------------------------------------------------------
-    */
-
-    public function approve(DesignReview $review)
-    {
-        $review->update([
-            'review_status' => 'approved',
-            'reviewed_by' => Auth::id(),
-            'reviewed_at' => now()
-        ]);
-
-        $review->order->update([
-            'status' => 'design_approved'
-        ]);
-
-        return redirect()->back()->with('success', 'Design approved');
+        $request->validate(['status' => 'required|in:approved,rejected', 'notes' => 'required|string']);
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))
+                ->post("{$this->apiUrl}/api/designs/{$designId}/review", $request->only(['status', 'notes']));
+            if ($r->successful()) return back()->with('success', 'Review desain berhasil disimpan.');
+            return back()->with('error', $r->json('message') ?? 'Gagal menyimpan review.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 }

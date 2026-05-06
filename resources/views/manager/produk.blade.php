@@ -1,0 +1,127 @@
+@extends('layouts.manager')
+
+@section('title', 'Manajemen Produk')
+@section('page_title', 'Kelola Produk & Varian')
+
+@section('content')
+<div x-data="{ 
+    modalOpen: false, 
+    editMode: false, 
+    currentProduct: { name: '', description: '', base_price: '', category_name: 'Printing', variants: [] },
+    openModal(product = null) {
+        if(product) {
+            this.editMode = true;
+            this.currentProduct = JSON.parse(JSON.stringify(product));
+        } else {
+            this.editMode = false;
+            this.currentProduct = { name: '', description: '', base_price: '', category_name: 'Printing', variants: [] };
+        }
+        this.modalOpen = true;
+    }
+}" class="space-y-6">
+
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">Katalog Produk</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Total {{ count($products) }} produk aktif</p>
+        </div>
+        <button @click="openModal()" class="btn-primary !py-2 !px-4 !text-xs !bg-primary-600 hover:!bg-primary-700 shadow-lg shadow-primary-100 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tambah Produk Baru
+        </button>
+    </div>
+
+    {{-- Grid Produk --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @foreach($products as $product)
+        <div class="card border-none shadow-md overflow-hidden bg-white group flex flex-col h-full">
+            <div class="aspect-video bg-slate-100 relative overflow-hidden shrink-0">
+                @if(!empty($product['image_url']))
+                    <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-slate-300">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                @endif
+                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 px-4">
+                    <button @click="openModal({{ json_encode($product) }})" class="p-2 bg-white rounded-xl text-primary-600 hover:bg-primary-50 transition-colors shadow-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </button>
+                    <form action="/manager/produk/{{ $product['id'] }}" method="POST" onsubmit="return confirm('Hapus produk ini?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="p-2 bg-white rounded-xl text-red-600 hover:bg-red-50 transition-colors shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-primary-600 mb-1 block">{{ $product['category_name'] ?? 'Category' }}</span>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1 leading-tight">{{ $product['name'] }}</h3>
+                    <p class="text-xs text-slate-400 line-clamp-2">{{ $product['description'] }}</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
+                    <div>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Mulai Dari</p>
+                        <p class="font-black text-slate-900">Rp {{ number_format($product['base_price'], 0, ',', '.') }}</p>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 italic">{{ count($product['variants'] ?? []) }} Varian</span>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- Modal Form (Tambah/Edit) --}}
+    <div x-show="modalOpen" x-cloak class="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="modalOpen = false"></div>
+        <div class="bg-white rounded-3xl w-full max-w-xl shadow-2xl relative z-10 overflow-hidden fade-in">
+            <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xl font-black text-slate-900 tracking-tight" x-text="editMode ? 'Edit Produk' : 'Tambah Produk Baru'"></h3>
+                <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <form :action="editMode ? '/manager/produk/' + currentProduct.id : '/manager/produk'" method="POST" class="px-8 py-8 space-y-6">
+                @csrf
+                <template x-if="editMode"><input type="hidden" name="_method" value="PUT"></template>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Nama Produk</label>
+                        <input type="text" name="name" x-model="currentProduct.name" class="form-input text-sm" required placeholder="Contoh: Banner Flexi 280gr">
+                    </div>
+                    <div>
+                        <label class="form-label">Kategori</label>
+                        <select name="category_name" x-model="currentProduct.category_name" class="form-input text-sm" required>
+                            <option>Printing</option>
+                            <option>Outdoor</option>
+                            <option>Indoor</option>
+                            <option>Merchandise</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Deskripsi</label>
+                    <textarea name="description" x-model="currentProduct.description" class="form-input text-sm h-24" required placeholder="Jelaskan detail produk..."></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">Harga Dasar (Rp)</label>
+                    <input type="number" name="base_price" x-model="currentProduct.base_price" class="form-input text-sm font-black text-primary-600" required placeholder="0">
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" @click="modalOpen = false" class="btn-secondary !text-xs">Batal</button>
+                    <button type="submit" class="btn-primary !text-xs !px-8" x-text="editMode ? 'Simpan Perubahan' : 'Tambah Produk'"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+@endsection

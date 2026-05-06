@@ -2,104 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Cart;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Display User Orders
-    |--------------------------------------------------------------------------
-    */
+    protected $apiUrl;
+    public function __construct() { $this->apiUrl = config('app.golang_api_url', 'http://localhost:8080'); }
+
+    private function api(string $method, string $path, array $data = []): ?array
+    {
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->{$method}("{$this->apiUrl}{$path}", $data);
+            return $r->successful() ? ($r->json('data') ?? $r->json()) : null;
+        } catch (\Exception $e) { Log::warning("Order API {$path}: ".$e->getMessage()); return null; }
+    }
 
     public function index()
     {
-        $orders = Order::where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
-
+        $orders = $this->api('get', '/api/orders') ?? [];
+        if (!is_array($orders) || isset($orders['id'])) $orders = [$orders];
         return view('orders.index', compact('orders'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Show Order Detail
-    |--------------------------------------------------------------------------
-    */
-
-    public function show(Order $order)
+    public function show(int $id)
     {
-        $order->load([
-            'items.product',
-            'items.size',
-            'items.material',
-            'items.finishing'
-        ]);
-
-        return view('orders.show', compact('order'));
+        $order = $this->api('get', "/api/orders/{$id}");
+        if (!$order) abort(404);
+        // Cek kepemilikan
+        if ((session('user.role') === 'customer') && ($order['customer_id'] ?? $order['user_id'] ?? null) != session('user.id')) {
+            abort(403);
+        }
+        return view('orders.detail', compact('order'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Checkout Cart to Create Order
-    |--------------------------------------------------------------------------
-    */
-
-    public function checkout()
+    public function checkout(Request $request)
     {
-        $cart = Cart::with('items')
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        $totalPrice = 0;
-
-        foreach ($cart->items as $item) {
-            $totalPrice += $item->quantity * $item->product->base_price;
-        }
-
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'order_code' => 'ORD-' . strtoupper(Str::random(6)),
-            'total_price' => $totalPrice,
-            'status' => 'pending',
-        ]);
-
-        foreach ($cart->items as $item) {
-
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'size_id' => $item->size_id,
-                'material_id' => $item->material_id,
-                'finishing_id' => $item->finishing_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->base_price,
-                'notes' => $item->notes,
-                'design_file' => $item->design_file
-            ]);
-        }
-
-        $cart->items()->delete();
-
-        return redirect()->route('orders.show', $order->id);
+        $result = $this->api('post', '/api/checkout', []);
+        if ($result) return redirect('/pesanan')->with('success', 'Checkout berhasil! Silakan upload bukti pembayaran.');
+        return back()->with('error', 'Checkout gagal. Pastikan keranjang Anda tidak kosong.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Customer Confirm Order Completed
-    |--------------------------------------------------------------------------
-    */
-
-    public function confirmCompleted(Order $order)
+    public function confirmCompleted(int $id)
     {
-        $order->update([
-            'status' => 'completed'
-        ]);
+        $r = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/orders/{$id}/complete");
+        if ($r->successful()) return back()->with('success', 'Terima kasih! Pesanan telah dikonfirmasi selesai.');
+        return back()->with('error', $r->json('message') ?? 'Gagal mengkonfirmasi pesanan.');
+    }
 
-        return redirect()->back()->with('success', 'Order confirmed as completed');
+    public function downloadInvoice(int $id)
+    {
+        try {
+            $r = Http::timeout(30)->withToken(session('token'))->get("{$this->apiUrl}/api/orders/{$id}/invoice/pdf");
+            if ($r->successful()) {
+                return response($r->body(), 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => "attachment; filename=Invoice-{$id}.pdf",
+                ]);
+            }
+        } catch (\Exception $e) {}
+        return back()->with('error', 'Gagal mengunduh invoice.');
     }
 }

@@ -2,57 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Display All Products
-    |--------------------------------------------------------------------------
-    */
+    protected $apiUrl;
 
-    public function index()
+    public function __construct()
     {
-        $products = Product::where('is_active', true)
-                    ->with('category')
-                    ->paginate(12);
-
-        return view('products.index', compact('products'));
+        $this->apiUrl = config('app.golang_api_url', 'http://localhost:8080');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Show Product Detail
-    |--------------------------------------------------------------------------
-    */
-
-    public function show(Product $product)
+    // =========================================================================
+    // Landing Page — Tampilkan produk unggulan dari Golang API
+    // =========================================================================
+    public function index(Request $request)
     {
-        $product->load([
-            'sizes',
-            'materials.material',
-            'finishing.finishing'
-        ]);
+        $products = [];
 
-        return view('products.show', compact('product'));
+        try {
+            $response = Http::timeout(10)->get("{$this->apiUrl}/products");
+            if ($response->successful()) {
+                $all      = $response->json('data') ?? $response->json() ?? [];
+                $products = array_slice($all, 0, 8); // Tampilkan max 8 di landing
+            }
+        } catch (\Exception $e) {
+            Log::warning('Products API unreachable: ' . $e->getMessage());
+        }
+
+        return view('landing', compact('products'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Show Products by Category
-    |--------------------------------------------------------------------------
-    */
-
-    public function byCategory($categoryId)
+    // =========================================================================
+    // Katalog — Semua produk dengan filter & search
+    // =========================================================================
+    public function catalog(Request $request)
     {
-        $category = Category::findOrFail($categoryId);
+        $products = [];
+        $search   = $request->query('q', '');
 
-        $products = Product::where('category_id', $categoryId)
-                    ->where('is_active', true)
-                    ->paginate(12);
+        try {
+            $response = Http::timeout(10)->get("{$this->apiUrl}/products");
+            if ($response->successful()) {
+                $all = $response->json('data') ?? $response->json() ?? [];
 
-        return view('products.category', compact('products', 'category'));
+                // Filter by search query
+                if ($search) {
+                    $all = array_filter($all, fn($p) =>
+                        stripos($p['name'] ?? '', $search) !== false ||
+                        stripos($p['description'] ?? '', $search) !== false
+                    );
+                }
+
+                $products = array_values($all);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Products API unreachable: ' . $e->getMessage());
+        }
+
+        return view('catalog', compact('products', 'search'));
+    }
+
+    // =========================================================================
+    // Product Detail
+    // =========================================================================
+    public function show(int $id)
+    {
+        $product = null;
+
+        try {
+            $response = Http::timeout(10)->get("{$this->apiUrl}/products/{$id}");
+            if ($response->successful()) {
+                $product = $response->json('data') ?? $response->json();
+            }
+        } catch (\Exception $e) {
+            Log::warning("Product {$id} API unreachable: " . $e->getMessage());
+        }
+
+        if (!$product) {
+            abort(404, 'Produk tidak ditemukan.');
+        }
+
+        return view('product-detail', compact('product'));
     }
 }

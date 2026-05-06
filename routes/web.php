@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
@@ -11,142 +10,99 @@ use App\Http\Controllers\DesignController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\UserLogController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ManagerController;
 
 /*
 |--------------------------------------------------------------------------
-| Authentication
+| AUTH (PUBLIC)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/register', [AuthController::class, 'showRegister']);
-
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
 /*
 |--------------------------------------------------------------------------
-| Products & Categories (Public)
+| PUBLIC (Produk & Landing)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', [ProductController::class, 'index']);
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
-
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{category}', [CategoryController::class, 'show']);
-
-
-/*
-|--------------------------------------------------------------------------
-| Cart (Customer)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/cart', [CartController::class, 'index']);
-
-Route::post('/cart/add', [CartController::class, 'add']);
-Route::post('/cart/update/{cartItem}', [CartController::class, 'update']);
-Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove']);
-
+Route::get('/katalog', [ProductController::class, 'catalog']);
+Route::get('/produk/{id}', [ProductController::class, 'show']);
+Route::view('/tentang', 'about');
+Route::view('/cara-order', 'cara-order');
+Route::view('/kontak', 'contact');
+Route::view('/syarat-ketentuan', 'terms');
+Route::view('/kebijakan-privasi', 'privacy');
 
 /*
 |--------------------------------------------------------------------------
-| Orders
+| CUSTOMER (Login Required)
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth.session:customer,owner,admin,staff'])->group(function () {
 
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    // Cart
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::post('/cart/update', [CartController::class, 'update']);
+    Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
 
-Route::post('/checkout', [OrderController::class, 'checkout']);
+    // Orders & Checkout
+    Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/pesanan/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::post('/pesanan/{id}/selesai', [OrderController::class, 'confirmCompleted']);
+    Route::get('/pesanan/{id}/invoice/pdf', [OrderController::class, 'downloadInvoice']);
 
-Route::post('/orders/{order}/complete', [OrderController::class, 'confirmCompleted']);
+    // Payment
+    Route::get('/pembayaran/metode', [PaymentController::class, 'methods']);
+    Route::post('/pembayaran/{orderId}/upload', [PaymentController::class, 'uploadProof']);
 
+    // Design Upload
+    Route::post('/desain/{orderItemId}/upload', [DesignController::class, 'upload']);
+    Route::get('/desain/{orderItemId}', [DesignController::class, 'index']);
+});
 
 /*
 |--------------------------------------------------------------------------
-| Payment
+| STAFF PANEL
 |--------------------------------------------------------------------------
 */
-
-Route::get('/payment/methods', [PaymentController::class, 'methods']);
-
-Route::post('/payment/{order}/upload', [PaymentController::class, 'uploadProof']);
-
-Route::post('/payment/verify/{payment}', [PaymentController::class, 'verify']);
-
+Route::prefix('staff')->middleware(['auth.session:staff,owner,admin'])->group(function () {
+    Route::get('/', fn() => redirect('/staff/dashboard'));
+    Route::get('/dashboard', [StaffController::class, 'dashboard']);
+    Route::get('/verifikasi', [StaffController::class, 'verifikasi']);
+    Route::get('/verifikasi/{id}', [StaffController::class, 'verifikasiDetail']);
+    Route::post('/pembayaran/{id}/setujui', [PaymentController::class, 'approve']);
+    Route::post('/pembayaran/{id}/tolak', [PaymentController::class, 'reject']);
+    Route::get('/desain', [StaffController::class, 'desainList']);
+    Route::post('/desain/{id}/review', [DesignController::class, 'addReview']);
+    Route::get('/produksi', [StaffController::class, 'produksi']);
+    Route::post('/produksi/{orderId}/mulai', [ProductionController::class, 'start']);
+    Route::post('/produksi/{orderId}/selesai', [ProductionController::class, 'finish']);
+});
 
 /*
 |--------------------------------------------------------------------------
-| Design Review
+| MANAGER / OWNER PANEL
 |--------------------------------------------------------------------------
 */
-
-Route::post('/design/review/{order}', [DesignController::class, 'review']);
-
-Route::post('/design/revision/{review}', [DesignController::class, 'requestRevision']);
-
-Route::post('/design/upload/{review}', [DesignController::class, 'uploadRevision']);
-
-Route::post('/design/approve/{review}', [DesignController::class, 'approve']);
-
-
-/*
-|--------------------------------------------------------------------------
-| Production
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/production/start/{order}', [ProductionController::class, 'start']);
-
-Route::post('/production/update/{log}', [ProductionController::class, 'updateStatus']);
-
-Route::post('/production/finish/{order}', [ProductionController::class, 'finish']);
-
-
-/*
-|--------------------------------------------------------------------------
-| Material Management
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/materials', [MaterialController::class, 'index']);
-
-Route::post('/materials/store', [MaterialController::class, 'store']);
-
-Route::put('/materials/{material}', [MaterialController::class, 'update']);
-
-Route::post('/materials/restock/{material}', [MaterialController::class, 'restock']);
-
-Route::get('/materials/history/{material}', [MaterialController::class, 'history']);
-
-
-/*
-|--------------------------------------------------------------------------
-| Reports (Manager / Owner)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/reports/sales', [ReportController::class, 'sales']);
-
-Route::get('/reports/orders', [ReportController::class, 'orders']);
-
-Route::get('/reports/production', [ReportController::class, 'production']);
-
-
-/*
-|--------------------------------------------------------------------------
-| User Logs (Security Monitoring)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/logs/login-history', [UserLogController::class, 'loginHistory']);
-
-Route::get('/logs/activity', [UserLogController::class, 'activity']);
-
-Route::get('/logs/audit', [UserLogController::class, 'audit']);
+Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(function () {
+    Route::get('/', fn() => redirect('/manager/dashboard'));
+    Route::get('/dashboard', [ManagerController::class, 'dashboard']);
+    Route::get('/produk', [ManagerController::class, 'produk']);
+    Route::post('/produk', [ManagerController::class, 'storeProduk']);
+    Route::put('/produk/{id}', [ManagerController::class, 'updateProduk']);
+    Route::delete('/produk/{id}', [ManagerController::class, 'deleteProduk']);
+    Route::get('/material', [MaterialController::class, 'index']);
+    Route::post('/material', [MaterialController::class, 'store']);
+    Route::put('/material/{id}', [MaterialController::class, 'update']);
+    Route::post('/material/{id}/restock', [MaterialController::class, 'restock']);
+    Route::get('/monitoring', [ManagerController::class, 'monitoring']);
+    Route::get('/pesanan', [ManagerController::class, 'pesanan']);
+    Route::get('/laporan', [ReportController::class, 'index']);
+});

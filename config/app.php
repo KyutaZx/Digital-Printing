@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'golang_api_url' => env('GOLANG_API_URL', 'http://localhost:8080'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Staff Panel') — Jaya Mandiri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>body { font-family: 'Inter', sans-serif; } [x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-slate-50">
+
+<div x-data="{ sidebarOpen: true }" class="flex h-screen overflow-hidden">
+
+    {{-- SIDEBAR --}}
+    <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-white border-r border-slate-200 flex flex-col transition-all duration-300 shrink-0 shadow-sm">
+        {{-- Logo --}}
+        <div class="h-16 flex items-center px-4 border-b border-slate-100">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center text-white font-black text-base shrink-0">J</div>
+                <div x-show="sidebarOpen" class="overflow-hidden">
+                    <p class="font-black text-slate-900 text-sm leading-tight whitespace-nowrap">Jaya Mandiri</p>
+                    <p class="text-xs text-primary-600 font-semibold">Staff Panel</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Nav Links --}}
+        <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            <p x-show="sidebarOpen" class="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">Menu Utama</p>
+
+            <a href="/staff/dashboard" class="sidebar-link {{ request()->is('staff/dashboard*') || request()->is('staff') ? 'active' : '' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span x-show="sidebarOpen" class="text-sm whitespace-nowrap">Dashboard</span>
+            </a>
+
+            <a href="/staff/verifikasi" class="sidebar-link {{ request()->is('staff/verifikasi*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span x-show="sidebarOpen" class="text-sm whitespace-nowrap">Verifikasi Pembayaran</span>
+            </a>
+
+            <a href="/staff/desain" class="sidebar-link {{ request()->is('staff/desain*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                <span x-show="sidebarOpen" class="text-sm whitespace-nowrap">Review Desain</span>
+            </a>
+
+            <a href="/staff/produksi" class="sidebar-link {{ request()->is('staff/produksi*') ? 'active' : '' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span x-show="sidebarOpen" class="text-sm whitespace-nowrap">Antrean Produksi</span>
+            </a>
+        </nav>
+
+        {{-- Footer Sidebar --}}
+        <div class="p-3 border-t border-slate-100">
+            <div x-show="sidebarOpen" class="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-50 mb-2">
+                <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {{ strtoupper(substr(session('user.name', 'S'), 0, 1)) }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-semibold text-slate-900 truncate">{{ session('user.name', 'Staff') }}</p>
+                    <p class="text-xs text-slate-500 capitalize">{{ session('user.role', 'staff') }}</p>
+                </div>
+            </div>
+            <form method="POST" action="/logout">
+                @csrf
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 text-sm font-medium transition-colors">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span x-show="sidebarOpen" class="whitespace-nowrap">Keluar</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    {{-- MAIN CONTENT --}}
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {{-- Topbar --}}
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <h1 class="font-bold text-slate-900">@yield('page_title', 'Dashboard')</h1>
+            </div>
+            <div class="text-sm text-slate-500">
+                {{ now()->translatedFormat('l, d F Y') }}
+            </div>
+        </header>
+
+        {{-- Flash Messages --}}
+        @if(session('success'))
+        <div class="mx-6 mt-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl text-sm font-medium fade-in">
+            <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+        @endif
+        @if(session('error'))
+        <div class="mx-6 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl text-sm font-medium fade-in">
+            <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            {{ session('error') }}
+        </div>
+        @endif
+
+        {{-- Page Content --}}
+        <main class="flex-1 overflow-y-auto p-6">
+            @yield('content')
+        </main>
+    </div>
+</div>
+
+</body>
+</html>
