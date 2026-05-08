@@ -47,12 +47,16 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.usecase.Create(req); err != nil {
+	productID, err := h.usecase.Create(req)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "success create product"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "success create product",
+		"data":    gin.H{"id": productID},
+	})
 }
 
 // ========================
@@ -97,4 +101,44 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "success delete product"})
+}
+
+// ========================
+// UPDATE PRODUCT IMAGE
+// ========================
+func (h *ProductHandler) UpdateImage(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid product id"})
+		return
+	}
+
+	// 1. Ambil file dari request
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "file image required"})
+		return
+	}
+
+	// 2. Generate nama file unik
+	filename := strconv.Itoa(id) + "_" + file.Filename
+	filepath := "uploads/products/" + filename
+
+	// 3. Simpan ke storage local server
+	if err := c.SaveUploadedFile(file, filepath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save image", "error": err.Error()})
+		return
+	}
+
+	// 4. Update path di database
+	if err := h.usecase.UpdateImage(id, "/"+filepath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success update product image",
+		"image":   "/" + filepath,
+	})
 }

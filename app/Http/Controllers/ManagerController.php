@@ -64,7 +64,8 @@ class ManagerController extends Controller
             $products = [];
         }
 
-        return view('manager.produk', compact('products'));
+        $apiUrl = $this->apiUrl;
+        return view('manager.produk', compact('products', 'apiUrl'));
     }
 
     private function mapCategoryNameToId($name)
@@ -102,12 +103,23 @@ class ManagerController extends Controller
 
         try {
             $response = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/admin/products", $payload);
+            
             if ($response->successful()) {
+                $productId = $response->json('data.id');
+
+                // 🔥 Jika ada upload foto, kirim ke endpoint khusus image
+                if ($request->hasFile('image') && $productId) {
+                    $image = $request->file('image');
+                    Http::timeout(30)->withToken(session('token'))
+                        ->attach('image', fopen($image->getRealPath(), 'r'), $image->getClientOriginalName())
+                        ->post("{$this->apiUrl}/api/admin/products/{$productId}/image");
+                }
+
                 return back()->with('success', 'Produk berhasil ditambahkan.');
             }
             return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghubungi server.');
+            return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
     }
 
@@ -136,11 +148,18 @@ class ManagerController extends Controller
         try {
             $response = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/admin/products/{$id}", $payload);
             if ($response->successful()) {
+                // 🔥 Jika ada upload foto baru saat update
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    Http::timeout(30)->withToken(session('token'))
+                        ->attach('image', fopen($image->getRealPath(), 'r'), $image->getClientOriginalName())
+                        ->post("{$this->apiUrl}/api/admin/products/{$id}/image");
+                }
                 return back()->with('success', 'Produk berhasil diperbarui.');
             }
             return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghubungi server.');
+            return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
     }
 

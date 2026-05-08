@@ -109,8 +109,8 @@
             @foreach($products as $product)
             <a href="/produk/{{ $product['id'] }}" class="group card hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
                 <div class="aspect-square bg-slate-100 overflow-hidden">
-                    @if(!empty($product['image_url']))
-                        <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}"
+                    @if(!empty($product['image']))
+                        <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-slate-300">

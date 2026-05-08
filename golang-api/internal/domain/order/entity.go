@@ -6,6 +6,8 @@ import "time"
 type Order struct {
 	ID                  int        `json:"id"`
 	UserID              int        `json:"user_id"`
+	CustomerName        string     `json:"customer_name,omitempty"`
+	CustomerFormattedID string     `json:"customer_formatted_id,omitempty"`
 	OrderCode           string     `json:"order_code"`            // Contoh: "ORD-2026-0001" [cite: 1259 16666]
 	TotalPrice          float64    `json:"total_price"`           // Sesuai numeric(12,2) [cite: 1259 16666]
 	Status              string     `json:"status"`                // ENUM: waiting_payment, production, dll [cite: 1247 1247]
@@ -69,10 +71,11 @@ type OrderDetail struct {
 	UpdatedAt           *time.Time       `json:"updated_at,omitempty"`
 
 	// Info Customer
-	CustomerID    int    `json:"customer_id"`
-	CustomerName  string `json:"customer_name"`
-	CustomerEmail string `json:"customer_email"`
-	CustomerPhone string `json:"customer_phone"`
+	CustomerID          int    `json:"customer_id"`
+	CustomerName        string `json:"customer_name"`
+	CustomerFormattedID string `json:"customer_formatted_id"`
+	CustomerEmail       string `json:"customer_email"`
+	CustomerPhone       string `json:"customer_phone"`
 
 	// Item Pesanan (dengan nama produk & variant)
 	Items []OrderItemDetail `json:"items"`

@@ -229,7 +229,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 		SELECT
 			o.id, o.order_code, o.status, o.total_price,
 			o.estimated_finish_date, o.created_at, o.updated_at,
-			u.id as customer_id, u.name as customer_name,
+			u.id as customer_id, u.name as customer_name, u.formatted_id as customer_formatted_id,
 			u.email as customer_email, COALESCE(u.phone, '') as customer_phone,
 			oi.id as item_id, oi.product_id,
 			p.name as product_name,
@@ -263,7 +263,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 		err := rows.Scan(
 			&d.ID, &d.OrderCode, &d.Status, &d.TotalPrice,
 			&d.EstimatedFinishDate, &d.CreatedAt, &d.UpdatedAt,
-			&d.CustomerID, &d.CustomerName, &d.CustomerEmail, &d.CustomerPhone,
+			&d.CustomerID, &d.CustomerName, &d.CustomerFormattedID, &d.CustomerEmail, &d.CustomerPhone,
 			&item.ID, &item.ProductID, &item.ProductName,
 			&item.VariantID, &item.VariantName, &item.SKU,
 			&item.Quantity, &item.UnitPrice, &item.Subtotal, &item.Notes,
@@ -422,10 +422,12 @@ func (r *orderRepository) UpdateStatus(ctx context.Context, orderID int, status 
 // =========================================================================
 func (r *orderRepository) GetOrdersByUserID(ctx context.Context, userID int) ([]order.Order, error) {
 	query := `
-		SELECT id, user_id, order_code, total_price, status, created_at
-		FROM orders
-		WHERE user_id = $1
-		ORDER BY created_at DESC
+		SELECT o.id, o.user_id, u.name as customer_name, u.formatted_id as customer_formatted_id, 
+		       o.order_code, o.total_price, o.status, o.created_at
+		FROM orders o
+		JOIN v_users u ON u.id = o.user_id
+		WHERE o.user_id = $1
+		ORDER BY o.created_at DESC
 	`
 	return r.scanOrders(ctx, query, userID)
 }
@@ -435,9 +437,11 @@ func (r *orderRepository) GetOrdersByUserID(ctx context.Context, userID int) ([]
 // =========================================================================
 func (r *orderRepository) GetAllOrders(ctx context.Context, limit int, offset int) ([]order.Order, error) {
 	query := `
-		SELECT id, user_id, order_code, total_price, status, created_at
-		FROM orders
-		ORDER BY created_at DESC
+		SELECT o.id, o.user_id, u.name as customer_name, u.formatted_id as customer_formatted_id,
+		       o.order_code, o.total_price, o.status, o.created_at
+		FROM orders o
+		JOIN v_users u ON u.id = o.user_id
+		ORDER BY o.created_at DESC
 		LIMIT $1 OFFSET $2
 	`
 	return r.scanOrders(ctx, query, limit, offset)
@@ -482,7 +486,7 @@ func (r *orderRepository) scanOrders(ctx context.Context, query string, args ...
 	var orders []order.Order
 	for rows.Next() {
 		var o order.Order
-		if err := rows.Scan(&o.ID, &o.UserID, &o.OrderCode, &o.TotalPrice, &o.Status, &o.CreatedAt); err != nil {
+		if err := rows.Scan(&o.ID, &o.UserID, &o.CustomerName, &o.CustomerFormattedID, &o.OrderCode, &o.TotalPrice, &o.Status, &o.CreatedAt); err != nil {
 			return nil, err
 		}
 		orders = append(orders, o)

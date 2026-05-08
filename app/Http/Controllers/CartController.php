@@ -24,7 +24,8 @@ class CartController extends Controller
         } catch (\Exception $e) {
             Log::warning('Cart API: ' . $e->getMessage());
         }
-        return view('cart', compact('items'));
+        $apiUrl = $this->apiUrl;
+        return view('cart', compact('items', 'apiUrl'));
     }
 
     public function add(Request $request)

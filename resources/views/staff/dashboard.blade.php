@@ -81,7 +81,10 @@
             @forelse($recentOrders as $order)
             <tr class="hover:bg-slate-50 transition-colors">
                 <td class="px-6 py-4 font-mono font-bold text-primary-600 text-xs">{{ $order['order_code'] ?? '-' }}</td>
-                <td class="px-6 py-4 text-slate-700">{{ $order['customer_name'] ?? ($order['user_id'] ?? '-') }}</td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-bold text-slate-900">{{ $order['customer_name'] ?? '-' }}</div>
+                    <div class="text-[10px] text-slate-500 font-mono">{{ $order['customer_formatted_id'] ?? '-' }}</div>
+                </td>
                 <td class="px-6 py-4 font-bold text-slate-900">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</td>
                 <td class="px-6 py-4">
                     @php

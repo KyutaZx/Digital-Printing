@@ -30,7 +30,8 @@
                     @endphp
                     <span class="{{ $badge }}">{{ $label }}</span>
                 </div>
-                <p class="text-sm text-slate-600">{{ $order['customer_name'] ?? 'Customer' }} • Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</p>
+                <p class="text-sm text-slate-600 font-bold">{{ $order['customer_name'] ?? 'Customer' }} <span class="text-xs font-mono text-slate-400 font-normal">({{ $order['customer_formatted_id'] ?? '-' }})</span></p>
+                <p class="text-xs text-slate-500 mt-0.5">Total: Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</p>
                 @if(($order['estimated_finish_date'] ?? null))
                 <p class="text-xs text-slate-400 mt-1">Est. selesai: {{ \Carbon\Carbon::parse($order['estimated_finish_date'])->format('d M Y') }}</p>
                 @endif
