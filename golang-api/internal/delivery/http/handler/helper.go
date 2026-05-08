@@ -35,3 +35,19 @@ func getUserRole(c *gin.Context) (string, bool) {
 
 	return role, true
 }
+
+// ========================
+// MAP ROLE ID TO STRING
+// ========================
+func mapRole(roleID int) string {
+	switch roleID {
+	case 1:
+		return "owner"
+	case 2:
+		return "staff"
+	case 3:
+		return "customer"
+	default:
+		return "customer"
+	}
+}

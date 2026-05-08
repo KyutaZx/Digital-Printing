@@ -29,6 +29,7 @@ type RegisterRequest struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
+	Phone    string `json:"phone"`
 }
 
 // Tambahan untuk pendaftaran staff oleh Owner
@@ -57,7 +58,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	ip := c.ClientIP()
 	ua := c.Request.UserAgent()
 
-	token, err := h.authUsecase.Login(c.Request.Context(), req.Email, req.Password, ip, ua)
+	token, userData, err := h.authUsecase.Login(c.Request.Context(), req.Email, req.Password, ip, ua)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": err.Error(),
@@ -68,6 +69,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login berhasil",
 		"token":   token,
+		"user": gin.H{
+			"id":    userData.ID,
+			"name":  userData.Name,
+			"email": userData.Email,
+			"phone": userData.Phone,
+			"role":  mapRole(userData.RoleID),
+		},
 	})
 }
 
@@ -91,7 +99,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	ip := c.ClientIP()
 	ua := c.Request.UserAgent()
 
-	err := h.authUsecase.Register(c.Request.Context(), req.Name, req.Email, req.Password, ip, ua)
+	err := h.authUsecase.Register(c.Request.Context(), req.Name, req.Email, req.Password, req.Phone, ip, ua)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
