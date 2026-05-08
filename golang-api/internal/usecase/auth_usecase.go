@@ -28,25 +28,25 @@ func NewAuthUsecase(userRepo user.Repository, auditRepo audit.Repository) *AuthU
 // =========================================================================
 // LOGIN
 // =========================================================================
-func (u *AuthUsecase) Login(ctx context.Context, email, password, ip, ua string) (string, error) {
+func (u *AuthUsecase) Login(ctx context.Context, email, password, ip, ua string) (string, *user.User, error) {
 	email = strings.TrimSpace(email)
 
 	if email == "" || password == "" {
-		return "", errors.New("email dan password wajib diisi")
+		return "", nil, errors.New("email dan password wajib diisi")
 	}
 
 	// 1. Cari User berdasarkan email
 	uData, err := u.userRepo.FindByEmail(ctx, email)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	if uData == nil {
-		return "", errors.New("email atau password tidak sesuai")
+		return "", nil, errors.New("email atau password tidak sesuai")
 	}
 
 	// 2. Verifikasi Password dengan bcrypt
 	if err := bcrypt.CompareHashAndPassword([]byte(uData.Password), []byte(password)); err != nil {
-		return "", errors.New("email atau password tidak sesuai")
+		return "", nil, errors.New("email atau password tidak sesuai")
 	}
 
 	// 3. Mapping ID Role ke nama string
@@ -55,7 +55,7 @@ func (u *AuthUsecase) Login(ctx context.Context, email, password, ip, ua string)
 	// 4. Generate JWT Token
 	token, err := jwt.GenerateToken(uData.ID, role)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	// 5. Catat Log Audit (Login Berhasil)
@@ -72,7 +72,7 @@ func (u *AuthUsecase) Login(ctx context.Context, email, password, ip, ua string)
 	// 6. Catat ke tabel login_logs (activity_type = 'login')
 	_ = u.userRepo.CreateLoginLog(ctx, uData.ID, "login", ip, ua)
 
-	return token, nil
+	return token, uData, nil
 }
 
 // =========================================================================
@@ -98,9 +98,10 @@ func (u *AuthUsecase) Logout(ctx context.Context, userID int, ip, ua string) err
 // =========================================================================
 // REGISTER (PUBLIC CUSTOMER)
 // =========================================================================
-func (u *AuthUsecase) Register(ctx context.Context, name, email, password, ip, ua string) error {
+func (u *AuthUsecase) Register(ctx context.Context, name, email, password, phone, ip, ua string) error {
 	name = strings.TrimSpace(name)
 	email = strings.TrimSpace(email)
+	phone = strings.TrimSpace(phone)
 
 	if name == "" || email == "" || password == "" {
 		return errors.New("seluruh kolom wajib diisi")
@@ -126,6 +127,7 @@ func (u *AuthUsecase) Register(ctx context.Context, name, email, password, ip, u
 		Name:     name,
 		Email:    email,
 		Password: string(hashed),
+		Phone:    phone,
 		RoleID:   3,
 	}
 

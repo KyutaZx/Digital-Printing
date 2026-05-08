@@ -67,25 +67,80 @@ class ManagerController extends Controller
         return view('manager.produk', compact('products'));
     }
 
+    private function mapCategoryNameToId($name)
+    {
+        $map = [
+            'Printing' => 2,      // Mengarah ke "Print Digital" di seeder
+            'Outdoor' => 4,       // Mengarah ke "Media Promosi"
+            'Indoor' => 5,        // Mengarah ke "Sticker / Label"
+            'Merchandise' => 7    // Mengarah ke "Merchandise"
+        ];
+        return $map[$name] ?? 2;  // Default ke 2 jika tidak ditemukan
+    }
+
     public function storeProduk(Request $request)
     {
         $request->validate(['name' => 'required', 'base_price' => 'required|numeric']);
 
+        $payload = [
+            'category_id' => $this->mapCategoryNameToId($request->category_name ?? 'Printing'),
+            'name' => $request->name,
+            'description' => $request->description ?? '',
+            'base_price' => (float) $request->base_price,
+            'estimated_days' => 1,
+            'is_active' => true,
+            'variants' => [
+                [
+                    'sku' => 'VAR-' . strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $request->name), 0, 4)) . '-' . rand(100,999),
+                    'variant_name' => 'Standar',
+                    'price' => (float) $request->base_price,
+                    'stock' => 999,
+                    'is_active' => true
+                ]
+            ]
+        ];
+
         try {
-            Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/products", $request->all());
-            return back()->with('success', 'Produk berhasil ditambahkan.');
+            $response = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/admin/products", $payload);
+            if ($response->successful()) {
+                return back()->with('success', 'Produk berhasil ditambahkan.');
+            }
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menambahkan produk.');
+            return back()->with('error', 'Gagal menghubungi server.');
         }
     }
 
     public function updateProduk(Request $request, int $id)
     {
+        $request->validate(['name' => 'required', 'base_price' => 'required|numeric']);
+
+        $payload = [
+            'category_id' => $this->mapCategoryNameToId($request->category_name ?? 'Printing'),
+            'name' => $request->name,
+            'description' => $request->description ?? '',
+            'base_price' => (float) $request->base_price,
+            'estimated_days' => 1,
+            'is_active' => true,
+            'variants' => [
+                [
+                    'sku' => 'VAR-UPD-' . rand(100,999),
+                    'variant_name' => 'Standar',
+                    'price' => (float) $request->base_price,
+                    'stock' => 999,
+                    'is_active' => true
+                ]
+            ]
+        ];
+
         try {
-            Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/products/{$id}", $request->all());
-            return back()->with('success', 'Produk berhasil diperbarui.');
+            $response = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/admin/products/{$id}", $payload);
+            if ($response->successful()) {
+                return back()->with('success', 'Produk berhasil diperbarui.');
+            }
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memperbarui produk.');
+            return back()->with('error', 'Gagal menghubungi server.');
         }
     }
 
