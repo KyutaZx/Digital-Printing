@@ -1,138 +1,152 @@
-# 🖨️ Digital Printing Management System
+# 🖨️ Digital Printing Management System (DPMS)
 
-[![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
-[![Golang](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Laravel](https://img.shields.io/badge/Frontend-Laravel_12-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![Golang](https://img.shields.io/badge/Backend-Go_1.25-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)
+[![FastAPI](https://img.shields.io/badge/AI_Service-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-An integrated, enterprise-grade digital printing management ecosystem. This project leverages a modern microservices-inspired architecture to handle high-traffic printing orders, production workflows, and AI-driven image processing.
-
----
-
-## 🏗️ System Architecture
-
-The platform is divided into three core services to ensure scalability and separation of concerns:
-
-1.  **Frontend (Web Interface)**: Built with **Laravel**, serving as the user-facing portal for Customers, Staff, and Owners.
-2.  **Core API (Backend)**: High-performance **Golang (Gin)** service handling business logic, transactions, and real-time operations.
-3.  **AI Service**: **Python (FastAPI)** service utilizing **TensorFlow** for specialized image processing and automated design analysis.
+**Digital Printing Management System (DPMS)** adalah ekosistem manajemen percetakan digital kelas enterprise yang terintegrasi. Platform ini dirancang menggunakan arsitektur modern berbasis microservices untuk menangani pesanan volume tinggi, alur kerja produksi yang kompleks, dan pemrosesan gambar berbasis AI.
 
 ---
 
-## ✨ Key Features
+## 🏛️ Arsitektur Sistem
 
--   **👑 Multi-Role Dashboard**: Tailored experiences for Owners (Analytics), Staff (Production Management), and Customers (Order Tracking).
--   **⚙️ Production Workflow**: Real-time status updates from design phase to final printing and finishing.
--   **📄 Automated Invoicing**: Dynamic PDF generation for all transactions using Golang's high-speed libraries.
--   **🤖 AI Design Assistance**: Automated checking and optimization of design files to ensure printing quality.
--   **💳 Payment Integration**: Secure transaction handling with detailed logging.
--   **⚡ Real-time Updates**: Interactive features powered by WebSockets.
--   **🛡️ Security First**: JWT-based authentication, Rate Limiting, and Role-Based Access Control (RBAC).
+Sistem ini dibangun dengan pendekatan *separation of concerns* untuk memastikan skalabilitas dan efisiensi performa:
+
+```mermaid
+graph TD
+    User((Pelanggan/Staff)) -->|Akses Web| Laravel[Laravel Frontend & Web Service]
+    Laravel -->|REST API & WebSockets| GoAPI[Golang Core Engine]
+    GoAPI -->|Database Queries| PostgreSQL[(PostgreSQL Database)]
+    GoAPI -->|AI Analysis Request| PythonAI[Python AI Service]
+    PythonAI -->|Blur/Sharp Detection| GoAPI
+    GoAPI -->|Real-time Updates| Laravel
+```
+
+Platform ini terbagi menjadi tiga layanan inti:
+1.  **Frontend & Web Service (Laravel)**: Berfungsi sebagai portal utama untuk Pelanggan, Staff, dan Owner dengan sistem Blade templating yang responsif.
+2.  **Core API Backend (Golang)**: Mesin utama yang menangani logika bisnis berat, transaksi keuangan, manajemen inventaris, dan operasi real-time dengan performa tinggi.
+3.  **AI Microservice (Python)**: Layanan khusus berbasis TensorFlow untuk deteksi kualitas desain secara otomatis sebelum masuk ke tahap cetak.
 
 ---
 
-## 🚀 Tech Stack
+## ✨ Fitur Unggulan
 
-### Frontend & Web Service
--   **Framework**: Laravel 10.x
+-   **👑 Dashboard Multi-Role**: Pengalaman yang dipersonalisasi untuk Owner (Analitik Bisnis), Staff (Manajemen Produksi), dan Pelanggan (Pelacakan Pesanan).
+-   **⚙️ Alur Kerja Produksi Terotomasi**: Pemantauan status real-time dari fase desain, antrean cetak, hingga finishing dan pengiriman.
+-   **🤖 Deteksi Kualitas AI**: Integrasi AI untuk mendeteksi gambar yang pecah (blur) secara otomatis, memastikan kualitas hasil cetak tetap premium.
+-   **📄 Invoicing Dinamis**: Pembuatan invoice PDF secara instan menggunakan engine Golang yang sangat cepat.
+-   **⚡ Operasi Real-time**: Notifikasi dan pembaruan status pesanan seketika menggunakan teknologi WebSockets.
+-   **🛡️ Keamanan Enterprise**: Autentikasi berbasis JWT, pembatasan laju (Rate Limiting), dan Kontrol Akses Berbasis Peran (RBAC).
+
+---
+
+## 🚀 Teknologi yang Digunakan
+
+### Frontend & Web Interface
+-   **Framework**: Laravel 12.x
 -   **UI Engine**: Blade & Vite
--   **Styling**: Vanilla CSS / Tailwind CSS
--   **Authentication**: Session-based (Web) & Sanctum/JWT (API Interaction)
+-   **Styling**: Modern CSS / Tailwind CSS
+-   **Authentication**: Session-based (Web) & Sanctum (API Bridge)
 
-### Core API Backend
+### Core Backend Engine
 -   **Language**: Go (Golang) 1.25+
--   **Web Framework**: Gin Gonic
+-   **Architecture**: Clean Architecture (Domain Driven Design inspired)
+-   **Framework**: Gin Gonic (High Performance)
 -   **Database**: PostgreSQL
--   **PDF Engine**: fpdf
--   **Caching**: Redis (Planned/Integrated)
+-   **Library Utama**: fpdf (Invoicing), SQLX/GORM
 
-### AI Microservice
--   **Language**: Python 3.x
+### AI Deep Learning Service
+-   **Language**: Python 3.9+
 -   **Framework**: FastAPI
--   **Machine Learning**: TensorFlow
--   **Image Processing**: Pillow (PIL)
+-   **AI Library**: TensorFlow & Keras
+-   **Fungsi Utama**: Computer Vision untuk Blur Detection pada file desain.
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Panduan Instalasi
 
-### Prerequisites
+### Prasyarat
 -   PHP 8.2+ & Composer
--   Go 1.21+
+-   Go 1.25+
 -   Python 3.9+
 -   PostgreSQL 15+
 
-### 1. Setting up Laravel (Frontend)
+### 1. Konfigurasi Laravel (Frontend)
 ```bash
+# Clone repository
+git clone https://github.com/KyutaZx/digital-printing.git
+cd digital-printing
+
 # Install dependencies
 composer install
 npm install
 
-# Configure environment
+# Setup environment
 cp .env.example .env
 php artisan key:generate
 
-# Run migrations
+# Migrasi Database
 php artisan migrate
 
-# Start development server
+# Jalankan server
 php artisan serve
 ```
 
-### 2. Setting up Golang API
+### 2. Konfigurasi Golang API (Core)
 ```bash
 cd golang-api
 
 # Install dependencies
 go mod download
 
-# Configure .env (Database credentials)
-# Start the server
+# Jalankan server (pastikan .env sudah dikonfigurasi)
 go run cmd/main.go
 ```
 
-### 3. Setting up Python AI Service
+### 3. Konfigurasi Python AI (Service)
 ```bash
 cd python-ai
 
-# Create virtual environment
+# Buat virtual environment
 python -m venv venv
-source venv/bin/activate # or venv\Scripts\activate on Windows
+source venv/bin/activate # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start FastAPI
+# Jalankan AI Service
 uvicorn main:app --reload
 ```
 
 ---
 
-## 📂 Project Structure
+## 📂 Struktur Proyek
 
 ```text
 .
-├── app/                # Laravel Logic
-├── golang-api/         # Core Backend (Go)
-│   ├── cmd/            # Entry points
-│   ├── internal/       # Business Logic (Domain, Usecase, Repo)
-│   └── configs/        # Go Configurations
-├── python-ai/          # AI Service (FastAPI)
+├── app/                # Logika Aplikasi Laravel
+├── golang-api/         # Core Backend (Clean Architecture)
+│   ├── cmd/            # Entry points aplikasi
+│   ├── internal/       # Business Logic (Usecase, Repository, Domain)
+│   └── configs/        # Konfigurasi sistem Go
+├── python-ai/          # Layanan Deteksi AI (FastAPI)
 ├── resources/          # Frontend Assets (Blade, CSS, JS)
-├── routes/             # Web & API Routing
-└── public/             # Static Files
+├── public/             # File statis dan akses publik
+└── storage/            # Media penyimpanan file lokal
 ```
 
 ---
 
-## 📝 API Documentation
-You can find the comprehensive API documentation in the [Postman Collection](Digital_Printing_API.postman_collection.json) included in the root directory.
+## 📝 Dokumentasi API
+Seluruh endpoint API didokumentasikan dengan lengkap. Anda dapat mengimpor file berikut ke Postman:
+[Digital_Printing_API.postman_collection.json](Digital_Printing_API.postman_collection.json)
 
 ---
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📄 Lisensi
+Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
 
 ---
-Developed with ❤️ by **KyutaZx**
+Dikembangkan dengan ☕ oleh **[KyutaZx](https://github.com/KyutaZx)**
