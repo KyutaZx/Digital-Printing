@@ -14,15 +14,6 @@
 
 Sistem ini dibangun dengan pendekatan *separation of concerns* untuk memastikan skalabilitas dan efisiensi performa:
 
-```mermaid
-graph TD
-    User((Pelanggan/Staff)) -->|Akses Web| Laravel[Laravel Frontend & Web Service]
-    Laravel -->|REST API & WebSockets| GoAPI[Golang Core Engine]
-    GoAPI -->|Database Queries| PostgreSQL[(PostgreSQL Database)]
-    GoAPI -->|AI Analysis Request| PythonAI[Python AI Service]
-    PythonAI -->|Blur/Sharp Detection| GoAPI
-    GoAPI -->|Real-time Updates| Laravel
-```
 
 Platform ini terbagi menjadi tiga layanan inti:
 1.  **Frontend & Web Service (Laravel)**: Berfungsi sebagai portal utama untuk Pelanggan, Staff, dan Owner dengan sistem Blade templating yang responsif.
