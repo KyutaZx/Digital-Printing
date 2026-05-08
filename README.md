@@ -1,59 +1,139 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🖨️ Digital Printing Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![Golang](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 
-## About Laravel
+An integrated, enterprise-grade digital printing management ecosystem. This project leverages a modern microservices-inspired architecture to handle high-traffic printing orders, production workflows, and AI-driven image processing.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏗️ System Architecture
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The platform is divided into three core services to ensure scalability and separation of concerns:
 
-## Learning Laravel
+1.  **Frontend (Web Interface)**: Built with **Laravel**, serving as the user-facing portal for Customers, Staff, and Owners.
+2.  **Core API (Backend)**: High-performance **Golang (Gin)** service handling business logic, transactions, and real-time operations.
+3.  **AI Service**: **Python (FastAPI)** service utilizing **TensorFlow** for specialized image processing and automated design analysis.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Key Features
 
-## Laravel Sponsors
+-   **👑 Multi-Role Dashboard**: Tailored experiences for Owners (Analytics), Staff (Production Management), and Customers (Order Tracking).
+-   **⚙️ Production Workflow**: Real-time status updates from design phase to final printing and finishing.
+-   **📄 Automated Invoicing**: Dynamic PDF generation for all transactions using Golang's high-speed libraries.
+-   **🤖 AI Design Assistance**: Automated checking and optimization of design files to ensure printing quality.
+-   **💳 Payment Integration**: Secure transaction handling with detailed logging.
+-   **⚡ Real-time Updates**: Interactive features powered by WebSockets.
+-   **🛡️ Security First**: JWT-based authentication, Rate Limiting, and Role-Based Access Control (RBAC).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Tech Stack
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Frontend & Web Service
+-   **Framework**: Laravel 10.x
+-   **UI Engine**: Blade & Vite
+-   **Styling**: Vanilla CSS / Tailwind CSS
+-   **Authentication**: Session-based (Web) & Sanctum/JWT (API Interaction)
 
-## Contributing
+### Core API Backend
+-   **Language**: Go (Golang) 1.25+
+-   **Web Framework**: Gin Gonic
+-   **Database**: PostgreSQL
+-   **PDF Engine**: fpdf
+-   **Caching**: Redis (Planned/Integrated)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### AI Microservice
+-   **Language**: Python 3.x
+-   **Framework**: FastAPI
+-   **Machine Learning**: TensorFlow
+-   **Image Processing**: Pillow (PIL)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🛠️ Getting Started
 
-## Security Vulnerabilities
+### Prerequisites
+-   PHP 8.2+ & Composer
+-   Go 1.21+
+-   Python 3.9+
+-   PostgreSQL 15+
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 1. Setting up Laravel (Frontend)
+```bash
+# Install dependencies
+composer install
+npm install
 
-## License
+# Configure environment
+cp .env.example .env
+php artisan key:generate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Run migrations
+php artisan migrate
+
+# Start development server
+php artisan serve
+```
+
+### 2. Setting up Golang API
+```bash
+cd golang-api
+
+# Install dependencies
+go mod download
+
+# Configure .env (Database credentials)
+# Start the server
+go run cmd/main.go
+```
+
+### 3. Setting up Python AI Service
+```bash
+cd python-ai
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate # or venv\Scripts\activate on Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start FastAPI
+uvicorn main:app --reload
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+.
+├── app/                # Laravel Logic
+├── golang-api/         # Core Backend (Go)
+│   ├── cmd/            # Entry points
+│   ├── internal/       # Business Logic (Domain, Usecase, Repo)
+│   └── configs/        # Go Configurations
+├── python-ai/          # AI Service (FastAPI)
+├── resources/          # Frontend Assets (Blade, CSS, JS)
+├── routes/             # Web & API Routing
+└── public/             # Static Files
+```
+
+---
+
+## 📝 API Documentation
+You can find the comprehensive API documentation in the [Postman Collection](Digital_Printing_API.postman_collection.json) included in the root directory.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+Developed with ❤️ by **KyutaZx**
