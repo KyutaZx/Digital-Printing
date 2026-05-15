@@ -62,7 +62,7 @@
                         <div class="p-6 flex flex-col md:flex-row gap-6">
                             <div class="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden shrink-0 border border-slate-100">
                                 @if(!empty($item['product_image']))
-                                    <img src="{{ $item['product_image'] }}" class="w-full h-full object-cover">
+                                    <img src="{{ config('app.golang_api_url') }}{{ $item['product_image'] }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-slate-200">
                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -83,10 +83,11 @@
                                 <div class="mt-4 pt-4 border-t border-slate-50">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">File Desain Cetak</p>
                                     
-                                    @if(!empty($item['designs']))
+                                    @php $itemDesigns = $item['designs'] ?? []; @endphp
+                                    @if(!empty($itemDesigns))
                                         <div class="flex flex-wrap gap-2 mb-3">
-                                            @foreach($item['designs'] as $design)
-                                            <a href="{{ $design['file_path'] }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
+                                            @foreach($itemDesigns as $design)
+                                            <a href="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
                                                 <svg class="w-3 h-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                                 <span class="text-[10px] font-bold text-slate-600">VERSI {{ $design['version'] }}</span>
                                             </a>

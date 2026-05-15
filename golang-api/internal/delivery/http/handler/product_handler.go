@@ -38,6 +38,29 @@ func (h *ProductHandler) GetAll(c *gin.Context) {
 }
 
 // ========================
+// GET PRODUCT BY ID
+// ========================
+func (h *ProductHandler) GetByID(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid product id"})
+		return
+	}
+
+	prod, err := h.usecase.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "product not found", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success get product",
+		"data":    prod,
+	})
+}
+
+// ========================
 // CREATE PRODUCT
 // ========================
 func (h *ProductHandler) Create(c *gin.Context) {

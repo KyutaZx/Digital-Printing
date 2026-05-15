@@ -21,9 +21,9 @@ func NewCartHandler(u *usecase.CartUsecase) *CartHandler {
 // =========================================================================
 type AddCartRequest struct {
 	ProductID int    `json:"product_id" binding:"required"`
-	VariantID int    `json:"variant_id" binding:"required"` // Pilihan varian
+	VariantID int    `json:"variant_id"` // Pilihan varian (bisa 0 jika tidak ada varian)
 	Quantity  int    `json:"quantity" binding:"required"`
-	Notes     string `json:"notes"`                         // Catatan kustom cetak
+	Notes     string `json:"notes"`      // Catatan kustom cetak
 }
 
 type UpdateCartRequest struct {

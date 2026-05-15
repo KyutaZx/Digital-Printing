@@ -1,0 +1,37 @@
+[
+  {
+    "id": "user_001",
+    "name": "Budi Santoso",
+    "email": "customer@test.com",
+    "password": "password123",
+    "role": "customer",
+    "phone": "081234567890",
+    "address": [
+      {
+        "id": "addr_1",
+        "label": "Rumah",
+        "fullAddress": "Jl. Mawar No. 123",
+        "city": "Jakarta Selatan",
+        "postalCode": "12345",
+        "isPrimary": true
+      }
+    ],
+    "avatar": null
+  },
+  {
+    "id": "staff_001",
+    "name": "Staff Produksi A",
+    "email": "staff@test.com",
+    "password": "password123",
+    "role": "staff",
+    "phone": "089876543210"
+  },
+  {
+    "id": "manager_001",
+    "name": "Manager Toko",
+    "email": "manager@test.com",
+    "password": "password123",
+    "role": "manager",
+    "phone": "08111222333"
+  }
+]

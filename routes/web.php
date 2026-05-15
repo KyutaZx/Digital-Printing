@@ -26,17 +26,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC (Produk & Landing)
+| PUBLIC (Produk & Landing) -> Menggunakan Blade (Bukan React)
 |--------------------------------------------------------------------------
 */
-Route::get('/', [ProductController::class, 'index']);
-Route::get('/katalog', [ProductController::class, 'catalog']);
-Route::get('/produk/{id}', [ProductController::class, 'show']);
-Route::view('/tentang', 'about');
-Route::view('/cara-order', 'cara-order');
-Route::view('/kontak', 'contact');
-Route::view('/syarat-ketentuan', 'terms');
-Route::view('/kebijakan-privasi', 'privacy');
+Route::get('/', [ProductController::class, 'index'])->name('home');
+Route::get('/katalog', [ProductController::class, 'catalog'])->name('catalog');
+Route::get('/produk/{id}', [ProductController::class, 'show'])->name('product.detail');
+Route::get('/tentang', function() { return view('about'); })->name('about');
+Route::get('/kontak', function() { return view('contact'); })->name('contact');
+Route::get('/cara-order', function() { return view('about'); }); // TODO: create view
+Route::get('/syarat-ketentuan', function() { return view('about'); }); // TODO: create view
+Route::get('/kebijakan-privasi', function() { return view('about'); }); // TODO: create view
 
 /*
 |--------------------------------------------------------------------------
@@ -106,3 +106,14 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::get('/pesanan', [ManagerController::class, 'pesanan']);
     Route::get('/laporan', [ReportController::class, 'index']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| REACT FRONTEND (Fallback Route)
+|--------------------------------------------------------------------------
+*/
+Route::fallback(function () {
+    return view('index');
+});
+
+require __DIR__.'/debug.php';

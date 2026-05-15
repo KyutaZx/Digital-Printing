@@ -110,6 +110,85 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 }
 
 // ========================
+// GET PRODUCT BY ID
+// ========================
+func (r *productRepository) FindByID(id int) (*product.Product, error) {
+	query := `
+		SELECT 
+			p.id, p.category_id, p.name, p.description, p.base_price, p.estimated_days, p.is_active, COALESCE(p.image, '') as image, p.created_at,
+			v.id as v_id, v.sku as v_sku, v.variant_name as v_name, v.price as v_price, v.stock as v_stock, v.is_active as v_is_active, v.material_id, v.material_usage, v.created_at as v_created_at
+		FROM products p
+		LEFT JOIN product_variants v ON v.product_id = p.id
+		WHERE p.id = $1 AND p.is_active = TRUE
+	`
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var p product.Product
+	hasProduct := false
+
+	for rows.Next() {
+		var pCatID sql.NullInt64
+		var vID sql.NullInt64
+		var vSku, vName sql.NullString
+		var vPrice sql.NullFloat64
+		var vStock sql.NullInt64
+		var vIsActive sql.NullBool
+		var vMaterialID sql.NullInt64
+		var vMaterialUsage sql.NullFloat64
+		var vCreatedAt sql.NullTime
+
+		err := rows.Scan(
+			&p.ID, &pCatID, &p.Name, &p.Description, &p.BasePrice, &p.EstimatedDays, &p.IsActive, &p.Image, &p.CreatedAt,
+			&vID, &vSku, &vName, &vPrice, &vStock, &vIsActive, &vMaterialID, &vMaterialUsage, &vCreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if !hasProduct {
+			if pCatID.Valid {
+				catID := int(pCatID.Int64)
+				p.CategoryID = &catID
+			}
+			hasProduct = true
+		}
+
+		if vID.Valid {
+			variant := product.ProductVariant{
+				ID:          int(vID.Int64),
+				ProductID:   p.ID,
+				SKU:         vSku.String,
+				VariantName: vName.String,
+				Price:       vPrice.Float64,
+				Stock:       int(vStock.Int64),
+				IsActive:    vIsActive.Bool,
+			}
+			if vCreatedAt.Valid {
+				variant.CreatedAt = vCreatedAt.Time
+			}
+			if vMaterialID.Valid {
+				matID := int(vMaterialID.Int64)
+				variant.MaterialID = &matID
+			}
+			if vMaterialUsage.Valid {
+				variant.MaterialUsage = vMaterialUsage.Float64
+			}
+			p.Variants = append(p.Variants, variant)
+		}
+	}
+
+	if !hasProduct {
+		return nil, sql.ErrNoRows
+	}
+
+	return &p, nil
+}
+
+// ========================
 // CREATE PRODUCT
 // ========================
 func (r *productRepository) Create(product *product.Product) error {

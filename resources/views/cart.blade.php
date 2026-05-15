@@ -37,7 +37,7 @@
                                     <p class="text-xs text-slate-400 italic mt-1">Note: {{ $item['notes'] }}</p>
                                 @endif
                             </div>
-                            <form action="/cart/remove/{{ $item['product_id'] }}" method="POST" onsubmit="return confirm('Hapus item ini?')">
+                            <form action="/cart/remove/{{ $item['cart_item_id'] }}" method="POST" onsubmit="return confirm('Hapus item ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors">
@@ -50,16 +50,14 @@
                             <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden">
                                 <form action="/cart/update" method="POST">
                                     @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="variant_id" value="{{ $item['variant_id'] }}">
+                                    <input type="hidden" name="cart_item_id" value="{{ $item['cart_item_id'] }}">
                                     <input type="hidden" name="quantity" value="{{ $item['quantity'] - 1 }}">
                                     <button type="submit" class="px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold" {{ $item['quantity'] <= 1 ? 'disabled' : '' }}>-</button>
                                 </form>
                                 <span class="px-4 py-1 text-sm font-bold text-slate-800">{{ $item['quantity'] }}</span>
                                 <form action="/cart/update" method="POST">
                                     @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="variant_id" value="{{ $item['variant_id'] }}">
+                                    <input type="hidden" name="cart_item_id" value="{{ $item['cart_item_id'] }}">
                                     <input type="hidden" name="quantity" value="{{ $item['quantity'] + 1 }}">
                                     <button type="submit" class="px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold">+</button>
                                 </form>

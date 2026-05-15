@@ -49,6 +49,7 @@ func SetupRoutes(
 	// PUBLIC ROUTES
 	// ========================
 	r.GET("/products", productHandler.GetAll)
+	r.GET("/products/:id", productHandler.GetByID)
 
 	// ========================
 	// PROTECTED ROUTES (JWT REQUIRED)

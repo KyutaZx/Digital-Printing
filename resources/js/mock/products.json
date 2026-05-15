@@ -1,0 +1,82 @@
+[
+  {
+    "id": "prod_001",
+    "name": "Banner Outdoor Custom",
+    "category": "Banner Outdoor",
+    "price": 50000,
+    "images": ["https://images.unsplash.com/photo-1598516086749-3467eaebdb76?q=80&w=2000&auto=format&fit=crop"],
+    "description": "Banner outdoor berkualitas tinggi tahan cuaca. Cocok untuk promosi di luar ruangan. Harga dihitung per meter persegi.",
+    "specs": {
+      "Material": "Flexi China 280gr",
+      "Finishing": "Mata Ayam (Eyelet)",
+      "Ketahanan": "6-12 Bulan (Outdoor)"
+    },
+    "stock": 999,
+    "status": "active",
+    "badges": ["Terlaris", "Promo"]
+  },
+  {
+    "id": "prod_002",
+    "name": "Spanduk Warung/Toko",
+    "category": "Spanduk",
+    "price": 45000,
+    "images": ["https://images.unsplash.com/photo-1542106680-36e76fc6d8f5?q=80&w=2000&auto=format&fit=crop"],
+    "description": "Spanduk bahan flexi yang ekonomis untuk warung, toko, atau kebutuhan event singkat.",
+    "specs": {
+      "Material": "Flexi China 280gr",
+      "Finishing": "Seling / Lebihan",
+      "Ketahanan": "3-6 Bulan"
+    },
+    "stock": 999,
+    "status": "active",
+    "badges": ["Ekonomis"]
+  },
+  {
+    "id": "prod_003",
+    "name": "Sticker Vinyl Custom Cut",
+    "category": "Sticker Custom",
+    "price": 125000,
+    "images": ["https://images.unsplash.com/photo-1582216584252-c3639e7825d0?q=80&w=2000&auto=format&fit=crop"],
+    "description": "Sticker bahan vinyl tahan air (waterproof) dengan fitur kiss-cut atau die-cut. Cocok untuk label kemasan atau merchandise. Harga per A3+.",
+    "specs": {
+      "Material": "Vinyl White/Transparan",
+      "Finishing": "Kiss-cut / Die-cut",
+      "Ketahanan": "Tahan Air & UV"
+    },
+    "stock": 500,
+    "status": "active",
+    "badges": ["Favorit"]
+  },
+  {
+    "id": "prod_004",
+    "name": "Kartu Nama Premium",
+    "category": "Kartu Nama",
+    "price": 40000,
+    "images": ["https://images.unsplash.com/photo-1616423640778-28d1b53229bd?q=80&w=2000&auto=format&fit=crop"],
+    "description": "Kartu nama profesional dengan bahan Art Carton tebal. 1 Box isi 100 lembar.",
+    "specs": {
+      "Material": "Art Carton 260gr",
+      "Laminasi": "Glossy / Doff",
+      "Ukuran": "9 x 5.5 cm"
+    },
+    "stock": 200,
+    "status": "active",
+    "badges": []
+  },
+  {
+    "id": "prod_005",
+    "name": "X-Banner Stand + Cetak",
+    "category": "Display Promo",
+    "price": 120000,
+    "images": ["https://images.unsplash.com/photo-1536237880829-dd441c2405ba?q=80&w=2000&auto=format&fit=crop"],
+    "description": "Paket lengkap kerangka X-Banner dan cetak bahan albatros/flexi. Sangat ringan dan mudah dipasang.",
+    "specs": {
+      "Material Cetak": "Albatros / Flexi",
+      "Kerangka": "Fiber Hitam/Putih",
+      "Ukuran": "60 x 160 cm"
+    },
+    "stock": 50,
+    "status": "active",
+    "badges": ["Promo"]
+  }
+]

@@ -116,6 +116,66 @@ func main() {
 	)
 
 	// =========================================================================
+	// DEBUG ENDPOINT (HAPUS SETELAH FIX)
+	// =========================================================================
+	r.GET("/debug/designs", func(c *gin.Context) {
+		type DebugDesign struct {
+			ID          int    `json:"id"`
+			OrderItemID int    `json:"order_item_id"`
+			FilePath    string `json:"file_path"`
+			Version     int    `json:"version"`
+			UploadedBy  int    `json:"uploaded_by"`
+			CreatedAt   string `json:"created_at"`
+		}
+		type DebugOrderItem struct {
+			ID      int    `json:"id"`
+			OrderID int    `json:"order_id"`
+			Status  string `json:"order_status"`
+		}
+		var designs []DebugDesign
+		rows, err := dbConn.QueryContext(c.Request.Context(), `
+			SELECT df.id, df.order_item_id, df.file_path, df.version, df.uploaded_by, df.created_at::text
+			FROM design_files df
+			ORDER BY df.created_at DESC
+			LIMIT 50
+		`)
+		if err != nil {
+			c.JSON(500, map[string]string{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var d DebugDesign
+			rows.Scan(&d.ID, &d.OrderItemID, &d.FilePath, &d.Version, &d.UploadedBy, &d.CreatedAt)
+			designs = append(designs, d)
+		}
+
+		var orderItems []DebugOrderItem
+		rows2, err := dbConn.QueryContext(c.Request.Context(), `
+			SELECT oi.id, oi.order_id, o.status
+			FROM order_items oi
+			JOIN orders o ON o.id = oi.order_id
+			ORDER BY oi.id DESC
+			LIMIT 20
+		`)
+		if err == nil {
+			defer rows2.Close()
+			for rows2.Next() {
+				var oi DebugOrderItem
+				rows2.Scan(&oi.ID, &oi.OrderID, &oi.Status)
+				orderItems = append(orderItems, oi)
+			}
+		}
+
+		c.JSON(200, map[string]interface{}{
+			"design_files_count": len(designs),
+			"design_files":       designs,
+			"order_items":        orderItems,
+		})
+	})
+
+
+	// =========================================================================
 	// 6. SETUP CRON JOBS (BACKGROUND TASKS)
 	// =========================================================================
 	c := cron.New()

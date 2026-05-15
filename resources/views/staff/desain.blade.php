@@ -32,7 +32,44 @@
             @foreach($order['items'] as $item)
             <div class="bg-white rounded-xl p-4 border border-slate-200">
                 <p class="font-semibold text-slate-900 text-sm mb-3">{{ $item['product_name'] ?? '-' }} (Qty: {{ $item['quantity'] ?? 1 }})</p>
-                <form method="POST" action="/staff/desain/{{ $item['latest_design_id'] ?? 0 }}/review" class="space-y-3">
+
+                {{-- Tampilkan Desain yang Sudah Diupload --}}
+                @php $itemDesigns = $item['designs'] ?? []; @endphp
+                @if(!empty($itemDesigns))
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">File Desain Terupload</p>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach($itemDesigns as $design)
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            @php $ext = pathinfo($design['file_path'] ?? '', PATHINFO_EXTENSION); @endphp
+                            @if(in_array(strtolower($ext), ['jpg','jpeg','png']))
+                                <img src="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}"
+                                     alt="Desain" class="w-48 h-48 object-contain bg-slate-50 p-2">
+                            @else
+                                <a href="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}" target="_blank"
+                                   class="flex items-center gap-2 p-4 text-xs font-semibold text-primary-600 hover:underline">
+                                    📎 Buka File Desain (Versi {{ $design['version'] ?? 1 }})
+                                </a>
+                            @endif
+                            <div class="px-3 py-2 bg-slate-50 border-t border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-400">Versi {{ $design['version'] ?? 1 }}</span>
+                                @if($design['status'] ?? '')
+                                    <span class="ml-2 text-[10px] font-bold {{ $design['status'] === 'approved' ? 'text-green-600' : ($design['status'] === 'rejected' ? 'text-red-500' : 'text-yellow-500') }}">
+                                        {{ strtoupper($design['status']) }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @else
+                <p class="text-xs text-slate-400 italic mb-4">Customer belum mengupload desain untuk item ini.</p>
+                @endif
+
+                @php $latestDesignId = !empty($itemDesigns) ? ($itemDesigns[count($itemDesigns)-1]['id'] ?? 0) : ($item['latest_design_id'] ?? 0); @endphp
+                @if($latestDesignId)
+                <form method="POST" action="/staff/desain/{{ $latestDesignId }}/review" class="space-y-3">
                     @csrf
                     <div>
                         <label class="form-label">Status Review</label>
@@ -48,6 +85,9 @@
                     </div>
                     <button type="submit" class="btn-primary text-sm">Simpan Review</button>
                 </form>
+                @else
+                <p class="text-xs text-amber-600 font-semibold">⚠️ Belum ada desain yang bisa direview.</p>
+                @endif
             </div>
             @endforeach
             @else

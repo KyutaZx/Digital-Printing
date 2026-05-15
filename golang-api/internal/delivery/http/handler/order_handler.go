@@ -190,6 +190,7 @@ func (h *OrderHandler) GetOrderDetail(c *gin.Context) {
 func (h *OrderHandler) GetAllOrders(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "10")
+	statusFilter := c.DefaultQuery("status", "")
 
 	page, _ := strconv.Atoi(pageStr)
 	limit, _ := strconv.Atoi(limitStr)
@@ -200,12 +201,27 @@ func (h *OrderHandler) GetAllOrders(c *gin.Context) {
 	if limit < 1 {
 		limit = 10
 	}
-	
+
 	offset := (page - 1) * limit
 
 	orders, err := h.usecase.GetAllOrders(c.Request.Context(), limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Filter by status if query param provided
+	if statusFilter != "" {
+		var filtered []order.Order
+		for _, o := range orders {
+			if o.Status == statusFilter {
+				filtered = append(filtered, o)
+			}
+		}
+		if filtered == nil {
+			filtered = []order.Order{}
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Semua pesanan", "data": filtered})
 		return
 	}
 

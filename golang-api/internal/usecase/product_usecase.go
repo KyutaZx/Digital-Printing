@@ -28,6 +28,17 @@ func (u *ProductUsecase) GetAll() ([]product.Product, error) {
 }
 
 // ========================
+// GET PRODUCT BY ID
+// ========================
+func (u *ProductUsecase) GetByID(id int) (*product.Product, error) {
+	prod, err := u.repo.FindByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get product by ID: %w", err)
+	}
+	return prod, nil
+}
+
+// ========================
 // CREATE PRODUCT
 // ========================
 func (u *ProductUsecase) Create(req product.ProductRequest) error {
