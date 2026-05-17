@@ -72,35 +72,36 @@
 <body class="bg-white text-slate-800">
 
 {{-- NAVBAR --}}
-<header x-data="{ open: false, scrolled: false }" 
-        @scroll.window="scrolled = (window.scrollY > 20)"
-        :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'"
-        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+<header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-slate-100"
+        x-data="{ open: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 lg:h-20">
             {{-- Logo --}}
             <a href="/" class="flex items-center gap-2 font-black text-xl">
                 <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center text-white text-sm">J</div>
-                <span :class="scrolled ? 'text-slate-900' : 'text-white'">Jaya Mandiri</span>
+                <span class="text-slate-900">Jaya Mandiri</span>
             </a>
 
             {{-- Desktop Nav --}}
             <nav class="hidden md:flex items-center gap-1">
-                <a href="/" :class="scrolled ? 'text-slate-700 hover:text-primary-600' : 'text-white/80 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm">Beranda</a>
-                <a href="/katalog" :class="scrolled ? 'text-slate-700 hover:text-primary-600' : 'text-white/80 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm">Katalog</a>
-                <a href="/tentang" :class="scrolled ? 'text-slate-700 hover:text-primary-600' : 'text-white/80 hover:text-white'" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm">Tentang</a>
+                <a href="/" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm text-slate-700 hover:text-primary-600 hover:bg-primary-50">Beranda</a>
+                <a href="/katalog" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm text-slate-700 hover:text-primary-600 hover:bg-primary-50">Katalog</a>
+                <a href="/tentang" class="px-4 py-2 rounded-lg font-medium transition-colors text-sm text-slate-700 hover:text-primary-600 hover:bg-primary-50">Tentang</a>
             </nav>
 
             {{-- Desktop Actions --}}
             <div class="hidden md:flex items-center gap-3">
                 @if(session('user'))
                     {{-- Cart Icon --}}
-                    <a href="/cart" class="relative p-2 rounded-xl transition-colors" :class="scrolled ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    </a>
+                    <div x-data="{ count: 0 }" x-init="fetch('{{ config('app.golang_api_url', 'http://localhost:8080') }}/api/cart', {headers: {'Authorization': 'Bearer {{ session('token') }}'}}).then(r => r.json()).then(d => { if(d.items) count = d.items.reduce((acc, item) => acc + item.quantity, 0) }).catch(() => {})">
+                        <a href="/cart" class="relative p-2 rounded-xl transition-colors flex items-center justify-center text-slate-700 hover:bg-slate-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            <span x-show="count > 0" x-text="count" x-cloak class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"></span>
+                        </a>
+                    </div>
                     {{-- User Dropdown --}}
                     <div x-data="{ userOpen: false }" class="relative">
-                        <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm transition-colors" :class="scrolled ? 'text-slate-700 bg-slate-100 hover:bg-slate-200' : 'text-white bg-white/10 hover:bg-white/20'">
+                        <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm transition-colors text-slate-700 bg-slate-100 hover:bg-slate-200">
                             <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                                 {{ strtoupper(substr(session('user.name', 'U'), 0, 1)) }}
                             </div>
@@ -112,6 +113,10 @@
                             <a href="/pesanan" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                 Pesanan Saya
+                            </a>
+                            <a href="/profil" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                Profil Saya
                             </a>
                             <hr class="my-1 border-slate-100">
                             <form method="POST" action="/logout">
@@ -170,7 +175,7 @@
 @endif
 
 {{-- PAGE CONTENT --}}
-<main>
+<main class="pt-16 lg:pt-20">
     @yield('content')
 </main>
 

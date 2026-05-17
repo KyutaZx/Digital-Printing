@@ -26,7 +26,7 @@ type Repository interface {
 	Cancel(ctx context.Context, orderID int, userID int) error
 
 	// Baris 86 di usecase kamu akan sembuh setelah menambahkan ctx di sini [cite: 1259 16666]
-	UpdateStatus(ctx context.Context, orderID int, status string) error
+	UpdateStatus(ctx context.Context, orderID int, status string, changedBy int, notes string) error
 
 	// ========================
 	// QUERY FOR CUSTOMER & OWNER

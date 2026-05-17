@@ -67,24 +67,34 @@
                 <p class="text-xs text-slate-400 italic mb-4">Customer belum mengupload desain untuk item ini.</p>
                 @endif
 
-                @php $latestDesignId = !empty($itemDesigns) ? ($itemDesigns[count($itemDesigns)-1]['id'] ?? 0) : ($item['latest_design_id'] ?? 0); @endphp
+                @php 
+                    $latestDesignId = !empty($itemDesigns) ? ($itemDesigns[count($itemDesigns)-1]['id'] ?? 0) : ($item['latest_design_id'] ?? 0); 
+                    $latestStatus = !empty($itemDesigns) ? ($itemDesigns[count($itemDesigns)-1]['status'] ?? '') : '';
+                @endphp
                 @if($latestDesignId)
-                <form method="POST" action="/staff/desain/{{ $latestDesignId }}/review" class="space-y-3">
-                    @csrf
-                    <div>
-                        <label class="form-label">Status Review</label>
-                        <select name="status" class="form-input" required>
-                            <option value="">Pilih Keputusan</option>
-                            <option value="approved">✅ Setujui Desain</option>
-                            <option value="rejected">❌ Tolak (Minta Revisi)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Catatan untuk Customer</label>
-                        <textarea name="notes" class="form-input" rows="2" placeholder="Berikan komentar atau alasan penolakan..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary text-sm">Simpan Review</button>
-                </form>
+                    @if($latestStatus === 'approved')
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+                            <p class="text-xs font-bold text-green-700">✅ Desain sudah disetujui</p>
+                            <p class="text-[10px] text-green-600 mt-0.5">Menunggu antrean cetak / produksi</p>
+                        </div>
+                    @else
+                        <form method="POST" action="/staff/desain/{{ $latestDesignId }}/review" class="space-y-3">
+                            @csrf
+                            <div>
+                                <label class="form-label">Status Review</label>
+                                <select name="status" class="form-input" required>
+                                    <option value="">Pilih Keputusan</option>
+                                    <option value="approved">✅ Setujui Desain</option>
+                                    <option value="rejected">❌ Tolak (Minta Revisi)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Catatan untuk Customer</label>
+                                <textarea name="notes" class="form-input" rows="2" placeholder="Berikan komentar atau alasan penolakan..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary text-sm">Simpan Review</button>
+                        </form>
+                    @endif
                 @else
                 <p class="text-xs text-amber-600 font-semibold">⚠️ Belum ada desain yang bisa direview.</p>
                 @endif

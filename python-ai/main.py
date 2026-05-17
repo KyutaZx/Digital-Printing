@@ -1,38 +1,68 @@
 import os
 import io
+import uvicorn
 import numpy as np
 import tensorflow as tf
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 
-app = FastAPI(title="Digital Printing AI Service")
+# Load environment variables from .env file if it exists
+load_dotenv()
 
-# Path ke file model (pastikan file blur_detector.h5 atau model.h5 ada di direktori ini)
-MODEL_PATH = "model.h5"
+# Configuration
+MODEL_PATH = os.getenv("MODEL_PATH", "model.h5")
+APP_PORT = int(os.getenv("APP_PORT", 5000))
+APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
 
-# Variabel global untuk menyimpan model di memori
+# Global variable for the model
 model = None
-
-# Class names sesuai dengan yang ditraining di Colab
 CLASS_NAMES = ['blur', 'sharp']
 
-@app.on_event("startup")
-async def load_model():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for FastAPI.
+    Handles startup and shutdown events.
+    """
     global model
+    print(f"Memulai Digital Printing AI Service...")
+    
     if os.path.exists(MODEL_PATH):
         try:
+            # Load the model
             model = tf.keras.models.load_model(MODEL_PATH)
-            print("Berhasil memuat model AI!")
+            print(f"✅ Berhasil memuat model AI dari {MODEL_PATH}")
         except Exception as e:
-            print(f"Gagal memuat model AI: {e}")
+            print(f"❌ Gagal memuat model AI: {e}")
     else:
-        print(f"WARNING: File {MODEL_PATH} tidak ditemukan. API akan selalu me-return 'sharp' untuk sementara.")
+        print(f"⚠️ WARNING: File {MODEL_PATH} tidak ditemukan.")
+        print("API akan berjalan dalam mode bypass (selalu me-return 'sharp').")
+    
+    yield
+    # Clean up and release resources if needed
+    print("Mematikan Digital Printing AI Service...")
+
+app = FastAPI(
+    title="Digital Printing AI Service",
+    description="Microservice untuk deteksi kualitas gambar (Blur Detection) menggunakan TensorFlow.",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 @app.post("/predict-blur")
 async def predict_blur(file: UploadFile = File(...)):
-    # Jika model belum ada, kembalikan 'sharp' sebagai bypass sementara
+    """
+    Endpoint untuk mendeteksi apakah gambar blur atau tajam (sharp).
+    """
+    # Jika model belum dimuat, gunakan logika bypass
     if model is None:
-        return {"status": "sharp", "confidence": 100.0, "message": "Model tidak ditemukan (Bypass)"}
+        return {
+            "status": "sharp", 
+            "confidence": 100.0, 
+            "message": "Model tidak ditemukan (Bypass Mode)"
+        }
 
     try:
         # Baca file ke dalam memori
@@ -67,4 +97,11 @@ async def predict_blur(file: UploadFile = File(...)):
 
 @app.get("/")
 def read_root():
-    return {"message": "Digital Printing AI Service is Running"}
+    return {
+        "message": "Digital Printing AI Service is Running",
+        "port": APP_PORT,
+        "model_loaded": model is not None
+    }
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host=APP_HOST, port=APP_PORT, reload=True)

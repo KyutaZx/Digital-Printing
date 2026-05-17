@@ -12,6 +12,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,8 +56,11 @@ Route::middleware(['auth.session:customer,owner,admin,staff'])->group(function (
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::post('/pesanan/{id}/batal', [OrderController::class, 'cancel']);
     Route::post('/pesanan/{id}/selesai', [OrderController::class, 'confirmCompleted']);
-    Route::get('/pesanan/{id}/invoice/pdf', [OrderController::class, 'downloadInvoice']);
+    Route::get('/pesanan/{id}/invoice/view', [OrderController::class, 'viewInvoice']);
+    Route::get('/pesanan/{id}/invoice/pdf-raw', [OrderController::class, 'streamInvoicePDF']);
+    Route::get('/pesanan/{id}/invoice/download', [OrderController::class, 'downloadInvoice']);
 
     // Payment
     Route::get('/pembayaran/metode', [PaymentController::class, 'methods']);
@@ -65,6 +69,10 @@ Route::middleware(['auth.session:customer,owner,admin,staff'])->group(function (
     // Design Upload
     Route::post('/desain/{orderItemId}/upload', [DesignController::class, 'upload']);
     Route::get('/desain/{orderItemId}', [DesignController::class, 'index']);
+
+    // Profile
+    Route::get('/profil', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profil/update', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 /*

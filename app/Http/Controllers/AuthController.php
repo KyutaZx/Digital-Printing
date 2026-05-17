@@ -57,6 +57,15 @@ class AuthController extends Controller
                 $data = $response->json();
 
                 // Simpan JWT token & data user ke Laravel Session
+                // Ambil data tambahan dari DB via API users (created_at, is_active)
+                $extraData = [];
+                try {
+                    $profileRes = Http::timeout(5)->withToken($data['token'])->get("{$this->apiUrl}/api/profile");
+                    if ($profileRes->successful()) {
+                        $extraData = $profileRes->json();
+                    }
+                } catch (\Exception $e) { /* silent */ }
+
                 session([
                     'token' => $data['token'],
                     'user'  => [
@@ -66,6 +75,8 @@ class AuthController extends Controller
                         'email'        => $data['user']['email'],
                         'phone'        => $data['user']['phone'] ?? '',
                         'role'         => $data['user']['role'] ?? 'customer',
+                        'is_active'    => true,
+                        'created_at'   => $extraData['created_at'] ?? null,
                     ],
                 ]);
 
@@ -131,7 +142,7 @@ class AuthController extends Controller
         $request->session()->flush();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'Berhasil keluar. Sampai jumpa!');
+        return redirect('/')->with('success', 'Berhasil keluar. Sampai jumpa!');
     }
 
     // =========================================================================

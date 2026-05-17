@@ -78,6 +78,13 @@ func (r *paymentRepository) UpdateStatus(ctx context.Context, id int, status str
 		return err
 	}
 
+	// 3. Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, orderStatus, verifiedBy, "Payment status updated: "+status)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	// (Logika potong stok dihapus dari sini dan dipindahkan ke Checkout di order_repository.go)
 
 	// Commit jika semua update berhasil

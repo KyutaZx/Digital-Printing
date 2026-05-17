@@ -51,17 +51,59 @@ class OrderController extends Controller
         return back()->with('error', $r->json('message') ?? 'Gagal mengkonfirmasi pesanan.');
     }
 
+    public function cancel(int $id)
+    {
+        $r = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/orders/{$id}/cancel");
+        if ($r->successful()) return back()->with('success', 'Pesanan berhasil dibatalkan.');
+        return back()->with('error', $r->json('message') ?? 'Gagal membatalkan pesanan.');
+    }
+
+    public function viewInvoice(int $id)
+    {
+        $order = $this->api('get', "/api/orders/{$id}");
+        if (!$order) abort(404, 'Invoice tidak ditemukan.');
+        return view('orders.invoice', compact('order', 'id'));
+    }
+
+    public function streamInvoicePDF(int $id)
+    {
+        try {
+            $response = Http::timeout(30)->withToken(session('token'))->get("{$this->apiUrl}/api/orders/{$id}/invoice/pdf");
+            
+            if ($response->successful()) {
+                if (ob_get_length()) ob_clean(); 
+                
+                // DEBUG: Return as plain text to see if it's valid
+                $body = $response->body();
+                if (empty($body)) {
+                    return response('PDF KOSONG DARI GOLANG API!', 500);
+                }
+                
+                return response($body, 200, [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => "inline; filename=Invoice-{$id}.pdf",
+                ]);
+            }
+            return response('Gagal memuat invoice dari API. Status: ' . $response->status(), 500);
+        } catch (\Exception $e) {
+            return response('Error saat memuat invoice: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function downloadInvoice(int $id)
     {
         try {
             $r = Http::timeout(30)->withToken(session('token'))->get("{$this->apiUrl}/api/orders/{$id}/invoice/pdf");
             if ($r->successful()) {
+                if (ob_get_length()) ob_clean(); // Prevent whitespace corruption
                 return response($r->body(), 200, [
                     'Content-Type'        => 'application/pdf',
                     'Content-Disposition' => "attachment; filename=Invoice-{$id}.pdf",
                 ]);
             }
-        } catch (\Exception $e) {}
-        return back()->with('error', 'Gagal mengunduh invoice.');
+            return back()->with('error', 'Gagal mengunduh invoice. API Status: ' . $r->status() . ' Body: ' . $r->body());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengunduh invoice. Error: ' . $e->getMessage());
+        }
     }
 }

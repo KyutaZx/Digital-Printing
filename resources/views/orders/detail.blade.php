@@ -23,6 +23,7 @@
                             'printing' => 'badge-purple',
                             'ready' => 'badge-green',
                             'completed' => 'badge-green',
+                            'cancelled' => 'badge-red',
                             default => 'badge-gray'
                         };
                         $label = match($s) {
@@ -32,6 +33,7 @@
                             'printing' => 'Sedang Dicetak',
                             'ready' => 'Siap Diambil',
                             'completed' => 'Selesai',
+                            'cancelled' => 'Dibatalkan',
                             default => ucfirst($s)
                         };
                     @endphp
@@ -40,9 +42,18 @@
             </div>
             
             <div class="flex gap-3">
-                <a href="/pesanan/{{ $order['id'] }}/invoice/pdf" class="btn-secondary text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Download Invoice (PDF)
+                @if(in_array($s, ['waiting_payment', 'payment_verification']))
+                    <form action="/pesanan/{{ $order['id'] }}/batal" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                        @csrf
+                        <button type="submit" class="btn-outline !text-red-500 !border-red-200 hover:!bg-red-50 text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Batalkan Pesanan
+                        </button>
+                    </form>
+                @endif
+                <a href="/pesanan/{{ $order['id'] }}/invoice/view" class="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors bg-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    Lihat Invoice
                 </a>
             </div>
         </div>
@@ -95,12 +106,26 @@
                                         </div>
                                     @endif
 
+                                    @php
+                                        $latestStatus = !empty($itemDesigns) ? $itemDesigns[count($itemDesigns)-1]['status'] : '';
+                                    @endphp
+
                                     @if($s === 'paid' || $s === 'payment_verification')
-                                    <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
-                                        @csrf
-                                        <input type="file" name="file" required class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
-                                        <button type="submit" class="text-xs font-bold text-primary-600 hover:underline">Upload Baru</button>
-                                    </form>
+                                        @if(empty($itemDesigns) || $latestStatus === 'rejected')
+                                        <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+                                            @csrf
+                                            <input type="file" name="file" required class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100">
+                                            <button type="submit" class="text-xs font-bold text-primary-600 hover:underline">Upload Baru</button>
+                                        </form>
+                                        @elseif($latestStatus === 'approved')
+                                        <div class="mt-2 inline-block px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg">
+                                            <p class="text-[11px] font-bold text-green-600">✅ Desain telah disetujui. Menunggu cetak.</p>
+                                        </div>
+                                        @else
+                                        <div class="mt-2 inline-block px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                                            <p class="text-[11px] font-bold text-amber-600">⏳ Sedang di-review oleh Staff. Harap tunggu...</p>
+                                        </div>
+                                        @endif
                                     @endif
                                 </div>
                                 @endif
@@ -164,7 +189,7 @@
                         @csrf
                         <div>
                             <label class="form-label !text-xs">Metode Pembayaran</label>
-                            <select name="method_id" class="form-input !text-xs" required>
+                            <select name="method_id" class="form-input !text-xs truncate pr-8 appearance-none bg-white" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto;" required>
                                 <option value="1">BCA - 123456789 (A/N Jaya Mandiri)</option>
                                 <option value="2">Mandiri - 987654321 (A/N Jaya Mandiri)</option>
                             </select>
@@ -173,13 +198,22 @@
                             <label class="form-label !text-xs">Nominal Transfer</label>
                             <input type="number" name="amount" value="{{ $order['total_price'] }}" class="form-input !text-xs" required>
                         </div>
-                        <div>
+                        <div class="hidden">
                             <label class="form-label !text-xs">Kode Transaksi / Referensi</label>
-                            <input type="text" name="transaction_code" placeholder="Misal: TRF123456" class="form-input !text-xs" required>
+                            <input type="text" name="transaction_code" value="AUTO-{{ $order['order_code'] ?? time() }}" class="form-input !text-xs" required>
                         </div>
                         <div>
                             <label class="form-label !text-xs">Bukti Transfer (Image/PDF)</label>
-                            <input type="file" name="proof" class="text-[10px] w-full" required>
+                            <div class="mt-1 flex items-center justify-center w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg class="w-8 h-8 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                        <p class="mb-2 text-xs text-slate-500"><span class="font-semibold text-primary-600">Klik untuk upload</span> atau drag and drop</p>
+                                        <p class="text-[10px] text-slate-400">PNG, JPG, atau PDF (Max. 5MB)</p>
+                                    </div>
+                                    <input type="file" name="proof" class="hidden" required onchange="this.parentElement.querySelector('p').innerHTML = '<span class=\'font-semibold text-primary-600\'>File terpilih:</span> ' + this.files[0].name" />
+                                </label>
+                            </div>
                         </div>
                         <button type="submit" class="w-full btn-primary py-3 text-sm">
                             Kirim Bukti Pembayaran

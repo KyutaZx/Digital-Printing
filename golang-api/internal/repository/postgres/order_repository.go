@@ -55,6 +55,12 @@ func (r *orderRepository) Create(ctx context.Context, o *order.Order, items []or
 		return err
 	}
 
+	// 2.5 Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", o.ID, o.Status, o.UserID, "Order created manually")
+	if err != nil {
+		return err
+	}
+
 	// 3. Simpan Item Order
 	for _, item := range items {
 		queryItem := `
@@ -174,6 +180,12 @@ func (r *orderRepository) Checkout(ctx context.Context, userID int) (int, string
 		return 0, "", 0, err
 	}
 
+	// 3.5 Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, "waiting_payment", userID, "Checkout created")
+	if err != nil {
+		return 0, "", 0, err
+	}
+
 	// 4. Pindahkan Item Keranjang ke Order Items (Beserta Spesifikasi)
 	for _, i := range items {
 		queryItems := `
@@ -289,7 +301,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 	// 1b. Query designs untuk setiap order item
 	queryDesigns := `
 		SELECT df.id, df.order_item_id, df.file_path, df.version, 
-		       COALESCE((SELECT status FROM design_reviews WHERE design_file_id = df.id ORDER BY created_at DESC LIMIT 1), '') as status,
+		       COALESCE((SELECT status::text FROM design_reviews WHERE design_file_id = df.id ORDER BY created_at DESC LIMIT 1), '') as status,
 		       df.created_at
 		FROM design_files df
 		WHERE df.order_item_id IN (
@@ -398,6 +410,12 @@ func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) e
 		return err
 	}
 	
+	// 3.5 Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, "cancelled", userID, "Order cancelled")
+	if err != nil {
+		return err
+	}
+	
 	// 4. Logika pengembalian stok (Refund Stock) untuk status 'paid' dan 'waiting_payment'
 	// (karena stok sudah dipotong sejak Checkout)
 	if currentStatus == "paid" || currentStatus == "waiting_payment" {
@@ -452,7 +470,7 @@ func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) e
 // =========================================================================
 // UPDATE STATUS
 // =========================================================================
-func (r *orderRepository) UpdateStatus(ctx context.Context, orderID int, status string) error {
+func (r *orderRepository) UpdateStatus(ctx context.Context, orderID int, status string, changedBy int, notes string) error {
 	query := `UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2`
 	res, err := r.db.ExecContext(ctx, query, status, orderID)
 	if err != nil {
@@ -463,6 +481,13 @@ func (r *orderRepository) UpdateStatus(ctx context.Context, orderID int, status 
 	if rows == 0 {
 		return fmt.Errorf("pesanan tidak ditemukan")
 	}
+
+	// Log status
+	_, err = r.db.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, status, changedBy, notes)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -564,5 +589,12 @@ func (r *orderRepository) CompleteOrder(ctx context.Context, orderID int, userID
 	if rows == 0 {
 		return fmt.Errorf("pesanan tidak ditemukan, bukan milik anda, atau statusnya bukan 'ready'")
 	}
+
+	// Log status
+	_, err = r.db.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, "completed", userID, "Order marked as completed by customer")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

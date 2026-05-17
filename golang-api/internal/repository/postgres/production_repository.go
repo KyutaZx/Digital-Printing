@@ -64,6 +64,12 @@ func (r *productionRepository) StartProduction(ctx context.Context, orderID int,
 		return errors.New("pesanan tidak ditemukan atau belum lunas")
 	}
 
+	// 1.5 Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, "printing", staffID, notes)
+	if err != nil {
+		return err
+	}
+
 	// 2. Insert ke tabel production_logs
 	_, err = tx.ExecContext(ctx, `
 		INSERT INTO production_logs (order_id, staff_id, start_time, notes) 
@@ -98,6 +104,12 @@ func (r *productionRepository) FinishProduction(ctx context.Context, orderID int
 		if err == sql.ErrNoRows {
 			return 0, errors.New("pesanan tidak ditemukan atau belum dicetak")
 		}
+		return 0, err
+	}
+
+	// 1.5 Log status
+	_, err = tx.ExecContext(ctx, "INSERT INTO order_status_logs (order_id, status, changed_by, notes, created_at) VALUES ($1, $2, $3, $4, NOW())", orderID, "ready", staffID, notes)
+	if err != nil {
 		return 0, err
 	}
 

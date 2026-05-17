@@ -84,7 +84,7 @@ func (u *PaymentUsecase) UploadProof(
 	}
 
 	// 4. Update Status Order ke Verifikasi [cite: 1259 16666]
-	if err := u.orderRepo.UpdateStatus(ctx, orderID, "payment_verification"); err != nil {
+	if err := u.orderRepo.UpdateStatus(ctx, orderID, "payment_verification", userID, "Customer uploaded payment proof"); err != nil {
 		return 0, err
 	}
 

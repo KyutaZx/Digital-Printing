@@ -67,17 +67,8 @@ func SetupRoutes(
 		// ========================
 		// USER PROFILE
 		// ========================
-		api.GET("/profile", func(c *gin.Context) {
-			userID, _ := c.Get("user_id")
-			role, _ := c.Get("role")
-
-			c.JSON(200, gin.H{
-				"message": "success",
-				"user_id": userID,
-				"role":    role,
-			})
-		})
-		api.PUT("/profile", userHandler.UpdateProfile) // 🔥 Update profil (Nama & No HP)
+		api.GET("/profile", userHandler.GetProfile)   // Return data profil lengkap
+		api.PUT("/profile", userHandler.UpdateProfile)  // Update profil (Nama & No HP)
 
 		// 🔥 LOGOUT (Pencatatan aktivitas)
 		api.POST("/logout", authHandler.Logout)

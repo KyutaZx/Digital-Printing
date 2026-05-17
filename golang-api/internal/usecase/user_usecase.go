@@ -21,6 +21,13 @@ func NewUserUsecase(userRepo user.Repository, auditRepo audit.Repository) *UserU
 }
 
 // =========================================================================
+// GET BY ID
+// =========================================================================
+func (u *UserUsecase) GetByID(ctx context.Context, id int) (*user.User, error) {
+	return u.userRepo.FindByID(ctx, id)
+}
+
+// =========================================================================
 // UPDATE PROFILE
 // =========================================================================
 func (u *UserUsecase) UpdateProfile(ctx context.Context, id int, name, phone, ip, ua string) error {

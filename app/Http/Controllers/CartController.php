@@ -40,7 +40,12 @@ class CartController extends Controller
             ];
             
             $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/cart", $payload);
-            if ($r->successful()) return back()->with('success', 'Produk ditambahkan ke keranjang!');
+            if ($r->successful()) {
+                if ($request->action === 'buy') {
+                    return redirect('/cart');
+                }
+                return back()->with('success', 'Produk ditambahkan ke keranjang!');
+            }
             
             return back()->with('error', $r->json('message') ?? 'Gagal menambahkan ke keranjang.');
         } catch (\Exception $e) {

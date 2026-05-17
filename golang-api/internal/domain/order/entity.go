@@ -54,7 +54,7 @@ type DesignFile struct {
 	FilePath    string     `json:"file_path"`
 	Version     int        `json:"version"`
 	Status      string     `json:"status"`
-	UploadedAt  *time.Time `json:"uploaded_at"` // Pointer karena bisa NULL di DB
+	UploadedAt  time.Time `json:"uploaded_at"` // Tidak boleh NULL di DB
 }
 
 // PaymentInfo adalah info pembayaran yang melekat pada invoice

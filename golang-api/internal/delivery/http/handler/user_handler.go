@@ -31,6 +31,37 @@ type UpdateStatusRequest struct {
 }
 
 // =========================================================================
+// GET PROFILE (User yang sedang login)
+// =========================================================================
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	userID := c.MustGet("user_id").(int)
+	u, err := h.usecase.GetByID(c.Request.Context(), userID)
+	if err != nil || u == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+		return
+	}
+
+	// Kirim null jika created_at adalah zero time (0001-01-01)
+	var createdAt interface{}
+	if !u.CreatedAt.IsZero() {
+		createdAt = u.CreatedAt
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data": gin.H{
+			"id":         u.ID,
+			"name":       u.Name,
+			"email":      u.Email,
+			"phone":      u.Phone,
+			"role_id":    u.RoleID,
+			"is_active":  u.IsActive,
+			"created_at": createdAt,
+		},
+	})
+}
+
+// =========================================================================
 // UPDATE PROFILE (Customer/Staff)
 // =========================================================================
 func (h *UserHandler) UpdateProfile(c *gin.Context) {

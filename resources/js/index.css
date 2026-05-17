@@ -1,19 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "../css/app.css";
 
 @layer components {
 
   /* Standard glassmorphism card */
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-card;
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg;
   }
 
   /* Standard glassmorphism card on hover */
   .glass-card:hover {
-    @apply shadow-card-hover transition-shadow duration-300;
+    @apply shadow-xl transition-shadow duration-300;
   }
 
   /* Glassmorphism navbar */
