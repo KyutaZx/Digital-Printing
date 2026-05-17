@@ -20,7 +20,7 @@ class CartController extends Controller
         $items = [];
         try {
             $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}/api/cart");
-            $items = $r->successful() ? ($r->json('data') ?? $r->json() ?? []) : [];
+            $items = $r->successful() ? ($r->json('items') ?? $r->json('data') ?? []) : [];
         } catch (\Exception $e) {
             Log::warning('Cart API: ' . $e->getMessage());
         }
@@ -32,8 +32,16 @@ class CartController extends Controller
     {
         $request->validate(['product_id' => 'required|integer', 'variant_id' => 'required|integer', 'quantity' => 'required|integer|min:1']);
         try {
-            $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/cart", $request->only(['product_id', 'variant_id', 'quantity', 'notes']));
+            $payload = [
+                'product_id' => (int) $request->product_id,
+                'variant_id' => (int) $request->variant_id,
+                'quantity'   => (int) $request->quantity,
+                'notes'      => $request->notes ?? ''
+            ];
+            
+            $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/cart", $payload);
             if ($r->successful()) return back()->with('success', 'Produk ditambahkan ke keranjang!');
+            
             return back()->with('error', $r->json('message') ?? 'Gagal menambahkan ke keranjang.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal terhubung ke server.');
@@ -43,7 +51,11 @@ class CartController extends Controller
     public function update(Request $request)
     {
         try {
-            Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/cart", $request->only(['product_id', 'variant_id', 'quantity']));
+            $payload = [
+                'cart_item_id' => (int) $request->cart_item_id,
+                'quantity'     => (int) $request->quantity
+            ];
+            Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/cart", $payload);
         } catch (\Exception $e) {}
         return back();
     }
@@ -51,7 +63,8 @@ class CartController extends Controller
     public function remove(int $id)
     {
         try {
-            Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/cart", ['product_id' => $id]);
+            // Gunakan JSON payload 'cart_item_id' sesuai API Go
+            Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/cart", ['cart_item_id' => $id]);
         } catch (\Exception $e) {}
         return back()->with('success', 'Item dihapus dari keranjang.');
     }

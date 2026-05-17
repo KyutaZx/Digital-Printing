@@ -240,7 +240,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 			(oi.quantity * oi.price) as subtotal,
 			COALESCE(oi.notes, '') as notes
 		FROM orders o
-		JOIN users u ON u.id = o.user_id
+		JOIN v_users u ON u.id = o.user_id
 		JOIN order_items oi ON oi.order_id = o.id
 		JOIN products p ON p.id = oi.product_id
 		LEFT JOIN product_variants pv ON pv.id = oi.variant_id
@@ -285,6 +285,55 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 	if detail == nil {
 		return nil, nil // Pesanan tidak ditemukan
 	}
+
+	// 1b. Query designs untuk setiap order item
+	queryDesigns := `
+		SELECT df.id, df.order_item_id, df.file_path, df.version, 
+		       COALESCE((SELECT status FROM design_reviews WHERE design_file_id = df.id ORDER BY created_at DESC LIMIT 1), '') as status,
+		       df.created_at
+		FROM design_files df
+		WHERE df.order_item_id IN (
+			SELECT id FROM order_items WHERE order_id = $1
+		)
+		ORDER BY df.order_item_id ASC, df.version ASC
+	`
+	fmt.Printf("[DEBUG] Querying designs for order_id=%d\n", orderID)
+	designRows, err := r.db.QueryContext(ctx, queryDesigns, orderID)
+	if err != nil {
+		fmt.Printf("[ERROR] QueryDesigns for Order %d: %v\n", orderID, err)
+		// Tetap lanjut, designs akan kosong
+	} else {
+		defer designRows.Close()
+		designMap := make(map[int][]order.DesignFile)
+		rowCount := 0
+		for designRows.Next() {
+			var df order.DesignFile
+			scanErr := designRows.Scan(&df.ID, &df.OrderItemID, &df.FilePath, &df.Version, &df.Status, &df.UploadedAt)
+			if scanErr != nil {
+				fmt.Printf("[ERROR] Scan design row for order %d: %v\n", orderID, scanErr)
+				continue
+			}
+			fmt.Printf("[DEBUG] Design found: id=%d order_item_id=%d file=%s version=%d status=%s\n",
+				df.ID, df.OrderItemID, df.FilePath, df.Version, df.Status)
+			designMap[df.OrderItemID] = append(designMap[df.OrderItemID], df)
+			rowCount++
+		}
+		if rowsErr := designRows.Err(); rowsErr != nil {
+			fmt.Printf("[ERROR] designRows iteration error for order %d: %v\n", orderID, rowsErr)
+		}
+		fmt.Printf("[DEBUG] Total design rows found for order %d: %d\n", orderID, rowCount)
+		// Attach designs ke masing-masing item
+		for i, item := range detail.Items {
+			if designs, ok := designMap[item.ID]; ok {
+				detail.Items[i].Designs = designs
+				fmt.Printf("[DEBUG] Item %d (id=%d) -> %d designs\n", i, item.ID, len(designs))
+			} else {
+				detail.Items[i].Designs = []order.DesignFile{}
+				fmt.Printf("[DEBUG] Item %d (id=%d) -> 0 designs\n", i, item.ID)
+			}
+		}
+	}
+
 
 	// 2. Query info pembayaran dari tabel payment_transactions (opsional, bisa nil)
 	queryPayment := `

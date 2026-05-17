@@ -71,8 +71,8 @@ func (r *cartRepository) GetByUserID(ctx context.Context, userID int) ([]map[str
 	query := `
 		SELECT 
 			ci.id, ci.product_id, p.name, ci.quantity, v.price,
-			v.variant_name,
-			ci.notes
+			v.variant_name, ci.variant_id,
+			ci.notes, COALESCE(p.image, '') as product_image
 		FROM carts c
 		JOIN cart_items ci ON ci.cart_id = c.id
 		JOIN products p ON p.id = ci.product_id
@@ -88,23 +88,25 @@ func (r *cartRepository) GetByUserID(ctx context.Context, userID int) ([]map[str
 
 	var items []map[string]interface{}
 	for rows.Next() {
-		var id, productID, qty int
-		var name, variantName string
+		var id, productID, qty, variantID int
+		var name, variantName, productImage string
 		var notes sql.NullString
 		var price float64
 
-		if err := rows.Scan(&id, &productID, &name, &qty, &price, &variantName, &notes); err != nil {
+		if err := rows.Scan(&id, &productID, &name, &qty, &price, &variantName, &variantID, &notes, &productImage); err != nil {
 			return nil, err
 		}
 
 		items = append(items, map[string]interface{}{
 			"cart_item_id": id,
 			"product_id":   productID,
+			"variant_id":   variantID,
 			"product_name": name,
 			"quantity":     qty,
 			"price":        price,
 			"variant_name": variantName,
 			"notes":        notes.String,
+			"product_image": productImage,
 			"subtotal":     float64(qty) * price,
 		})
 	}

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ORD-20240115-001",
+    "customerId": "user_001",
+    "items": [
+      {
+        "productId": "prod_001",
+        "name": "Banner Outdoor Custom",
+        "price": 50000,
+        "quantity": 2,
+        "options": {
+          "Material": "Flexi China",
+          "Ukuran": "2x1m"
+        },
+        "subtotal": 100000
+      }
+    ],
+    "total": 100000,
+    "status": "pending",
+    "timerExpiresAt": "2026-05-01T23:59:59Z",
+    "timerStartedAt": "2026-04-30T23:59:59Z",
+    "timerDuration": 86400000,
+    "designFile": null,
+    "paymentProof": null,
+    "createdAt": "2026-04-30T23:59:59Z",
+    "updatedAt": "2026-04-30T23:59:59Z",
+    "notes": [],
+    "assignedStaff": null
+  },
+  {
+    "id": "ORD-20240114-002",
+    "customerId": "user_001",
+    "items": [
+      {
+        "productId": "prod_003",
+        "name": "Sticker Vinyl Custom Cut",
+        "price": 125000,
+        "quantity": 1,
+        "options": {
+          "Material": "Vinyl Transparan",
+          "Finishing": "Die-cut"
+        },
+        "subtotal": 125000
+      }
+    ],
+    "total": 125000,
+    "status": "production",
+    "timerExpiresAt": null,
+    "designFile": {
+      "name": "logo-final.pdf",
+      "base64": "data:application/pdf;base64,...",
+      "uploadedAt": "2026-04-29T10:00:00Z",
+      "version": 1
+    },
+    "paymentProof": {
+      "name": "bukti-tf.jpg",
+      "base64": "data:image/jpeg;base64,...",
+      "uploadedAt": "2026-04-29T10:30:00Z"
+    },
+    "createdAt": "2026-04-29T09:30:00Z",
+    "updatedAt": "2026-04-29T14:00:00Z",
+    "notes": [
+      "2026-04-29 11:00 - Payment verified by Staff A",
+      "2026-04-29 14:00 - Design approved and moved to production"
+    ],
+    "assignedStaff": "staff_001"
+  }
+]

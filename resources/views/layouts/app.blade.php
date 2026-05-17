@@ -7,12 +7,67 @@
     <meta name="description" content="@yield('meta_description', 'Solusi digital printing berkualitas tinggi dengan harga terjangkau.')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        [x-cloak] { display: none !important; }
+    <!-- Tailwind CSS via CDN (agar jalan tanpa Vite/Node.js) -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+            /* Primary: Blue */
+            --color-primary-50: #eff6ff;
+            --color-primary-100: #dbeafe;
+            --color-primary-200: #bfdbfe;
+            --color-primary-300: #93c5fd;
+            --color-primary-400: #60a5fa;
+            --color-primary-500: #3b82f6;
+            --color-primary-600: #2563eb;
+            --color-primary-700: #1d4ed8;
+            --color-primary-800: #1e40af;
+            --color-primary-900: #1e3a8a;
+
+            /* Secondary: Emerald */
+            --color-secondary-50: #ecfdf5;
+            --color-secondary-100: #d1fae5;
+            --color-secondary-200: #a7f3d0;
+            --color-secondary-300: #6ee7b7;
+            --color-secondary-400: #34d399;
+            --color-secondary-500: #10b981;
+            --color-secondary-600: #059669;
+            --color-secondary-700: #047857;
+        }
+
+        @layer base {
+            * { @apply scroll-smooth; }
+            body { @apply antialiased text-slate-700; }
+        }
+
+        @layer components {
+            .btn-primary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 cursor-pointer; }
+            .btn-secondary { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all duration-200 shadow-sm cursor-pointer; }
+            .btn-outline { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-transparent hover:bg-white/10 text-white font-semibold rounded-xl border border-white/30 transition-all duration-200 cursor-pointer; }
+            .card { @apply bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden; }
+            .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+            .badge-blue { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700; }
+            .badge-green { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700; }
+            .badge-yellow { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700; }
+            .badge-red { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700; }
+            .badge-gray { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600; }
+            .badge-purple { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700; }
+
+            .form-input { @apply w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all; }
+            .form-label { @apply block text-sm font-semibold text-slate-700 mb-1.5; }
+            .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-primary-50 hover:text-primary-700 transition-all duration-150; }
+            .sidebar-link.active { @apply bg-primary-600 text-white shadow-sm; }
+            
+            .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
     </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>body { font-family: 'Inter', sans-serif; } [x-cloak] { display: none !important; }</style>
 </head>
 <body class="bg-white text-slate-800">
 

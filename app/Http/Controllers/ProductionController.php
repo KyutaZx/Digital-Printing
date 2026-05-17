@@ -9,67 +9,26 @@ use Illuminate\Http\Request;
 
 class ProductionController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Start Production
-    |--------------------------------------------------------------------------
-    */
+    protected $apiUrl;
+    public function __construct() { $this->apiUrl = config('app.golang_api_url', 'http://localhost:8080'); }
 
-    public function start(Order $order)
+    public function start(int $orderId)
     {
-        ProductionLog::create([
-            'order_id' => $order->id,
-            'operator_id' => Auth::id(),
-            'status' => 'in_production',
-            'notes' => 'Production started'
-        ]);
-
-        $order->update([
-            'status' => 'in_production'
-        ]);
-
-        return redirect()->back()->with('success', 'Production started');
+        try {
+            $r = \Illuminate\Support\Facades\Http::timeout(10)->withToken(session('token'))
+                ->put("{$this->apiUrl}/api/staff/production/{$orderId}/start");
+            if ($r->successful()) return back()->with('success', 'Produksi berhasil dimulai.');
+            return back()->with('error', $r->json('message') ?? 'Gagal memulai produksi.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update Production Status
-    |--------------------------------------------------------------------------
-    */
-
-    public function updateStatus(Request $request, ProductionLog $log)
+    public function finish(int $orderId)
     {
-        $request->validate([
-            'status' => 'required|string'
-        ]);
-
-        $log->update([
-            'status' => $request->status,
-            'notes' => $request->notes
-        ]);
-
-        return redirect()->back()->with('success', 'Production status updated');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Finish Production
-    |--------------------------------------------------------------------------
-    */
-
-    public function finish(Order $order)
-    {
-        ProductionLog::create([
-            'order_id' => $order->id,
-            'operator_id' => Auth::id(),
-            'status' => 'finished',
-            'notes' => 'Production finished'
-        ]);
-
-        $order->update([
-            'status' => 'finished'
-        ]);
-
-        return redirect()->back()->with('success', 'Production finished');
+        try {
+            $r = \Illuminate\Support\Facades\Http::timeout(10)->withToken(session('token'))
+                ->put("{$this->apiUrl}/api/staff/production/{$orderId}/finish");
+            if ($r->successful()) return back()->with('success', 'Produksi berhasil diselesaikan.');
+            return back()->with('error', $r->json('message') ?? 'Gagal menyelesaikan produksi.');
+        } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }
     }
 }

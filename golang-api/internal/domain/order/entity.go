@@ -41,9 +41,20 @@ type OrderItemDetail struct {
 	VariantName string  `json:"variant_name"`  // JOIN dari tabel product_variants (nama finishing)
 	SKU         string  `json:"sku"`
 	Quantity    int     `json:"quantity"`
-	UnitPrice   float64 `json:"unit_price"`    // Harga per satuan
-	Subtotal    float64 `json:"subtotal"`      // unit_price * quantity
-	Notes       string  `json:"notes"`         // Catatan cetak dari customer
+	UnitPrice   float64      `json:"unit_price"`    // Harga per satuan
+	Subtotal    float64      `json:"subtotal"`      // unit_price * quantity
+	Notes       string       `json:"notes"`         // Catatan cetak dari customer
+	Designs     []DesignFile `json:"designs"`       // Array file desain yang diupload
+}
+
+// DesignFile merepresentasikan desain untuk order detail
+type DesignFile struct {
+	ID          int        `json:"id"`
+	OrderItemID int        `json:"order_item_id"`
+	FilePath    string     `json:"file_path"`
+	Version     int        `json:"version"`
+	Status      string     `json:"status"`
+	UploadedAt  *time.Time `json:"uploaded_at"` // Pointer karena bisa NULL di DB
 }
 
 // PaymentInfo adalah info pembayaran yang melekat pada invoice

@@ -55,7 +55,7 @@
                     <p class="font-black text-green-600">Rp {{ number_format($order['payment']['amount'] ?? 0, 0, ',', '.') }}</p></div>
             </div>
             <div class="rounded-xl overflow-hidden border border-slate-200">
-                <img src="{{ $order['payment']['payment_proof'] }}" alt="Bukti Bayar"
+                <img src="{{ config('app.golang_api_url') }}{{ $order['payment']['payment_proof'] }}" alt="Bukti Bayar"
                      class="w-full max-h-80 object-contain bg-slate-50">
             </div>
         </div>
