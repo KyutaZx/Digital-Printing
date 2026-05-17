@@ -95,6 +95,7 @@ func SetupRoutes(
 		// ========================
 		api.POST("/orders", orderHandler.Create)
 		api.GET("/orders", orderHandler.GetMyOrders)          // Customer lihat daftar pesanannya
+		api.GET("/orders/all", orderHandler.GetAllOrders)      // 🔥 Dashboard & Monitoring (Staff/Admin/Owner)
 		api.GET("/orders/:id", orderHandler.GetOrderDetail)   // 🔥 Detail pesanan / Invoice
 		api.GET("/orders/:id/invoice/pdf", orderHandler.DownloadInvoicePDF) // 🔥 Download Invoice PDF
 		api.POST("/checkout", orderHandler.Checkout)
@@ -121,6 +122,7 @@ func SetupRoutes(
 
 			// 🔥 Product Management (Admin/Owner)
 			admin.POST("/products", productHandler.Create)
+			admin.POST("/products/:id/image", productHandler.UpdateImage) // 🔥 Upload Foto Produk
 			admin.PUT("/products/:id", productHandler.Update)
 			admin.DELETE("/products/:id", productHandler.Delete)
 

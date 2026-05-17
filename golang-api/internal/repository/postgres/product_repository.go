@@ -21,7 +21,7 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 
 	query := `
 		SELECT 
-			p.id, p.category_id, p.name, p.description, p.base_price, p.estimated_days, p.is_active, p.created_at,
+			p.id, p.category_id, p.name, p.description, p.base_price, p.estimated_days, p.is_active, COALESCE(p.image, '') as image, p.created_at,
 			v.id as v_id, v.sku as v_sku, v.variant_name as v_name, v.price as v_price, v.stock as v_stock, v.is_active as v_is_active, v.material_id, v.material_usage, v.created_at as v_created_at
 		FROM products p
 		LEFT JOIN product_variants v ON v.product_id = p.id
@@ -50,7 +50,7 @@ func (r *productRepository) FindAll() ([]product.Product, error) {
 		var vCreatedAt sql.NullTime
 
 		err := rows.Scan(
-			&p.ID, &pCatID, &p.Name, &p.Description, &p.BasePrice, &p.EstimatedDays, &p.IsActive, &p.CreatedAt,
+			&p.ID, &pCatID, &p.Name, &p.Description, &p.BasePrice, &p.EstimatedDays, &p.IsActive, &p.Image, &p.CreatedAt,
 			&vID, &vSku, &vName, &vPrice, &vStock, &vIsActive, &vMaterialID, &vMaterialUsage, &vCreatedAt,
 		)
 		if err != nil {
@@ -322,6 +322,15 @@ func (r *productRepository) Update(product *product.Product) error {
 	}
 
 	return tx.Commit()
+}
+
+// ========================
+// UPDATE PRODUCT IMAGE
+// ========================
+func (r *productRepository) UpdateImage(id int, imagePath string) error {
+	query := `UPDATE products SET image = $1, updated_at = NOW() WHERE id = $2`
+	_, err := r.db.Exec(query, imagePath, id)
+	return err
 }
 
 // ========================

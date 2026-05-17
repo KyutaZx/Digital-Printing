@@ -56,7 +56,10 @@
                         <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick="window.location='/manager/pesanan?q={{ $order['order_code'] }}'">
                             <td class="px-6 py-4">
                                 <p class="font-bold text-slate-900">{{ $order['customer_name'] ?? '-' }}</p>
-                                <p class="text-[10px] font-mono text-primary-600 mt-0.5">{{ $order['order_code'] ?? '-' }}</p>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[9px] font-mono text-slate-400 bg-slate-50 px-1 rounded">{{ $order['customer_formatted_id'] ?? '-' }}</span>
+                                    <span class="text-[9px] font-mono text-primary-600 font-bold uppercase tracking-tighter">{{ $order['order_code'] ?? '-' }}</span>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 @if(!empty($order['items']))

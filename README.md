@@ -1,59 +1,143 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🖨️ Digital Printing Management System (DPMS)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel](https://img.shields.io/badge/Frontend-Laravel_12-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![Golang](https://img.shields.io/badge/Backend-Go_1.25-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)
+[![FastAPI](https://img.shields.io/badge/AI_Service-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-## About Laravel
+**Digital Printing Management System (DPMS)** adalah ekosistem manajemen percetakan digital kelas enterprise yang terintegrasi. Platform ini dirancang menggunakan arsitektur modern berbasis microservices untuk menangani pesanan volume tinggi, alur kerja produksi yang kompleks, dan pemrosesan gambar berbasis AI.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏛️ Arsitektur Sistem
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Sistem ini dibangun dengan pendekatan *separation of concerns* untuk memastikan skalabilitas dan efisiensi performa:
 
-## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Platform ini terbagi menjadi tiga layanan inti:
+1.  **Frontend & Web Service (Laravel)**: Berfungsi sebagai portal utama untuk Pelanggan, Staff, dan Owner dengan sistem Blade templating yang responsif.
+2.  **Core API Backend (Golang)**: Mesin utama yang menangani logika bisnis berat, transaksi keuangan, manajemen inventaris, dan operasi real-time dengan performa tinggi.
+3.  **AI Microservice (Python)**: Layanan khusus berbasis TensorFlow untuk deteksi kualitas desain secara otomatis sebelum masuk ke tahap cetak.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## ✨ Fitur Unggulan
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+-   **👑 Dashboard Multi-Role**: Pengalaman yang dipersonalisasi untuk Owner (Analitik Bisnis), Staff (Manajemen Produksi), dan Pelanggan (Pelacakan Pesanan).
+-   **⚙️ Alur Kerja Produksi Terotomasi**: Pemantauan status real-time dari fase desain, antrean cetak, hingga finishing dan pengiriman.
+-   **🤖 Deteksi Kualitas AI**: Integrasi AI untuk mendeteksi gambar yang pecah (blur) secara otomatis, memastikan kualitas hasil cetak tetap premium.
+-   **📄 Invoicing Dinamis**: Pembuatan invoice PDF secara instan menggunakan engine Golang yang sangat cepat.
+-   **⚡ Operasi Real-time**: Notifikasi dan pembaruan status pesanan seketika menggunakan teknologi WebSockets.
+-   **🛡️ Keamanan Enterprise**: Autentikasi berbasis JWT, pembatasan laju (Rate Limiting), dan Kontrol Akses Berbasis Peran (RBAC).
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🚀 Teknologi yang Digunakan
 
-## Contributing
+### Frontend & Web Interface
+-   **Framework**: Laravel 12.x
+-   **UI Engine**: Blade & Vite
+-   **Styling**: Modern CSS / Tailwind CSS
+-   **Authentication**: Session-based (Web) & Sanctum (API Bridge)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Core Backend Engine
+-   **Language**: Go (Golang) 1.25+
+-   **Architecture**: Clean Architecture (Domain Driven Design inspired)
+-   **Framework**: Gin Gonic (High Performance)
+-   **Database**: PostgreSQL
+-   **Library Utama**: fpdf (Invoicing), SQLX/GORM
 
-## Code of Conduct
+### AI Deep Learning Service
+-   **Language**: Python 3.9+
+-   **Framework**: FastAPI
+-   **AI Library**: TensorFlow & Keras
+-   **Fungsi Utama**: Computer Vision untuk Blur Detection pada file desain.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🛠️ Panduan Instalasi
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Prasyarat
+-   PHP 8.2+ & Composer
+-   Go 1.25+
+-   Python 3.9+
+-   PostgreSQL 15+
 
-## License
+### 1. Konfigurasi Laravel (Frontend)
+```bash
+# Clone repository
+git clone https://github.com/KyutaZx/digital-printing.git
+cd digital-printing
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Install dependencies
+composer install
+npm install
+
+# Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# Migrasi Database
+php artisan migrate
+
+# Jalankan server
+php artisan serve
+```
+
+### 2. Konfigurasi Golang API (Core)
+```bash
+cd golang-api
+
+# Install dependencies
+go mod download
+
+# Jalankan server (pastikan .env sudah dikonfigurasi)
+go run cmd/main.go
+```
+
+### 3. Konfigurasi Python AI (Service)
+```bash
+cd python-ai
+
+# Buat virtual environment
+python -m venv venv
+source venv/bin/activate # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Jalankan AI Service
+uvicorn main:app --reload
+```
+
+---
+
+## 📂 Struktur Proyek
+
+```text
+.
+├── app/                # Logika Aplikasi Laravel
+├── golang-api/         # Core Backend (Clean Architecture)
+│   ├── cmd/            # Entry points aplikasi
+│   ├── internal/       # Business Logic (Usecase, Repository, Domain)
+│   └── configs/        # Konfigurasi sistem Go
+├── python-ai/          # Layanan Deteksi AI (FastAPI)
+├── resources/          # Frontend Assets (Blade, CSS, JS)
+├── public/             # File statis dan akses publik
+└── storage/            # Media penyimpanan file lokal
+```
+
+---
+
+## 📝 Dokumentasi API
+Seluruh endpoint API didokumentasikan dengan lengkap. Anda dapat mengimpor file berikut ke Postman:
+[Digital_Printing_API.postman_collection.json](Digital_Printing_API.postman_collection.json)
+
+---
+
+## 📄 Lisensi
+Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
+
+---
+Dikembangkan dengan ☕ oleh **[KyutaZx](https://github.com/KyutaZx)**

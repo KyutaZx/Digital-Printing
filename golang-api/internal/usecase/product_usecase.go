@@ -41,7 +41,7 @@ func (u *ProductUsecase) GetByID(id int) (*product.Product, error) {
 // ========================
 // CREATE PRODUCT
 // ========================
-func (u *ProductUsecase) Create(req product.ProductRequest) error {
+func (u *ProductUsecase) Create(req product.ProductRequest) (int, error) {
 	// Map request to entity
 	newProduct := product.Product{
 		CategoryID:    req.CategoryID,
@@ -66,10 +66,10 @@ func (u *ProductUsecase) Create(req product.ProductRequest) error {
 
 	err := u.repo.Create(&newProduct)
 	if err != nil {
-		return fmt.Errorf("failed to create product: %w", err)
+		return 0, fmt.Errorf("failed to create product: %w", err)
 	}
 
-	return nil
+	return newProduct.ID, nil
 }
 
 // ========================
@@ -106,6 +106,13 @@ func (u *ProductUsecase) Update(id int, req product.ProductRequest) error {
 	}
 
 	return nil
+}
+
+// ========================
+// UPDATE PRODUCT IMAGE
+// ========================
+func (u *ProductUsecase) UpdateImage(id int, imagePath string) error {
+	return u.repo.UpdateImage(id, imagePath)
 }
 
 // ========================

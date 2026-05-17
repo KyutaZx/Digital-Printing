@@ -32,7 +32,8 @@ class ProductController extends Controller
             Log::warning('Products API unreachable: ' . $e->getMessage());
         }
 
-        return view('landing', compact('products'));
+        $apiUrl = $this->apiUrl;
+        return view('landing', compact('products', 'apiUrl'));
     }
 
     // =========================================================================
@@ -62,7 +63,8 @@ class ProductController extends Controller
             Log::warning('Products API unreachable: ' . $e->getMessage());
         }
 
-        return view('catalog', compact('products', 'search'));
+        $apiUrl = $this->apiUrl;
+        return view('catalog', compact('products', 'search', 'apiUrl'));
     }
 
     // =========================================================================
@@ -85,6 +87,7 @@ class ProductController extends Controller
             abort(404, 'Produk tidak ditemukan.');
         }
 
-        return view('product-detail', compact('product'));
+        $apiUrl = $this->apiUrl;
+        return view('product-detail', compact('product', 'apiUrl'));
     }
 }
