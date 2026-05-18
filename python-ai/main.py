@@ -33,11 +33,11 @@ async def lifespan(app: FastAPI):
         try:
             # Load the model
             model = tf.keras.models.load_model(MODEL_PATH)
-            print(f"✅ Berhasil memuat model AI dari {MODEL_PATH}")
+            print(f"SUCCESS: Berhasil memuat model AI dari {MODEL_PATH}")
         except Exception as e:
-            print(f"❌ Gagal memuat model AI: {e}")
+            print(f"ERROR: Gagal memuat model AI: {e}")
     else:
-        print(f"⚠️ WARNING: File {MODEL_PATH} tidak ditemukan.")
+        print(f"WARNING: File {MODEL_PATH} tidak ditemukan.")
         print("API akan berjalan dalam mode bypass (selalu me-return 'sharp').")
     
     yield
@@ -69,27 +69,57 @@ async def predict_blur(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
         
-        # Konversi ke RGB jika gambar memiliki Alpha channel (PNG/RGBA)
+        # 1. Metode Algoritma Klasik (Variance of Laplacian)
+        # Sangat bagus untuk mendeteksi blur secara umum
+        gray_image = image.convert('L')
+        img_np = np.array(gray_image, dtype=np.float32)
+        top = img_np[:-2, 1:-1]
+        bottom = img_np[2:, 1:-1]
+        left = img_np[1:-1, :-2]
+        right = img_np[1:-1, 2:]
+        center = img_np[1:-1, 1:-1]
+        laplacian = top + bottom + left + right - 4 * center
+        laplacian_var = float(laplacian.var())
+        
+        # 2. Metode Deep Learning (MobileNetV2 AI)
         if image.mode != "RGB":
             image = image.convert("RGB")
             
         # Resize ke 224x224 (ukuran input AI saat training)
         image = image.resize((224, 224))
         
-        # Konversi ke numpy array dan tambahkan dimensi batch
-        img_array = tf.keras.preprocessing.image.img_to_array(image)
-        img_array = tf.expand_dims(img_array, 0)
+        # Konversi ke numpy array dan normalisasi ke [0,1]
+        img_array = tf.keras.preprocessing.image.img_to_array(image) / 255.0
+        img_array = tf.expand_dims(img_array, 0)  # tambahkan dimensi batch
         
-        # Prediksi
-        predictions = model.predict(img_array)
-        score = tf.nn.softmax(predictions[0])
+        # Prediksi — output: sigmoid scalar [0,1]
+        predictions = model.predict(img_array, verbose=0)
+        score = float(predictions[0][0])  # probabilitas "sharp"
         
-        nama_kelas = CLASS_NAMES[np.argmax(score)]
-        persentase = 100 * np.max(score)
+        # 3. Penggabungan Keputusan (Ensemble)
+        # AI kita dilatih dengan Gaussian Blur di dataset Bunga. 
+        # Ia mungkin kesulitan dengan Motion Blur di jalanan malam hari.
+        # Jadi kita gunakan Laplacian Variance sebagai filter pencegah lolos.
+        LAPLACIAN_THRESHOLD = 150.0  # Semakin kecil var = semakin blur
         
+        if score >= 0.5 and laplacian_var > LAPLACIAN_THRESHOLD:
+            nama_kelas = "sharp"
+            confidence = score * 100
+        else:
+            nama_kelas = "blur"
+            # Jika AI salah duga sharp tapi laplacian mendeteksi blur
+            if score >= 0.5:
+                confidence = 85.0 # Kita beri tingkat keyakinan hardcode karena AI gagal
+            else:
+                confidence = (1 - score) * 100
+                
         return {
-            "status": nama_kelas,
-            "confidence": float(persentase)
+            "status":     nama_kelas,
+            "confidence": round(confidence, 2),
+            "debug": {
+                "ai_score": round(score, 4),
+                "laplacian_variance": round(laplacian_var, 2)
+            }
         }
         
     except Exception as e:

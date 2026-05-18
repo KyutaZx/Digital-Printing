@@ -5,3 +5,5 @@ tensorflow>=2.21.0
 pillow>=10.1.0
 python-dotenv>=1.0.0
 numpy>=1.26.2
+tensorflow-datasets>=4.9.0
+importlib_resources>=6.0.0
