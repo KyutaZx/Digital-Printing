@@ -23,7 +23,24 @@ class OrderController extends Controller
     {
         $orders = $this->api('get', '/api/orders') ?? [];
         if (!is_array($orders) || isset($orders['id'])) $orders = [$orders];
-        return view('orders.index', compact('orders'));
+        
+        $activeOrders = array_filter($orders, function($order) {
+            return !in_array($order['status'] ?? '', ['completed', 'cancelled']);
+        });
+
+        return view('orders.index', ['orders' => $activeOrders]);
+    }
+
+    public function history()
+    {
+        $orders = $this->api('get', '/api/orders') ?? [];
+        if (!is_array($orders) || isset($orders['id'])) $orders = [$orders];
+        
+        $historyOrders = array_filter($orders, function($order) {
+            return in_array($order['status'] ?? '', ['completed', 'cancelled']);
+        });
+
+        return view('orders.history', ['orders' => $historyOrders]);
     }
 
     public function show(int $id)
@@ -37,11 +54,88 @@ class OrderController extends Controller
         return view('orders.detail', compact('order'));
     }
 
+    public function buyNow(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|integer',
+            'variant_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+            'notes' => 'nullable|string'
+        ]);
+
+        $payload = [
+            'items' => [
+                [
+                    'product_id' => (int) $request->product_id,
+                    'variant_id' => (int) $request->variant_id,
+                    'quantity' => (int) $request->quantity,
+                    'notes' => $request->notes ?? ''
+                ]
+            ]
+        ];
+
+        // Memanggil API CreateOrder (manual, bypass keranjang)
+        $r = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/orders", $payload);
+        if ($r->successful()) {
+            $data = $r->json('data') ?? $r->json();
+            // Asumsi API mengembalikan ID pesanan di response message atau data.
+            // Karena di golang-api handler Create mengembalikan message saja, mungkin kita perlu menyesuaikan golang-api agar mengembalikan order_id, atau kita asumsikan getMyOrders terbaru adalah order tersebut.
+            // Untuk amannya, kita panggil getMyOrders dan ambil yang pertama.
+            $orders = $this->api('get', '/api/orders') ?? [];
+            if (!empty($orders)) {
+                $latestOrder = $orders[0];
+                return redirect("/pesanan/{$latestOrder['id']}/upload-desain")->with('success', 'Pesanan berhasil dibuat! Silakan upload desain Anda.');
+            }
+            return redirect('/pesanan')->with('success', 'Pesanan berhasil dibuat!');
+        }
+
+        return back()->with('error', $r->json('message') ?? 'Gagal membuat pesanan.');
+    }
+
     public function checkout(Request $request)
     {
         $result = $this->api('post', '/api/checkout', []);
-        if ($result) return redirect('/pesanan')->with('success', 'Checkout berhasil! Silakan upload bukti pembayaran.');
+        if ($result && isset($result['order_id'])) {
+            return redirect("/pesanan/{$result['order_id']}/upload-desain")->with('success', 'Checkout berhasil! Silakan upload desain untuk pesanan Anda.');
+        } elseif ($result) {
+            // Fallback if order_id is not returned directly
+            $orders = $this->api('get', '/api/orders') ?? [];
+            if (!empty($orders)) {
+                $latestOrder = $orders[0];
+                return redirect("/pesanan/{$latestOrder['id']}/upload-desain")->with('success', 'Checkout berhasil! Silakan upload desain Anda.');
+            }
+            return redirect('/pesanan')->with('success', 'Checkout berhasil! Silakan upload desain Anda.');
+        }
         return back()->with('error', 'Checkout gagal. Pastikan keranjang Anda tidak kosong.');
+    }
+
+    public function showUploadDesign(int $id)
+    {
+        $order = $this->api('get', "/api/orders/{$id}");
+        if (!$order) abort(404);
+        
+        // Cek kepemilikan
+        if ((session('user.role') === 'customer') && ($order['customer_id'] ?? $order['user_id'] ?? null) != session('user.id')) {
+            abort(403);
+        }
+
+        return view('orders.upload_design', compact('order'));
+    }
+
+    public function showPayment(int $id)
+    {
+        $order = $this->api('get', "/api/orders/{$id}");
+        if (!$order) abort(404);
+        
+        // Cek kepemilikan
+        if ((session('user.role') === 'customer') && ($order['customer_id'] ?? $order['user_id'] ?? null) != session('user.id')) {
+            abort(403);
+        }
+
+        // Ambil list metode pembayaran
+        $methods = $this->api('get', '/api/payments/methods') ?? [];
+        
+        return view('orders.payment', compact('order', 'methods'));
     }
 
     public function confirmCompleted(int $id)

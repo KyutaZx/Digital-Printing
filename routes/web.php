@@ -53,8 +53,12 @@ Route::middleware(['auth.session:customer,owner,admin,staff'])->group(function (
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
 
     // Orders & Checkout
+    Route::post('/pesanan/beli-sekarang', [OrderController::class, 'buyNow']);
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/riwayat', [OrderController::class, 'history'])->name('orders.history');
     Route::get('/pesanan/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/pesanan/{id}/upload-desain', [OrderController::class, 'showUploadDesign']);
+    Route::get('/pesanan/{id}/pembayaran', [OrderController::class, 'showPayment']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
     Route::post('/pesanan/{id}/batal', [OrderController::class, 'cancel']);
     Route::post('/pesanan/{id}/selesai', [OrderController::class, 'confirmCompleted']);
@@ -83,10 +87,6 @@ Route::middleware(['auth.session:customer,owner,admin,staff'])->group(function (
 Route::prefix('staff')->middleware(['auth.session:staff,owner,admin'])->group(function () {
     Route::get('/', fn() => redirect('/staff/dashboard'));
     Route::get('/dashboard', [StaffController::class, 'dashboard']);
-    Route::get('/verifikasi', [StaffController::class, 'verifikasi']);
-    Route::get('/verifikasi/{id}', [StaffController::class, 'verifikasiDetail']);
-    Route::post('/pembayaran/{id}/setujui', [PaymentController::class, 'approve']);
-    Route::post('/pembayaran/{id}/tolak', [PaymentController::class, 'reject']);
     Route::get('/desain', [StaffController::class, 'desainList']);
     Route::post('/desain/{id}/review', [DesignController::class, 'addReview']);
     Route::get('/produksi', [StaffController::class, 'produksi']);
@@ -102,6 +102,10 @@ Route::prefix('staff')->middleware(['auth.session:staff,owner,admin'])->group(fu
 Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(function () {
     Route::get('/', fn() => redirect('/manager/dashboard'));
     Route::get('/dashboard', [ManagerController::class, 'dashboard']);
+    Route::get('/verifikasi', [ManagerController::class, 'verifikasi']);
+    Route::get('/verifikasi/{id}', [ManagerController::class, 'verifikasiDetail']);
+    Route::post('/pembayaran/{id}/setujui', [PaymentController::class, 'approve']);
+    Route::post('/pembayaran/{id}/tolak', [PaymentController::class, 'reject']);
     Route::get('/produk', [ManagerController::class, 'produk']);
     Route::post('/produk', [ManagerController::class, 'storeProduk']);
     Route::put('/produk/{id}', [ManagerController::class, 'updateProduk']);
@@ -112,7 +116,11 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::post('/material/{id}/restock', [MaterialController::class, 'restock']);
     Route::get('/monitoring', [ManagerController::class, 'monitoring']);
     Route::get('/pesanan', [ManagerController::class, 'pesanan']);
+    Route::get('/pesanan/{id}', [ManagerController::class, 'detailPesanan']);
     Route::get('/laporan', [ReportController::class, 'index']);
+    Route::get('/users', [ManagerController::class, 'users']);
+    Route::post('/users/staff', [ManagerController::class, 'registerStaff']);
+    Route::post('/users/{id}/status', [ManagerController::class, 'updateUserStatus']);
 });
 
 /*

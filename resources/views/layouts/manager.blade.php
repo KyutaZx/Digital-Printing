@@ -63,6 +63,10 @@
                 from { opacity: 0; transform: translateY(12px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+            @keyframes progress {
+                from { width: 100%; }
+                to { width: 0%; }
+            }
         }
     </style>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -94,6 +98,11 @@
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Dashboard</span>
             </a>
 
+            <a href="/manager/verifikasi" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/verifikasi*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Verifikasi Pembayaran</span>
+            </a>
+
             <a href="/manager/produk" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/produk*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Produk</span>
@@ -106,12 +115,22 @@
 
             <a href="/manager/monitoring" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/monitoring*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span x-show="sidebarOpen" class="whitespace-nowrap">Monitoring & Laporan</span>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Monitoring Transaksi</span>
+            </a>
+
+            <a href="/manager/laporan" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/laporan*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Laporan & Audit Logs</span>
             </a>
 
             <a href="/manager/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/pesanan*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Semua Pesanan</span>
+            </a>
+
+            <a href="/manager/users" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/users*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Pengguna</span>
             </a>
         </nav>
 
@@ -148,15 +167,33 @@
         </header>
 
         @if(session('success'))
-        <div class="mx-6 mt-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl text-sm font-medium">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms x-cloak class="fixed top-20 right-6 z-[9999] flex items-center gap-4 bg-white border border-slate-100 p-4 rounded-2xl shadow-2xl shadow-slate-200/50 max-w-md w-full fade-in overflow-hidden">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-bold text-slate-900">Berhasil</h4>
+                <p class="text-sm text-slate-500 mt-0.5">{{ session('success') }}</p>
+            </div>
+            <button @click="show = false" class="flex-shrink-0 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="absolute bottom-0 left-0 h-1 bg-green-500" style="animation: progress 5s linear forwards;"></div>
         </div>
         @endif
         @if(session('error'))
-        <div class="mx-6 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl text-sm font-medium">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            {{ session('error') }}
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms x-cloak class="fixed top-20 right-6 z-[9999] flex items-center gap-4 bg-white border border-slate-100 p-4 rounded-2xl shadow-2xl shadow-slate-200/50 max-w-md w-full fade-in overflow-hidden">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-bold text-slate-900">Oops, Terjadi Kesalahan</h4>
+                <p class="text-sm text-slate-500 mt-0.5">{{ session('error') }}</p>
+            </div>
+            <button @click="show = false" class="flex-shrink-0 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="absolute bottom-0 left-0 h-1 bg-red-500" style="animation: progress 5s linear forwards;"></div>
         </div>
         @endif
 

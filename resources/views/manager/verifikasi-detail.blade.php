@@ -1,4 +1,4 @@
-@extends('layouts.staff')
+@extends('layouts.manager')
 @section('title', 'Detail Verifikasi #' . ($order['order_code'] ?? ''))
 @section('page_title', 'Detail Verifikasi Pembayaran')
 
@@ -70,7 +70,7 @@
             @if(($order['payment']['payment_status'] ?? '') === 'pending')
 
             {{-- Approve --}}
-            <form method="POST" action="/staff/pembayaran/{{ $order['payment']['id'] ?? 0 }}/setujui"
+            <form method="POST" action="/manager/pembayaran/{{ $order['payment']['id'] ?? 0 }}/setujui"
                   onsubmit="return confirm('Setujui pembayaran ini? Pesanan akan otomatis diproses.')"
                   class="mb-3">
                 @csrf
@@ -82,7 +82,7 @@
             </form>
 
             {{-- Reject --}}
-            <form method="POST" action="/staff/pembayaran/{{ $order['payment']['id'] ?? 0 }}/tolak"
+            <form method="POST" action="/manager/pembayaran/{{ $order['payment']['id'] ?? 0 }}/tolak"
                   onsubmit="return confirm('Tolak pembayaran ini? Customer dapat upload ulang bukti.')">
                 @csrf
                 <button type="submit"
@@ -100,7 +100,7 @@
             @endif
         </div>
 
-        <a href="/staff/verifikasi" class="btn-secondary w-full justify-center text-sm">
+        <a href="/manager/verifikasi" class="btn-secondary w-full justify-center text-sm">
             ← Kembali ke Daftar
         </a>
     </div>

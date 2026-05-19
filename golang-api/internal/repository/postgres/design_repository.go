@@ -121,14 +121,21 @@ func (r *designRepository) AddReview(ctx context.Context, review *design.DesignR
 	var existingStatus sql.NullString
 	checkQuery := `SELECT status FROM design_reviews WHERE design_file_id = $1 ORDER BY id DESC LIMIT 1`
 	err := r.db.QueryRowContext(ctx, checkQuery, review.DesignFileID).Scan(&existingStatus)
-	
+
 	if err == nil && existingStatus.Valid && existingStatus.String == "approved" {
 		return errors.New("desain ini sudah disetujui sebelumnya, tidak dapat direview lagi")
 	}
 
+	// Gunakan UPSERT agar bisa update status (misal dari revision_requested → approved)
+	// tanpa melanggar unique constraint unique_review_per_file
 	query := `
 		INSERT INTO design_reviews (design_file_id, reviewed_by, status, notes, created_at)
 		VALUES ($1, $2, $3, $4, NOW())
+		ON CONFLICT (design_file_id) DO UPDATE SET
+			status      = EXCLUDED.status,
+			notes       = EXCLUDED.notes,
+			reviewed_by = EXCLUDED.reviewed_by,
+			created_at  = NOW()
 		RETURNING id, created_at
 	`
 	var notes *string

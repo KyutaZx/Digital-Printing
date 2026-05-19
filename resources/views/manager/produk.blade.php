@@ -7,14 +7,23 @@
 <div x-data="{ 
     modalOpen: false, 
     editMode: false, 
-    currentProduct: { name: '', description: '', base_price: '', category_name: 'Printing', variants: [] },
+    currentProduct: { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] },
+    variants: [{ name: '', price: '', stock: '' }],
+    addVariant() { this.variants.push({ name: '', price: '', stock: '' }); },
+    removeVariant(i) { if (this.variants.length > 1) this.variants.splice(i, 1); },
     openModal(product = null) {
         if(product) {
             this.editMode = true;
             this.currentProduct = JSON.parse(JSON.stringify(product));
+            if (product.variants && product.variants.length > 0) {
+                this.variants = product.variants.map(v => ({ id: v.id, name: v.variant_name, price: v.price, stock: v.stock ?? 999 }));
+            } else {
+                this.variants = [{ id: 0, name: '', price: '', stock: '' }];
+            }
         } else {
             this.editMode = false;
-            this.currentProduct = { name: '', description: '', base_price: '', category_name: 'Printing', variants: [] };
+            this.currentProduct = { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] };
+            this.variants = [{ id: 0, name: '', price: '', stock: '' }];
         }
         this.modalOpen = true;
     }
@@ -97,10 +106,15 @@
                     <div>
                         <label class="form-label">Kategori</label>
                         <select name="category_name" x-model="currentProduct.category_name" class="form-input text-sm" required>
-                            <option>Printing</option>
-                            <option>Outdoor</option>
-                            <option>Indoor</option>
-                            <option>Merchandise</option>
+                            <option value="Printing Digital">🖨️ Printing Digital</option>
+                            <option value="Poster & Brosur">📄 Poster &amp; Brosur</option>
+                            <option value="Cetak Buku & Majalah">📚 Cetak Buku &amp; Majalah</option>
+                            <option value="Banner & Spanduk">🏷️ Banner &amp; Spanduk</option>
+                            <option value="Sticker & Label">🔖 Sticker &amp; Label</option>
+                            <option value="Kartu & Undangan">💌 Kartu &amp; Undangan</option>
+                            <option value="Kaos & Merchandise">👕 Kaos &amp; Merchandise</option>
+                            <option value="Outdoor Advertising">📢 Outdoor Advertising</option>
+                            <option value="Packaging & Dus">📦 Packaging &amp; Dus</option>
                         </select>
                     </div>
                 </div>
@@ -113,6 +127,40 @@
                 <div>
                     <label class="form-label">Harga Dasar (Rp)</label>
                     <input type="number" name="base_price" x-model="currentProduct.base_price" class="form-input text-sm font-black text-primary-600" required placeholder="0">
+                </div>
+
+                <div>
+                    <label class="form-label">Estimasi Pengerjaan (Hari)</label>
+                    <input type="number" name="estimated_days" x-model="currentProduct.estimated_days" class="form-input text-sm" min="1" placeholder="1">
+                </div>
+
+                {{-- VARIAN PRODUK --}}
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="form-label mb-0">Varian Produk</label>
+                        <button type="button" @click="addVariant()" class="inline-flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Tambah Varian
+                        </button>
+                    </div>
+                    <div class="space-y-2">
+                        <template x-for="(variant, index) in variants" :key="index">
+                            <div class="flex gap-2 items-center">
+                                <input type="hidden" :name="'variant_id[' + index + ']'" x-model="variant.id">
+                                <input type="text" :name="'variant_name[' + index + ']'" x-model="variant.name"
+                                       class="form-input text-xs flex-[3]" placeholder="Nama Varian (e.g. A3 Glossy)" required>
+                                <input type="number" :name="'variant_price[' + index + ']'" x-model="variant.price"
+                                       class="form-input text-xs flex-[2]" placeholder="Harga (Rp)" min="0">
+                                <input type="number" :name="'variant_stock[' + index + ']'" x-model="variant.stock"
+                                       class="form-input text-xs flex-1" placeholder="Stok" min="0">
+                                <button type="button" @click="removeVariant(index)" x-show="variants.length > 1"
+                                        class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2">Kosongkan kolom harga untuk menggunakan harga dasar.</p>
                 </div>
 
                 <div>

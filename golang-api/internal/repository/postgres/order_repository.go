@@ -302,6 +302,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 	queryDesigns := `
 		SELECT df.id, df.order_item_id, df.file_path, df.version, 
 		       COALESCE((SELECT status::text FROM design_reviews WHERE design_file_id = df.id ORDER BY created_at DESC LIMIT 1), '') as status,
+		       COALESCE((SELECT notes::text FROM design_reviews WHERE design_file_id = df.id ORDER BY created_at DESC LIMIT 1), '') as notes,
 		       df.created_at
 		FROM design_files df
 		WHERE df.order_item_id IN (
@@ -320,7 +321,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 		rowCount := 0
 		for designRows.Next() {
 			var df order.DesignFile
-			scanErr := designRows.Scan(&df.ID, &df.OrderItemID, &df.FilePath, &df.Version, &df.Status, &df.UploadedAt)
+			scanErr := designRows.Scan(&df.ID, &df.OrderItemID, &df.FilePath, &df.Version, &df.Status, &df.Notes, &df.UploadedAt)
 			if scanErr != nil {
 				fmt.Printf("[ERROR] Scan design row for order %d: %v\n", orderID, scanErr)
 				continue

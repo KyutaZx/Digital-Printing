@@ -11,10 +11,10 @@
         </div>
 
         <div class="flex border-b border-slate-200 mb-8">
-            <a href="{{ route('orders.index') }}" class="px-6 py-3 border-b-2 border-primary-600 text-primary-600 font-bold text-sm">
+            <a href="{{ route('orders.index') }}" class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium text-sm transition-colors">
                 Pesanan Aktif
             </a>
-            <a href="{{ route('orders.history') }}" class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium text-sm transition-colors">
+            <a href="{{ route('orders.history') }}" class="px-6 py-3 border-b-2 border-primary-600 text-primary-600 font-bold text-sm">
                 Riwayat Pemesanan
             </a>
         </div>
@@ -37,6 +37,7 @@
                                 'printing' => 'badge-purple',
                                 'ready' => 'badge-green',
                                 'completed' => 'badge-green',
+                                'cancelled' => 'badge-red',
                                 default => 'badge-gray'
                             };
                             $label = match($s) {
@@ -46,6 +47,7 @@
                                 'printing' => 'Sedang Dicetak',
                                 'ready' => 'Siap Diambil',
                                 'completed' => 'Selesai',
+                                'cancelled' => 'Dibatalkan',
                                 default => ucfirst($s)
                             };
                         @endphp
@@ -89,18 +91,6 @@
                     <a href="/pesanan/{{ $order['id'] }}" class="btn-secondary text-xs !px-6 py-2.5">
                         Detail Pesanan
                     </a>
-                    @if($s === 'waiting_payment')
-                        <a href="/pesanan/{{ $order['id'] }}/upload-desain" class="btn-primary text-xs !px-6 py-2.5 bg-gradient-to-r from-primary-600 to-blue-600 hover:from-primary-700 hover:to-blue-700 font-bold border-0">
-                            Lengkapi Desain & Bayar
-                        </a>
-                    @elseif($s === 'ready')
-                        <form action="/pesanan/{{ $order['id'] }}/selesai" method="POST">
-                            @csrf
-                            <button type="submit" class="btn-primary text-xs !px-6 py-2.5 !bg-green-600 hover:!bg-green-700">
-                                Selesaikan Pesanan
-                            </button>
-                        </form>
-                    @endif
                 </div>
             </div>
             @empty
@@ -108,8 +98,8 @@
                 <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Belum Ada Pesanan</h2>
-                <p class="text-slate-500 mb-8">Belum ada pesanan aktif saat ini.</p>
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Belum Ada Riwayat Pesanan</h2>
+                <p class="text-slate-500 mb-8">Pesanan yang sudah selesai atau dibatalkan akan muncul di sini.</p>
                 <a href="/katalog" class="btn-primary px-8 py-3">Pesan Sekarang</a>
             </div>
             @endforelse

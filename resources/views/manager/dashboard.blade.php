@@ -11,14 +11,14 @@
         @php
             $cards = [
                 ['label' => 'Total Omzet', 'value' => 'Rp ' . number_format($stats['total_omzet'] ?? 0, 0, ',', '.'), 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'bg-green-500'],
-                ['label' => 'Pesanan Aktif', 'value' => $stats['pesanan_aktif'] ?? 0, 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'color' => 'bg-blue-500'],
+                ['label' => 'Perlu Verifikasi', 'value' => $stats['perlu_verifikasi'] ?? 0, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'bg-yellow-500', 'link' => '/manager/verifikasi'],
                 ['label' => 'Stok Menipis', 'value' => $stats['material_rendah'] ?? 0, 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', 'color' => 'bg-amber-500'],
                 ['label' => 'Pesanan Selesai', 'value' => $stats['pesanan_selesai'] ?? 0, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'bg-indigo-500'],
             ];
         @endphp
 
         @foreach($cards as $card)
-        <div class="card p-6 border-none shadow-md relative overflow-hidden group">
+        <a href="{{ $card['link'] ?? '#' }}" class="card p-6 border-none shadow-md relative overflow-hidden group block hover:shadow-lg transition-shadow">
             <div class="absolute -right-4 -bottom-4 w-24 h-24 {{ $card['color'] }} opacity-5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 {{ $card['color'] }} bg-opacity-10 rounded-2xl flex items-center justify-center text-{{ str_replace('bg-', '', $card['color']) }}">
@@ -29,7 +29,7 @@
                     <h3 class="text-2xl font-black text-slate-900 mt-1">{{ $card['value'] }}</h3>
                 </div>
             </div>
-        </div>
+        </a>
         @endforeach
     </div>
 

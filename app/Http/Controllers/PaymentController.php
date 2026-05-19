@@ -41,7 +41,7 @@ class PaymentController extends Controller
                     'transaction_code'  => $request->transaction_code,
                 ]);
 
-            if ($r->successful()) return redirect("/pesanan/{$orderId}")->with('success', 'Bukti pembayaran berhasil dikirim! Menunggu verifikasi.');
+            if ($r->successful()) return redirect("/pesanan")->with('success', 'Bukti pembayaran berhasil dikirim! Menunggu verifikasi.');
             return back()->with('error', $r->json('message') ?? $r->json('error') ?? 'Upload gagal.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal terhubung ke server: ' . $e->getMessage());

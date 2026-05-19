@@ -54,6 +54,7 @@ type DesignFile struct {
 	FilePath    string     `json:"file_path"`
 	Version     int        `json:"version"`
 	Status      string     `json:"status"`
+	Notes       string     `json:"notes"`
 	UploadedAt  time.Time `json:"uploaded_at"` // Tidak boleh NULL di DB
 }
 

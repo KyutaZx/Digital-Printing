@@ -25,7 +25,7 @@ func (r *reportRepository) GetRevenueReport(ctx context.Context, startDate, endD
 			COUNT(id) AS total_orders,
 			COALESCE(SUM(total_price), 0) AS total_revenue
 		FROM orders
-		WHERE status IN ('paid', 'printing', 'ready', 'completed')
+		WHERE status = 'completed'
 		  AND created_at >= $1::date AND created_at < ($2::date + interval '1 day')
 		GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
 		ORDER BY date ASC
@@ -61,7 +61,7 @@ func (r *reportRepository) GetTopProducts(ctx context.Context, limit int) ([]rep
 		FROM order_items oi
 		JOIN products p ON oi.product_id = p.id
 		JOIN orders o ON oi.order_id = o.id
-		WHERE o.status IN ('paid', 'printing', 'ready', 'completed')
+		WHERE o.status = 'completed'
 		GROUP BY p.id, p.name
 		ORDER BY total_sold DESC
 		LIMIT $1
@@ -85,16 +85,25 @@ func (r *reportRepository) GetTopProducts(ctx context.Context, limit int) ([]rep
 }
 
 // =========================================================================
-// AUDIT LOGS
+// AUDIT LOGS (Sekarang digunakan untuk Riwayat Verifikasi Desain)
 // =========================================================================
 func (r *reportRepository) GetAuditLogs(ctx context.Context, limit int) ([]report.AuditLogDisplay, error) {
 	query := `
 		SELECT 
-			a.id, u.name, a.role, a.action, a.entity_type, 
-			COALESCE(a.entity_id, 0), COALESCE(a.ip_address, ''), a.created_at
-		FROM audit_logs a
-		LEFT JOIN users u ON a.user_id = u.id
-		ORDER BY a.created_at DESC
+			dr.id,
+			u.name AS user_name,
+			dr.status AS role,
+			o.order_code AS action,
+			COALESCE(dr.notes, '') AS entity_type,
+			df.version AS entity_id,
+			'' AS ip_address,
+			dr.created_at
+		FROM design_reviews dr
+		JOIN design_files df ON dr.design_file_id = df.id
+		JOIN order_items oi ON df.order_item_id = oi.id
+		JOIN orders o ON oi.order_id = o.id
+		LEFT JOIN users u ON dr.reviewed_by = u.id
+		ORDER BY dr.created_at DESC
 		LIMIT $1
 	`
 
@@ -118,16 +127,23 @@ func (r *reportRepository) GetAuditLogs(ctx context.Context, limit int) ([]repor
 }
 
 // =========================================================================
-// LOGIN LOGS
+// LOGIN LOGS (Sekarang digunakan untuk Riwayat Verifikasi Pembayaran)
 // =========================================================================
 func (r *reportRepository) GetLoginLogs(ctx context.Context, limit int) ([]report.LoginLogDisplay, error) {
 	query := `
 		SELECT 
-			l.id, u.name, l.activity_type, 
-			COALESCE(l.ip_address, ''), COALESCE(l.user_agent, ''), l.created_at
-		FROM login_logs l
-		LEFT JOIN users u ON l.user_id = u.id
-		ORDER BY l.created_at DESC
+			a.id,
+			u.name AS user_name,
+			a.action AS activity_type,
+			o.order_code AS ip_address,
+			pt.amount::text AS user_agent,
+			a.created_at
+		FROM audit_logs a
+		JOIN payment_transactions pt ON a.entity_id = pt.id AND a.entity_type = 'payment_transactions'
+		JOIN orders o ON pt.order_id = o.id
+		LEFT JOIN users u ON a.user_id = u.id
+		WHERE a.action IN ('approve_payment', 'reject_payment')
+		ORDER BY a.created_at DESC
 		LIMIT $1
 	`
 

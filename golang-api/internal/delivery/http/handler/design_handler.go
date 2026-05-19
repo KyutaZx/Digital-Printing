@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -91,7 +92,11 @@ func (h *DesignHandler) UploadDesign(c *gin.Context) {
 				io.Copy(part, src)
 				writer.Close()
 
-				req, err := http.NewRequest("POST", "http://localhost:5000/predict-blur", body)
+				aiServiceURL := os.Getenv("AI_SERVICE_URL")
+				if aiServiceURL == "" {
+					aiServiceURL = "http://localhost:5000"
+				}
+				req, err := http.NewRequest("POST", aiServiceURL+"/predict-blur", body)
 				if err == nil {
 					req.Header.Set("Content-Type", writer.FormDataContentType())
 					

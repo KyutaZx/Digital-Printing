@@ -40,8 +40,12 @@ class DesignController extends Controller
     {
         $request->validate(['status' => 'required|in:approved,rejected', 'notes' => 'required|string']);
         try {
+            $status = $request->status === 'rejected' ? 'revision_requested' : $request->status;
             $r = Http::timeout(10)->withToken(session('token'))
-                ->post("{$this->apiUrl}/api/staff/designs/{$designId}/review", $request->only(['status', 'notes']));
+                ->post("{$this->apiUrl}/api/staff/designs/{$designId}/review", [
+                    'status' => $status,
+                    'notes' => $request->notes
+                ]);
             if ($r->successful()) return back()->with('success', 'Review desain berhasil disimpan.');
             return back()->with('error', $r->json('message') ?? 'Gagal menyimpan review.');
         } catch (\Exception $e) { return back()->with('error', 'Koneksi ke server gagal.'); }

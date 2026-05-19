@@ -6,9 +6,11 @@
 <div class="space-y-5">
 
     {{-- Filter Status --}}
-    <div class="flex gap-2 flex-wrap">
-        @foreach(['Semua' => '', 'Lunas' => 'paid', 'Sedang Cetak' => 'printing', 'Siap Ambil' => 'ready'] as $label => $val)
-        <span class="badge {{ request('status', '') === $val ? 'bg-primary-600 text-white' : 'badge-gray' }} cursor-pointer px-3 py-1.5 text-xs">{{ $label }}</span>
+    <div class="flex gap-2 flex-wrap mb-4">
+        @foreach(['Semua' => '', 'Siap Cetak' => 'paid', 'Sedang Cetak' => 'printing', 'Siap Ambil' => 'ready'] as $label => $val)
+        <a href="?status={{ $val }}" class="badge {{ request('status', '') === $val ? 'bg-primary-600 text-white shadow-sm' : 'badge-gray hover:bg-slate-200' }} px-3 py-1.5 text-xs transition-colors">
+            {{ $label }}
+        </a>
         @endforeach
     </div>
 
