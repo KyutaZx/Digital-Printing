@@ -15,6 +15,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 mb-2">1. Pemesanan & Desain</h3>
                     <ul class="list-disc list-inside space-y-1">
+                        <li>Pelanggan wajib mengunggah desain untuk seluruh item pesanan sebelum melakukan pembayaran.</li>
                         <li>Semua file desain yang diunggah harus sesuai dengan spesifikasi ukuran dan siap cetak (ready to print).</li>
                         <li>Kami tidak bertanggung jawab atas hasil cetak yang kurang maksimal (pecah/blur) akibat resolusi file desain yang rendah.</li>
                         <li>Perbedaan warna antara monitor dan hasil cetak (sekitar 10-15%) adalah hal wajar karena perbedaan profil warna (RGB ke CMYK).</li>
@@ -24,7 +25,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 mb-2">2. Pembayaran</h3>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Pesanan hanya akan diproses setelah pembayaran lunas dikonfirmasi oleh tim kami.</li>
+                        <li>Pesanan masuk verifikasi desain setelah pembayaran lunas dikonfirmasi oleh tim kami.</li>
                         <li>Bukti transfer palsu akan kami proses ke pihak berwajib.</li>
                         <li>Pesanan yang telah dibayar tidak dapat dibatalkan secara sepihak oleh pelanggan kecuali terdapat kesalahan dari pihak kami.</li>
                     </ul>
@@ -33,7 +34,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 mb-2">3. Waktu Pengerjaan & Pengambilan</h3>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Waktu pengerjaan standar dihitung sejak desain dinyatakan ACC (layak cetak) dan pembayaran dikonfirmasi.</li>
+                        <li>Waktu pengerjaan standar dihitung sejak semua desain disetujui (ACC) dan pembayaran telah lunas.</li>
                         <li>Keterlambatan penyelesaian pesanan karena force majeure (bencana alam, pemadaman listrik, kerusakan mesin) tidak dapat dituntut ganti rugi.</li>
                         <li>Barang pesanan harap diambil maksimal 30 hari setelah dinyatakan selesai. Lebih dari itu, kerusakan atau kehilangan bukan tanggung jawab kami.</li>
                     </ul>

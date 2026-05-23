@@ -34,10 +34,10 @@ Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/katalog', [ProductController::class, 'catalog'])->name('catalog');
 Route::get('/produk/{id}', [ProductController::class, 'show'])->name('product.detail');
 Route::get('/tentang', function() { return view('about'); })->name('about');
-Route::get('/kontak', function() { return view('contact'); })->name('contact');
-Route::get('/cara-order', function() { return view('about'); }); // TODO: create view
-Route::get('/syarat-ketentuan', function() { return view('about'); }); // TODO: create view
-Route::get('/kebijakan-privasi', function() { return view('about'); }); // TODO: create view
+Route::redirect('/kontak', '/#kontak');
+Route::get('/cara-order', function () { return view('cara-order'); })->name('cara-order');
+Route::get('/syarat-ketentuan', function () { return view('terms'); })->name('terms');
+Route::get('/kebijakan-privasi', function () { return view('privacy'); })->name('privacy');
 
 /*
 |--------------------------------------------------------------------------

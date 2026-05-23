@@ -236,7 +236,6 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="/tentang" class="hover:text-white transition-colors">Tentang Kami</a></li>
                     <li><a href="/cara-order" class="hover:text-white transition-colors">Cara Order</a></li>
-                    <li><a href="/kontak" class="hover:text-white transition-colors">Kontak</a></li>
                 </ul>
             </div>
             <div>
