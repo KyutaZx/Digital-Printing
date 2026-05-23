@@ -1,30 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Profil Saya - Jaya Mandiri')
+@section('title', 'Profil Saya — Jaya Mandiri')
 
 @section('content')
-<div class="min-h-screen bg-slate-50">
-<div class="max-w-3xl mx-auto py-8 px-4">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
 
-    {{-- Page Header --}}
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-slate-900">Profil Saya</h1>
-        <p class="text-slate-500 text-sm mt-1">Kelola informasi akun dan keamanan Anda</p>
+    <div>
+        <h1 class="text-xl sm:text-2xl font-black text-slate-900">Profil Saya</h1>
+        <p class="text-sm text-slate-500 mt-1">Kelola informasi akun Anda</p>
     </div>
-
-    {{-- Alerts --}}
-    @if(session('success'))
-    <div class="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm font-medium">
-        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        {{ session('success') }}
-    </div>
-    @endif
-    @if(session('error'))
-    <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3 text-sm font-medium">
-        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        {{ session('error') }}
-    </div>
-    @endif
 
     <div class="space-y-6">
 
@@ -45,7 +29,7 @@
             }
         @endphp
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm">
             {{-- Banner --}}
             <div class="h-32 rounded-t-2xl" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #10b981 100%);"></div>
             {{-- Avatar overlapping banner --}}
@@ -68,7 +52,7 @@
         </div>
 
         {{-- ===== CARD: Edit Profil ===== --}}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm">
             <div class="px-6 py-5 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -120,7 +104,7 @@
         </div>
 
         {{-- ===== CARD: Info Akun ===== --}}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm">
             <div class="px-6 py-5 border-b border-slate-100">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center">
@@ -176,6 +160,5 @@
         </div>
 
     </div>
-</div>
 </div>
 @endsection

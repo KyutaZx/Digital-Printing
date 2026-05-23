@@ -3,19 +3,23 @@
 @section('title', 'Pembayaran — ' . ($order['order_code'] ?? 'Pesanan'))
 
 @section('content')
-<div class="pt-24 min-h-screen bg-slate-50 pb-20">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="mb-8 flex items-center justify-between">
-            <div>
-                <a href="/pesanan/{{ $order['id'] }}/upload-desain" class="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-medium text-sm mb-4 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Kembali
-                </a>
-                <h1 class="text-3xl font-black text-slate-900 mb-2">Upload Bukti Pembayaran</h1>
-                <p class="text-slate-500">Selesaikan pembayaran untuk memproses pesanan Anda.</p>
-            </div>
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
+
+        <div>
+            <a href="/pesanan/{{ $order['id'] }}" class="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold text-xs mb-3 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Kembali
+            </a>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Upload Bukti Pembayaran</h1>
+            <p class="text-xs text-slate-500 mt-1">Selesaikan pembayaran setelah semua desain terupload</p>
         </div>
+
+        @if($order['payment_rejected'] ?? false)
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-800">
+            <p class="font-bold">Bukti pembayaran sebelumnya ditolak.</p>
+            <p class="mt-1 text-red-700">Silakan unggah bukti transfer yang valid.</p>
+        </div>
+        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div class="card p-6 bg-primary-600 text-white rounded-2xl shadow-lg shadow-primary-200">
@@ -92,6 +96,5 @@
             </form>
         </div>
 
-    </div>
 </div>
 @endsection

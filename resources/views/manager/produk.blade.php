@@ -8,43 +8,63 @@
     modalOpen: false, 
     editMode: false, 
     currentProduct: { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] },
-    variants: [{ name: '', price: '', stock: '' }],
-    addVariant() { this.variants.push({ name: '', price: '', stock: '' }); },
+    variants: [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }],
+    addVariant() { this.variants.push({ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }); },
     removeVariant(i) { if (this.variants.length > 1) this.variants.splice(i, 1); },
     openModal(product = null) {
         if(product) {
             this.editMode = true;
             this.currentProduct = JSON.parse(JSON.stringify(product));
             if (product.variants && product.variants.length > 0) {
-                this.variants = product.variants.map(v => ({ id: v.id, name: v.variant_name, price: v.price, stock: v.stock ?? 999 }));
+                this.variants = product.variants.map(v => ({ 
+                    id: v.id, 
+                    name: v.variant_name, 
+                    price: v.price, 
+                    stock: v.stock ?? 999,
+                    material_id: v.material_id ?? '',
+                    material_usage: v.material_usage ?? ''
+                }));
             } else {
-                this.variants = [{ id: 0, name: '', price: '', stock: '' }];
+                this.variants = [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }];
             }
         } else {
             this.editMode = false;
             this.currentProduct = { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] };
-            this.variants = [{ id: 0, name: '', price: '', stock: '' }];
+            this.variants = [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }];
         }
         this.modalOpen = true;
     }
-}" class="space-y-6">
+}" class="space-y-6 fade-in pb-8">
 
-    {{-- Header --}}
-    <div class="flex items-center justify-between">
+    @include('manager.partials.flash')
+
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
-            <h2 class="text-xl font-black text-slate-900 tracking-tight">Katalog Produk</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Total {{ count($products) }} produk aktif</p>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Katalog Produk</h1>
+            <p class="text-xs text-slate-500 mt-1">Kelola produk, varian, dan harga jual toko</p>
         </div>
-        <button @click="openModal()" class="btn-primary !py-2 !px-4 !text-xs !bg-primary-600 hover:!bg-primary-700 shadow-lg shadow-primary-100 flex items-center gap-2">
+        <button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Tambah Produk Baru
         </button>
     </div>
 
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Produk</p>
+            <h3 class="text-2xl font-black text-slate-900 mt-2">{{ count($products) }}</h3>
+        </div>
+        <div class="lg:col-span-2 bg-gradient-to-br from-primary-600 to-primary-500 rounded-3xl p-5 shadow-lg shadow-primary-500/20 text-white relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+            <p class="text-[10px] font-bold text-primary-100 uppercase tracking-widest relative z-10">Manajemen Katalog</p>
+            <p class="text-xs text-primary-100 mt-1 relative z-10">Klik kartu produk untuk edit atau hapus</p>
+        </div>
+    </div>
+
     {{-- Grid Produk --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @foreach($products as $product)
-        <div class="card border-none shadow-md overflow-hidden bg-white group flex flex-col h-full">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden group flex flex-col h-full hover:shadow-md transition-shadow">
             <div class="aspect-video bg-slate-100 relative overflow-hidden shrink-0">
                 @if(!empty($product['image']))
                     <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover">
@@ -86,7 +106,7 @@
     {{-- Modal Form (Tambah/Edit) --}}
     <div x-show="modalOpen" x-cloak class="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="modalOpen = false"></div>
-        <div class="bg-white rounded-3xl w-full max-w-xl shadow-2xl relative z-10 overflow-hidden fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-4xl shadow-2xl relative z-10 overflow-hidden fade-in">
             <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="text-xl font-black text-slate-900 tracking-tight" x-text="editMode ? 'Edit Produk' : 'Tambah Produk Baru'"></h3>
                 <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600 transition-colors">
@@ -97,7 +117,7 @@
             <form :action="editMode ? '/manager/produk/' + currentProduct.id : '/manager/produk'" method="POST" enctype="multipart/form-data" class="px-8 py-8 space-y-6">
                 @csrf
                 <template x-if="editMode"><input type="hidden" name="_method" value="PUT"></template>
-
+ 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="form-label">Nama Produk</label>
@@ -118,22 +138,23 @@
                         </select>
                     </div>
                 </div>
-
+ 
                 <div>
                     <label class="form-label">Deskripsi</label>
                     <textarea name="description" x-model="currentProduct.description" class="form-input text-sm h-24" required placeholder="Jelaskan detail produk..."></textarea>
                 </div>
-
-                <div>
-                    <label class="form-label">Harga Dasar (Rp)</label>
-                    <input type="number" name="base_price" x-model="currentProduct.base_price" class="form-input text-sm font-black text-primary-600" required placeholder="0">
+ 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Harga Dasar (Rp)</label>
+                        <input type="number" name="base_price" x-model="currentProduct.base_price" class="form-input text-sm font-black text-primary-600" required placeholder="0">
+                    </div>
+                    <div>
+                        <label class="form-label">Estimasi Pengerjaan (Hari)</label>
+                        <input type="number" name="estimated_days" x-model="currentProduct.estimated_days" class="form-input text-sm" min="1" placeholder="1">
+                    </div>
                 </div>
-
-                <div>
-                    <label class="form-label">Estimasi Pengerjaan (Hari)</label>
-                    <input type="number" name="estimated_days" x-model="currentProduct.estimated_days" class="form-input text-sm" min="1" placeholder="1">
-                </div>
-
+ 
                 {{-- VARIAN PRODUK --}}
                 <div>
                     <div class="flex items-center justify-between mb-3">
@@ -144,15 +165,38 @@
                         </button>
                     </div>
                     <div class="space-y-2">
+                        <div class="hidden md:flex gap-2 items-center text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+                            <span class="flex-[3]">Nama Varian</span>
+                            <span class="flex-[2]">Harga (Rp)</span>
+                            <span class="flex-1">Stok</span>
+                            <span class="flex-[2.5]">Bahan Baku Gudang</span>
+                            <span class="flex-[1.5]">Konsumsi</span>
+                            <span class="w-8 shrink-0"></span>
+                        </div>
                         <template x-for="(variant, index) in variants" :key="index">
-                            <div class="flex gap-2 items-center">
+                            <div class="flex gap-2 items-center flex-wrap md:flex-nowrap border-b border-slate-100 pb-3 md:pb-0 md:border-none">
                                 <input type="hidden" :name="'variant_id[' + index + ']'" x-model="variant.id">
+                                
                                 <input type="text" :name="'variant_name[' + index + ']'" x-model="variant.name"
-                                       class="form-input text-xs flex-[3]" placeholder="Nama Varian (e.g. A3 Glossy)" required>
+                                       class="form-input text-xs flex-[3] w-full" placeholder="Varian (e.g. A3 Glossy)" required>
+                                       
                                 <input type="number" :name="'variant_price[' + index + ']'" x-model="variant.price"
-                                       class="form-input text-xs flex-[2]" placeholder="Harga (Rp)" min="0">
+                                       class="form-input text-xs flex-[2] w-full" placeholder="Harga" min="0">
+                                       
                                 <input type="number" :name="'variant_stock[' + index + ']'" x-model="variant.stock"
-                                       class="form-input text-xs flex-1" placeholder="Stok" min="0">
+                                       class="form-input text-xs flex-1 w-full" placeholder="Stok" min="0">
+
+                                <select :name="'variant_material_id[' + index + ']'" x-model="variant.material_id"
+                                        class="form-input text-xs flex-[2.5] w-full">
+                                    <option value="">-- Tanpa Bahan --</option>
+                                    @foreach($materials as $material)
+                                        <option value="{{ $material['id'] }}">{{ $material['name'] }} ({{ $material['unit'] }})</option>
+                                    @endforeach
+                                </select>
+
+                                <input type="number" step="0.01" :name="'variant_material_usage[' + index + ']'" x-model="variant.material_usage"
+                                       class="form-input text-xs flex-[1.5] w-full" placeholder="Jumlah" min="0">
+                                       
                                 <button type="button" @click="removeVariant(index)" x-show="variants.length > 1"
                                         class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>

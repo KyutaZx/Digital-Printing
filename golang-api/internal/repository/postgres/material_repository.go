@@ -110,3 +110,35 @@ func (r *materialRepository) AdjustStock(ctx context.Context, materialID int, ch
 
 	return tx.Commit()
 }
+
+func (r *materialRepository) Update(ctx context.Context, m *material.Material) error {
+	query := `UPDATE materials SET name = $1, unit = $2 WHERE id = $3`
+	res, err := r.db.ExecContext(ctx, query, m.Name, m.Unit, m.ID)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return errors.New("material tidak ditemukan")
+	}
+	return nil
+}
+
+func (r *materialRepository) Delete(ctx context.Context, id int) error {
+	query := `DELETE FROM materials WHERE id = $1`
+	res, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return errors.New("material tidak ditemukan")
+	}
+	return nil
+}

@@ -1,225 +1,256 @@
 @extends('layouts.app')
 
-@section('title', 'Jaya Mandiri Digital Printing — Solusi Cetak Berkualitas')
-@section('meta_description', 'Jaya Mandiri menyediakan layanan digital printing berkualitas tinggi: banner, spanduk, sticker, kartu nama, dan lainnya.')
+@section('title', 'Jaya Mandiri Digital Printing — Solusi Cetak Profesional')
+@section('meta_description', 'Jaya Mandiri — percetakan digital terpercaya. Banner, spanduk, sticker, kartu nama, dan pesanan cetak online dengan kualitas premium.')
+
+@push('head')
+<style>
+    .font-display { font-family: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .animate-float { animation: float-slow 5s ease-in-out infinite; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-up { animation: fade-up 0.7s ease-out forwards; }
+</style>
+@endpush
 
 @section('content')
+@php
+    $apiUrl = $apiUrl ?? config('app.golang_api_url', 'http://localhost:8080');
+    $productList = isset($products) && count($products) > 0 ? array_slice($products, 0, 3) : [
+        ['id' => 0, 'name' => 'Brosur A4 Premium', 'category_name' => 'Promosi', 'base_price' => 50000, 'image' => null, 'placeholder' => 'from-violet-500 to-purple-700'],
+        ['id' => 0, 'name' => 'Poster', 'category_name' => 'Indoor', 'base_price' => 5000, 'image' => null, 'placeholder' => 'from-rose-500 to-orange-600'],
+        ['id' => 0, 'name' => 'Banner', 'category_name' => 'Outdoor', 'base_price' => 10000, 'image' => null, 'placeholder' => 'from-primary-600 to-blue-800'],
+    ];
+    $services = [
+        ['label' => 'Sticker Custom', 'desc' => 'Vinyl waterproof untuk branding produk & kendaraan.', 'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
+        ['label' => 'Banner Outdoor', 'desc' => 'Flexi premium tahan cuaca untuk promosi luar ruang.', 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
+        ['label' => 'Spanduk', 'desc' => 'Cetak spanduk event & toko dengan finishing rapi.', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+        ['label' => 'Kartu Nama', 'desc' => 'Berbagai finishing: matte, glossy, dan spot UV.', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
+        ['label' => 'Kalender', 'desc' => 'Kalender meja & dinding custom untuk corporate gift.', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+        ['label' => 'Kaos Printing', 'desc' => 'DTF & sublimasi dengan warna tajam dan awet.', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
+        ['label' => 'Kemasan', 'desc' => 'Box & packaging custom untuk produk UMKM.', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+        ['label' => 'Kanvas Print', 'desc' => 'Cetak foto & artwork premium di media kanvas.', 'icon' => 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z'],
+    ];
+    $steps = [
+        ['num' => '01', 'title' => 'Pilih Produk', 'desc' => 'Jelajahi katalog kami dan pilih produk sesuai kebutuhan bisnis Anda.'],
+        ['num' => '02', 'title' => 'Upload Desain', 'desc' => 'Upload file desain (JPG, PNG, PDF, AI, CDR) langsung dari akun Anda.'],
+        ['num' => '03', 'title' => 'Pembayaran', 'desc' => 'Bayar via transfer bank dan unggah bukti pembayaran dengan aman.'],
+        ['num' => '04', 'title' => 'Terima Pesanan', 'desc' => 'Pesanan dicetak berkualitas dan siap diambil atau dikirim.'],
+    ];
+@endphp
 
-{{-- ============================
-     HERO SECTION
-     ============================ --}}
-<section class="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center overflow-hidden">
-    {{-- Decorative orbs --}}
-    <div class="absolute top-20 right-10 w-80 h-80 bg-primary-600/20 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-20 left-10 w-96 h-96 bg-secondary-500/10 rounded-full blur-3xl pointer-events-none"></div>
+{{-- ═══════════════════════════════════════
+     HERO — Split layout, above the fold
+     ═══════════════════════════════════════ --}}
+<section class="relative bg-white overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-primary-50/40 pointer-events-none"></div>
+    <div class="absolute top-0 right-0 w-[55%] h-full bg-gradient-to-l from-primary-50/60 to-transparent pointer-events-none hidden lg:block"></div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
-        <div class="fade-in">
-            <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-xs font-semibold px-4 py-2 rounded-full mb-6">
-                <span class="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></span>
-                Percetakan Digital Terpercaya #1 di Kota Anda
-            </span>
-            <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-6">
-                Cetak Impian Anda<br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">Bersama Kami</span>
-            </h1>
-            <p class="text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Dari banner raksasa hingga kartu nama elegan — kami hadir dengan teknologi printing terkini, harga terjangkau, dan pengiriman cepat.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/katalog" class="btn-primary text-base px-8 py-4 shadow-xl shadow-primary-900/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"/></svg>
-                    Lihat Katalog
-                </a>
-                <a href="#cara-order" class="btn-outline text-base px-8 py-4">
-                    Cara Order
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </a>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28 pb-16 lg:pb-24">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {{-- Copy --}}
+            <div class="animate-fade-up max-w-xl">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-50 border border-primary-100 text-primary-700 text-xs font-bold mb-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Percetakan Digital Terpercaya #1 di Kota Anda
+                </span>
+                <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold text-slate-900 leading-[1.1] tracking-tight">
+                    Cetak Impian Anda
+                    <span class="block text-primary-600 mt-1">Bersama Kami</span>
+                </h1>
+                <p class="mt-6 text-lg text-slate-600 leading-relaxed">
+                    Dari banner raksasa hingga kartu nama elegan — kami hadir dengan teknologi printing terkini, harga terjangkau, dan pengiriman cepat.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row gap-3">
+                    <a href="/katalog"
+                       class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-600/25 transition-all hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Lihat Katalog
+                    </a>
+                    <a href="#cara-order"
+                       class="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-xl text-sm border-2 border-slate-200 hover:border-primary-300 transition-all">
+                        Cara Order
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+                </div>
+                <div class="mt-12 flex flex-wrap gap-8 pt-8 border-t border-slate-100">
+                    @foreach([['500+', 'Pelanggan'], ['10K+', 'Pesanan'], ['2 Jam', 'Estimasi Cetak']] as $stat)
+                    <div>
+                        <p class="font-display text-2xl font-extrabold text-slate-900">{{ $stat[0] }}</p>
+                        <p class="text-xs font-semibold text-slate-500 mt-0.5">{{ $stat[1] }}</p>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Visual mockup --}}
+            <div class="relative lg:h-[520px] animate-fade-up" style="animation-delay: 0.15s">
+                <div class="absolute -inset-4 bg-gradient-to-br from-primary-100/50 to-emerald-100/30 rounded-[2rem] blur-2xl"></div>
+                <div class="relative h-full min-h-[360px] lg:min-h-0 rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl shadow-slate-900/10">
+                    <img src="https://images.unsplash.com/photo-1562577309-2592ab84b1bc?w=900&q=80&auto=format&fit=crop"
+                         alt="Produk cetak premium Jaya Mandiri"
+                         class="absolute inset-0 w-full h-full object-cover"
+                         loading="eager">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent"></div>
+                    {{-- Floating cards --}}
+                    <div class="absolute bottom-6 left-6 right-6 flex gap-3 animate-float">
+                        <div class="flex-1 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/50">
+                            <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center mb-2">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">Kualitas</p>
+                            <p class="text-sm font-bold text-slate-900">Print HD Premium</p>
+                        </div>
+                        <div class="flex-1 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg border border-white/50" style="animation-delay: 0.5s">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center mb-2">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">Cepat</p>
+                            <p class="text-sm font-bold text-slate-900">Proses Kilat</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        {{-- Stats --}}
-        <div class="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            @foreach([['500+', 'Pelanggan Puas'], ['10K+', 'Pesanan Selesai'], ['2 Jam', 'Estimasi Cetak']] as $stat)
-            <div class="text-center">
-                <div class="text-3xl font-black text-white mb-1">{{ $stat[0] }}</div>
-                <div class="text-sm text-slate-400">{{ $stat[1] }}</div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- Scroll Indicator --}}
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-xs animate-bounce">
-        <span>Scroll</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
     </div>
 </section>
 
-{{-- ============================
-     LAYANAN UNGGULAN
-     ============================ --}}
-<section class="py-24 bg-white">
+{{-- ═══════════════════════════════════════
+     LAYANAN — 4×2 grid
+     ═══════════════════════════════════════ --}}
+<section class="py-20 lg:py-28 bg-slate-50/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <span class="text-primary-600 font-bold text-sm uppercase tracking-widest">Layanan Kami</span>
-            <h2 class="text-4xl font-black text-slate-900 mt-2">Semua Kebutuhan Cetak Anda</h2>
-            <p class="text-slate-500 mt-3 max-w-xl mx-auto">Kami melayani berbagai kebutuhan printing dengan kualitas terbaik dan harga kompetitif.</p>
+        <div class="text-center max-w-2xl mx-auto mb-14 lg:mb-16">
+            <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-3">Layanan Kami</p>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Semua Kebutuhan Cetak Anda</h2>
+            <p class="mt-4 text-slate-600 leading-relaxed">Kami melayani berbagai kebutuhan printing dengan kualitas terbaik dan harga kompetitif.</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            @foreach([
-                ['🏷️', 'Sticker Custom', 'Sticker vinyl waterproof untuk keperluan branding'],
-                ['🎪', 'Banner Outdoor', 'Cetak banner besar dengan bahan flexi premium'],
-                ['📋', 'Spanduk', 'Spanduk promosi untuk segala event'],
-                ['💌', 'Kartu Nama', 'Kartu nama profesional berbagai finishing'],
-                ['📅', 'Kalender', 'Kalender meja dan dinding custom'],
-                ['👕', 'Kaos Printing', 'Sablon kaos dengan teknik DTF & Sublimasi'],
-                ['📦', 'Kemasan', 'Box packaging custom untuk produk Anda'],
-                ['🖼️', 'Kanvas Print', 'Cetak foto di atas kanvas berkualitas tinggi'],
-            ] as $service)
-            <div class="group card p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer text-center">
-                <div class="text-4xl mb-3">{{ $service[0] }}</div>
-                <h3 class="font-bold text-slate-900 text-sm mb-1">{{ $service[1] }}</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">{{ $service[2] }}</p>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+            @foreach($services as $service)
+            <a href="/katalog"
+               class="group bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 hover:border-primary-200/60 transition-all duration-300">
+                <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-5 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ $service['icon'] }}"/></svg>
+                </div>
+                <h3 class="font-display font-bold text-slate-900 text-base mb-2">{{ $service['label'] }}</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">{{ $service['desc'] }}</p>
+            </a>
             @endforeach
         </div>
     </div>
 </section>
 
-{{-- ============================
-     PRODUK TERBARU
-     ============================ --}}
-<section class="py-24 bg-slate-50">
+{{-- ═══════════════════════════════════════
+     PRODUK PILIHAN — 3-column grid
+     ═══════════════════════════════════════ --}}
+<section class="py-20 lg:py-28 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-10">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
             <div>
-                <span class="text-primary-600 font-bold text-sm uppercase tracking-widest">Produk</span>
-                <h2 class="text-3xl font-black text-slate-900 mt-1">Produk Pilihan</h2>
+                <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-3">Katalog</p>
+                <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Produk Pilihan</h2>
             </div>
-            <a href="/katalog" class="btn-secondary text-sm hidden md:flex">
+            <a href="/katalog"
+               class="inline-flex items-center gap-2 text-sm font-bold text-primary-600 hover:text-primary-700 group shrink-0">
                 Lihat Semua
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
         </div>
 
-        @if(isset($products) && count($products) > 0)
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            @foreach($products as $product)
-            <a href="/produk/{{ $product['id'] }}" class="group card hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                <div class="aspect-square bg-slate-100 overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            @foreach($productList as $product)
+            @php
+                $href = !empty($product['id']) ? '/produk/' . $product['id'] : '/katalog';
+                $gradient = $product['placeholder'] ?? 'from-slate-400 to-slate-600';
+            @endphp
+            <a href="{{ $href }}" class="group block bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div class="aspect-[4/3] overflow-hidden relative">
                     @if(!empty($product['image']))
                         <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-slate-300">
-                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <div class="w-full h-full bg-gradient-to-br {{ $gradient }} flex items-center justify-center">
+                            <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
                     @endif
+                    <div class="absolute top-3 left-3">
+                        <span class="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur text-[10px] font-bold text-slate-700 uppercase tracking-wide">{{ $product['category_name'] ?? 'Printing' }}</span>
+                    </div>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-bold text-slate-900 text-sm mb-1 line-clamp-2">{{ $product['name'] }}</h3>
-                    <p class="text-xs text-slate-500 mb-2">{{ $product['category_name'] ?? 'Printing' }}</p>
-                    <p class="text-primary-600 font-black text-base">
+                <div class="p-5 lg:p-6">
+                    <h3 class="font-display font-bold text-slate-900 text-lg group-hover:text-primary-600 transition-colors">{{ $product['name'] }}</h3>
+                    <p class="mt-3 font-display text-2xl font-extrabold text-slate-900">
                         Rp {{ number_format($product['base_price'] ?? 0, 0, ',', '.') }}
                     </p>
+                    <p class="text-xs text-slate-400 mt-1 font-medium">Harga mulai · belum termasuk custom</p>
                 </div>
             </a>
             @endforeach
         </div>
-        @else
-        <div class="text-center py-16 text-slate-400">
-            <svg class="w-16 h-16 mx-auto mb-4 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            <p>Produk belum tersedia</p>
-        </div>
-        @endif
     </div>
 </section>
 
-{{-- ============================
-     CARA ORDER
-     ============================ --}}
-<section id="cara-order" class="py-24 bg-white">
+{{-- ═══════════════════════════════════════
+     CARA ORDER — Timeline
+     ═══════════════════════════════════════ --}}
+<section id="cara-order" class="py-20 lg:py-28 bg-slate-50/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <span class="text-primary-600 font-bold text-sm uppercase tracking-widest">Prosedur</span>
-            <h2 class="text-4xl font-black text-slate-900 mt-2">Cara Order Mudah</h2>
+        <div class="text-center max-w-2xl mx-auto mb-14 lg:mb-20">
+            <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-3">Prosedur</p>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Cara Order Mudah</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-            {{-- Line --}}
-            <div class="hidden md:block absolute top-10 left-1/8 right-1/8 h-0.5 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200 z-0"></div>
-
-            @foreach([
-                ['1', 'Pilih Produk', 'Jelajahi katalog kami dan pilih produk yang Anda butuhkan.', '🛍️'],
-                ['2', 'Upload Desain', 'Upload file desain Anda (JPG/PNG/PDF/AI/CDR) dengan mudah.', '🎨'],
-                ['3', 'Pembayaran', 'Bayar melalui transfer bank dan upload bukti pembayaran.', '💳'],
-                ['4', 'Terima Pesanan', 'Pesanan Anda dicetak & siap diambil atau dikirim!', '🚚'],
-            ] as $step)
-            <div class="relative z-10 text-center flex flex-col items-center">
-                <div class="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-primary-200 mb-5">
-                    {{ $step[3] }}
+        <div class="relative">
+            <div class="hidden lg:block absolute top-14 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-primary-300 to-transparent"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+                @foreach($steps as $step)
+                <div class="relative text-center lg:text-left bg-white lg:bg-transparent rounded-2xl lg:rounded-none p-6 lg:p-0 border border-slate-100 lg:border-0 shadow-sm lg:shadow-none">
+                    <div class="inline-flex lg:flex w-14 h-14 rounded-2xl bg-primary-600 text-white font-display font-extrabold text-lg items-center justify-center shadow-lg shadow-primary-600/30 mb-5">
+                        {{ $step['num'] }}
+                    </div>
+                    <h3 class="font-display font-bold text-lg text-slate-900 mb-2">{{ $step['title'] }}</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">{{ $step['desc'] }}</p>
                 </div>
-                <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-black mb-4 -mt-2">
-                    {{ $step[0] }}
-                </div>
-                <h3 class="font-black text-slate-900 text-lg mb-2">{{ $step[1] }}</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">{{ $step[2] }}</p>
+                @endforeach
             </div>
-            @endforeach
         </div>
 
-        <div class="text-center mt-12">
-            <a href="/katalog" class="btn-primary text-base px-8 py-4">
-                Mulai Order Sekarang →
+        <div class="text-center mt-14">
+            <a href="/katalog"
+               class="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-primary-600/25 transition-all hover:-translate-y-0.5">
+                Mulai Order Sekarang
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
         </div>
     </div>
 </section>
 
-{{-- ============================
-     TESTIMONI
-     ============================ --}}
-<section class="py-24 bg-gradient-to-br from-primary-600 to-primary-800">
+{{-- ═══════════════════════════════════════
+     FINAL CTA — No testimonials
+     ═══════════════════════════════════════ --}}
+<section class="py-20 lg:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <span class="text-primary-200 font-bold text-sm uppercase tracking-widest">Ulasan</span>
-            <h2 class="text-4xl font-black text-white mt-2">Apa Kata Pelanggan Kami?</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach([
-                ['Budi Santoso', 'Pengusaha', 'Kualitas banner luar biasa! Warna tajam, bahan tebal. Pasti order lagi!', 5],
-                ['Siti Rahayu', 'Event Organizer', 'Proses ordernya gampang banget, desainnya bisa langsung di-review. Mantap!', 5],
-                ['Ahmad Fauzi', 'UMKM Owner', 'Harga bersaing dan hasilnya memuaskan. Recommended banget buat semua pelaku bisnis.', 5],
-            ] as $review)
-            <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-                <div class="flex gap-1 mb-4">
-                    @for($i = 0; $i < $review[3]; $i++)
-                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    @endfor
-                </div>
-                <p class="text-white/90 text-sm leading-relaxed mb-4 italic">"{{ $review[2] }}"</p>
-                <div>
-                    <p class="font-bold text-white text-sm">{{ $review[0] }}</p>
-                    <p class="text-white/60 text-xs">{{ $review[1] }}</p>
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 px-8 py-14 sm:px-14 sm:py-20 text-center">
+            <div class="absolute top-0 right-0 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative max-w-2xl mx-auto">
+                <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Siap Mulai Mencetak?</h2>
+                <p class="mt-4 text-slate-300 text-lg leading-relaxed">
+                    Daftar sekarang dan nikmati kemudahan memesan cetak secara online kapan saja dan di mana saja.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="/register"
+                       class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-900/30 transition-all">
+                        Daftar Gratis
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                    <a href="/katalog"
+                       class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-sm border border-white/20 backdrop-blur transition-all">
+                        Lihat Produk
+                    </a>
                 </div>
             </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- ============================
-     CTA SECTION
-     ============================ --}}
-<section class="py-24 bg-white">
-    <div class="max-w-3xl mx-auto text-center px-4">
-        <h2 class="text-4xl font-black text-slate-900 mb-4">Siap Mulai Mencetak?</h2>
-        <p class="text-slate-500 mb-8">Daftar sekarang dan nikmati kemudahan memesan cetak secara online kapan saja dan di mana saja.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/register" class="btn-primary text-base px-8 py-4">Daftar Gratis →</a>
-            <a href="/katalog" class="btn-secondary text-base px-8 py-4">Lihat Produk</a>
         </div>
     </div>
 </section>

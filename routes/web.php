@@ -113,11 +113,15 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::get('/material', [MaterialController::class, 'index']);
     Route::post('/material', [MaterialController::class, 'store']);
     Route::put('/material/{id}', [MaterialController::class, 'update']);
+    Route::delete('/material/{id}', [MaterialController::class, 'destroy']);
     Route::post('/material/{id}/restock', [MaterialController::class, 'restock']);
     Route::get('/monitoring', [ManagerController::class, 'monitoring']);
     Route::get('/pesanan', [ManagerController::class, 'pesanan']);
+    Route::post('/pesanan/{id}/status', [ManagerController::class, 'updateStatus']);
+    Route::get('/riwayat-pesanan', [ManagerController::class, 'riwayatPesanan']);
     Route::get('/pesanan/{id}', [ManagerController::class, 'detailPesanan']);
     Route::get('/laporan', [ReportController::class, 'index']);
+    Route::get('/laporan/export', [ReportController::class, 'export']);
     Route::get('/users', [ManagerController::class, 'users']);
     Route::post('/users/staff', [ManagerController::class, 'registerStaff']);
     Route::post('/users/{id}/status', [ManagerController::class, 'updateUserStatus']);

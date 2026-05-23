@@ -10,4 +10,6 @@ type Repository interface {
 	AddReview(ctx context.Context, review *DesignReview) error
 	// VerifyOrderItemOwnership memastikan order_item milik user tersebut
 	VerifyOrderItemOwnership(ctx context.Context, orderItemID int, userID int) (bool, error)
+
+	GetOrderIDByDesignFileID(ctx context.Context, designFileID int) (int, error)
 }

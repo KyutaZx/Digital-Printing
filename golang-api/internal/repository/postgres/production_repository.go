@@ -49,11 +49,11 @@ func (r *productionRepository) StartProduction(ctx context.Context, orderID int,
 		return errors.New("produksi tidak dapat dimulai: masih ada item pesanan yang desainnya belum disetujui oleh staf")
 	}
 
-	// 1. Update status order menjadi 'printing' (Hanya bisa jika status 'paid')
+	// 1. Update status order menjadi 'printing' (hanya jika status 'design_review')
 	res, err := tx.ExecContext(ctx, `
 		UPDATE orders 
 		SET status = 'printing', updated_at = $1 
-		WHERE id = $2 AND status = 'paid'`,
+		WHERE id = $2 AND status = 'design_review'`,
 		time.Now(), orderID)
 	if err != nil {
 		return err

@@ -127,6 +127,8 @@ func SetupRoutes(
 			// 🔥 Material / Inventory Management (Admin/Owner)
 			admin.GET("/materials", materialHandler.GetAll)
 			admin.POST("/materials", materialHandler.Create)
+			admin.PUT("/materials/:id", materialHandler.Update)
+			admin.DELETE("/materials/:id", materialHandler.Delete)
 			admin.POST("/materials/:id/adjust", materialHandler.AdjustStock)
 
 			// 🔥 FIX #7: Dashboard Owner — lihat semua pesanan

@@ -3,40 +3,18 @@
 @section('title', 'Upload Desain — ' . ($order['order_code'] ?? 'Pesanan'))
 
 @section('content')
-<div class="pt-24 min-h-screen bg-slate-50 pb-20">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
 
-        {{-- Flash Messages --}}
-        @if(session('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-             class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-2xl text-sm font-medium">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            {{ session('success') }}
-        </div>
-        @endif
-        @if(session('error'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
-             class="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-medium">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            {{ session('error') }}
-        </div>
-        @endif
-
-        {{-- Header --}}
-        <div class="mb-8">
-            <a href="/pesanan/{{ $order['id'] }}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary-600 mb-4 transition-colors">
+        <div>
+            <a href="/pesanan/{{ $order['id'] }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-600 mb-3 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 Kembali ke Detail Pesanan
             </a>
-            <div class="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900 mb-1">Upload Desain Cetak</h1>
-                    <p class="text-slate-500 text-sm">
-                        Pesanan <span class="font-mono font-bold text-primary-600">{{ $order['order_code'] ?? '-' }}</span>
-                        &bull; Pastikan gambar tidak pecah/blur sebelum diunggah.
-                    </p>
-                </div>
-            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Upload Desain Cetak</h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Pesanan <span class="font-mono font-bold text-primary-600">{{ $order['order_code'] ?? '-' }}</span>
+                — pastikan gambar tidak pecah/blur
+            </p>
         </div>
 
         @php
@@ -246,6 +224,5 @@
             </div>
         </div>
 
-    </div>
 </div>
 @endsection

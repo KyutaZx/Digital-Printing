@@ -4,13 +4,14 @@
 @section('meta_description', 'Temukan berbagai produk digital printing berkualitas tinggi di Jaya Mandiri.')
 
 @section('content')
-<div class="pt-20 min-h-screen bg-slate-50">
+<div class="min-h-screen bg-slate-50">
 
     {{-- Page Header --}}
-    <div class="bg-gradient-to-br from-slate-900 to-blue-950 py-16 px-4">
-        <div class="max-w-7xl mx-auto text-center">
-            <h1 class="text-4xl font-black text-white mb-3">Katalog Produk</h1>
-            <p class="text-slate-400 mb-8">Temukan produk cetak yang Anda butuhkan</p>
+    <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 px-4">
+        <div class="max-w-7xl mx-auto text-center fade-in">
+            <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-[10px] font-bold px-3 py-1.5 rounded-full mb-4 uppercase tracking-widest">Katalog</span>
+            <h1 class="text-3xl md:text-4xl font-black text-white mb-2">Katalog Produk</h1>
+            <p class="text-slate-400 text-sm mb-8">Temukan produk cetak yang Anda butuhkan</p>
 
             {{-- Search --}}
             <form method="GET" action="/katalog" class="max-w-lg mx-auto">
@@ -41,7 +42,7 @@
         @if(count($products) > 0)
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             @foreach($products as $product)
-            <a href="/produk/{{ $product['id'] }}" class="group card hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+            <a href="/produk/{{ $product['id'] }}" class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
                 {{-- Product Image --}}
                 <div class="aspect-square bg-slate-100 overflow-hidden">
                     @if(!empty($product['image']))

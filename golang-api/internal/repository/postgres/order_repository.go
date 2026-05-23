@@ -369,6 +369,18 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 	}
 	if err == nil {
 		detail.Payment = &pay
+		if pay.Status == "rejected" && detail.Status == "payment_verification" {
+			detail.PaymentRejected = true
+			var notes sql.NullString
+			_ = r.db.QueryRowContext(ctx, `
+				SELECT notes FROM order_status_logs
+				WHERE order_id = $1 AND status = 'payment_verification'
+				ORDER BY created_at DESC LIMIT 1
+			`, orderID).Scan(&notes)
+			if notes.Valid {
+				detail.PaymentRejectNotes = notes.String
+			}
+		}
 	}
 
 	return detail, nil
@@ -419,7 +431,7 @@ func (r *orderRepository) Cancel(ctx context.Context, orderID int, userID int) e
 	
 	// 4. Logika pengembalian stok (Refund Stock) untuk status 'paid' dan 'waiting_payment'
 	// (karena stok sudah dipotong sejak Checkout)
-	if currentStatus == "paid" || currentStatus == "waiting_payment" {
+	if currentStatus == "paid" || currentStatus == "design_review" || currentStatus == "waiting_payment" {
 		queryUsage := `
 			SELECT oi.quantity, pv.material_id, pv.material_usage 
 			FROM order_items oi
@@ -598,4 +610,34 @@ func (r *orderRepository) CompleteOrder(ctx context.Context, orderID int, userID
 	}
 
 	return nil
+}
+
+// =========================================================================
+// DESIGN HELPERS
+// =========================================================================
+func (r *orderRepository) AllItemsHaveDesign(ctx context.Context, orderID int) (bool, error) {
+	query := `
+		SELECT COUNT(*) = 0 FROM order_items oi
+		WHERE oi.order_id = $1
+		AND NOT EXISTS (SELECT 1 FROM design_files df WHERE df.order_item_id = oi.id)
+	`
+	var ok bool
+	err := r.db.QueryRowContext(ctx, query, orderID).Scan(&ok)
+	return ok, err
+}
+
+func (r *orderRepository) AllItemsHaveApprovedDesign(ctx context.Context, orderID int) (bool, error) {
+	query := `
+		SELECT COUNT(*) = 0 FROM order_items oi
+		WHERE oi.order_id = $1
+		AND NOT EXISTS (
+			SELECT 1 FROM design_files df
+			JOIN design_reviews dr ON dr.design_file_id = df.id AND dr.status = 'approved'
+			WHERE df.order_item_id = oi.id
+			AND df.version = (SELECT MAX(version) FROM design_files WHERE order_item_id = oi.id)
+		)
+	`
+	var ok bool
+	err := r.db.QueryRowContext(ctx, query, orderID).Scan(&ok)
+	return ok, err
 }

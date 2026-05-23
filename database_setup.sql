@@ -1,5 +1,5 @@
 -- TYPES
-CREATE TYPE public.status_order AS ENUM ('waiting_payment','payment_verification','paid','production','completed','cancelled','printing','ready');
+CREATE TYPE public.status_order AS ENUM ('waiting_payment','payment_verification','paid','design_review','printing','ready','completed','cancelled','production');
 CREATE TYPE public.status_payment AS ENUM ('pending','approved','rejected');
 CREATE TYPE public.status_review AS ENUM ('approved','revision_requested');
 CREATE TYPE public.type_activity AS ENUM ('login','logout');

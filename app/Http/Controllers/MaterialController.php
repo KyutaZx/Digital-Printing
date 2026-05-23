@@ -54,9 +54,39 @@ class MaterialController extends Controller
 
     public function update(Request $request, int $id)
     {
-        // Golang API tidak menyediakan endpoint edit nama/unit secara khusus,
-        // namun kita sediakan method ini jika diperlukan atau fallback ke penyesuaian stok.
-        return back()->with('error', 'Fitur edit data material tidak didukung oleh server. Silakan gunakan Update Stok.');
+        $request->validate([
+            'name' => 'required|string',
+            'unit' => 'required|string'
+        ]);
+
+        try {
+            $payload = [
+                'name' => $request->name,
+                'unit' => $request->unit,
+                'stock' => 0.0
+            ];
+
+            $r = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/admin/materials/{$id}", $payload);
+            if ($r->successful()) {
+                return back()->with('success', 'Material berhasil diperbarui.');
+            }
+            return back()->with('error', $r->json('error') ?? $r->json('message') ?? 'Gagal memperbarui material.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Koneksi ke server gagal.');
+        }
+    }
+
+    public function destroy(int $id)
+    {
+        try {
+            $r = Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/admin/materials/{$id}");
+            if ($r->successful()) {
+                return back()->with('success', 'Material berhasil dihapus.');
+            }
+            return back()->with('error', $r->json('error') ?? $r->json('message') ?? 'Gagal menghapus material.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Koneksi ke server gagal.');
+        }
     }
 
     public function restock(Request $request, int $id)

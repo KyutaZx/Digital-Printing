@@ -6,16 +6,19 @@ import (
 
 	"golang-api/internal/domain/audit"
 	"golang-api/internal/domain/design"
+	"golang-api/internal/domain/order"
 )
 
 type DesignUsecase struct {
 	designRepo design.Repository
+	orderRepo  order.Repository
 	auditRepo  audit.Repository
 }
 
-func NewDesignUsecase(designRepo design.Repository, auditRepo audit.Repository) *DesignUsecase {
+func NewDesignUsecase(designRepo design.Repository, orderRepo order.Repository, auditRepo audit.Repository) *DesignUsecase {
 	return &DesignUsecase{
 		designRepo: designRepo,
+		orderRepo:  orderRepo,
 		auditRepo:  auditRepo,
 	}
 }
@@ -123,6 +126,28 @@ func (u *DesignUsecase) AddReview(ctx context.Context, designID int, req design.
 		IPAddress:  ip,
 		UserAgent:  ua,
 	})
+
+	// Semua desain disetujui → mulai produksi
+	if req.Status == "approved" {
+		orderID, err := u.designRepo.GetOrderIDByDesignFileID(ctx, designID)
+		if err != nil {
+			return err
+		}
+		o, err := u.orderRepo.FindByID(ctx, orderID)
+		if err != nil || o == nil {
+			return err
+		}
+		if o.Status != "design_review" && o.Status != "paid" {
+			return nil
+		}
+		allApproved, err := u.orderRepo.AllItemsHaveApprovedDesign(ctx, orderID)
+		if err != nil {
+			return err
+		}
+		if allApproved {
+			_ = u.orderRepo.UpdateStatus(ctx, orderID, "printing", reviewerID, "Semua desain disetujui, produksi dimulai")
+		}
+	}
 
 	return nil
 }

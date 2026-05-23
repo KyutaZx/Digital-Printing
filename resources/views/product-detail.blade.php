@@ -8,7 +8,7 @@
 @section('title', ($product['name'] ?? 'Detail Produk') . ' — Jaya Mandiri')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 pt-24 pb-24" x-data="{
+<div class="min-h-screen bg-slate-50 pt-20 lg:pt-24 pb-24" x-data="{
     activeImage: 0,
     images: {{ json_encode($images) }},
     quantity: 1,
@@ -63,7 +63,7 @@
             
             <!-- Left: Images -->
             <div class="w-full lg:w-1/2 space-y-4">
-                <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center p-4">
+                <div class="aspect-[4/3] rounded-3xl overflow-hidden bg-white border border-slate-100 flex items-center justify-center p-4">
                     <template x-if="images.length > 0">
                         <img :src="'{{ $apiUrl ?? '' }}' + images[activeImage]" alt="{{ $product['name'] ?? '' }}" class="w-full h-full object-contain">
                     </template>
@@ -100,10 +100,10 @@
                         <span class="text-slate-500 font-normal ml-1 text-sm">(120 ulasan)</span>
                     </div>
                     <div class="w-1 h-1 rounded-full bg-slate-300"></div>
-                    @if(($product['stock'] ?? 0) > 10)
+                    @if($product['is_active'] ?? true)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">Tersedia</span>
                     @else
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">Stok Terbatas</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">Tidak Tersedia</span>
                     @endif
                 </div>
 
@@ -112,7 +112,7 @@
                     <template x-if="isCustomSize"><span class="text-lg font-normal text-slate-500 pb-1"> / pcs</span></template>
                 </div>
 
-                <form action="/cart/add" method="POST" class="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm mb-8 space-y-6">
+                <form action="/cart/add" method="POST" class="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm mb-8 space-y-6">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product['id'] ?? '' }}">
                     <input type="hidden" name="material" x-model="selectedMaterial">
@@ -145,22 +145,22 @@
                         <div class="space-y-5">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Pilih Material</label>
-                                <select x-model="selectedMaterial" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-3.5 outline-none transition-colors">
+                                <select x-model="selectedMaterial" class="w-full bg-slate-50 border border-slate-100 text-slate-900 text-sm rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-3.5 outline-none transition-colors">
                                     <option value="Standar">Standar</option>
                                     <option value="Flexi Korea 440gr">Flexi Korea 440gr</option>
                                     <option value="Vinyl Transparan">Vinyl Transparan</option>
                                 </select>
                             </div>
-                            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">Lebar (Meter)</label>
-                                    <input type="number" min="0.5" step="0.5" x-model.number="width" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-slate-900 outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all">
+                                    <input type="number" min="0.5" step="0.5" x-model.number="width" class="w-full bg-white border border-slate-100 rounded-lg p-3 text-slate-900 outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700 mb-2">Tinggi (Meter)</label>
-                                    <input type="number" min="0.5" step="0.5" x-model.number="height" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-slate-900 outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all">
+                                    <input type="number" min="0.5" step="0.5" x-model.number="height" class="w-full bg-white border border-slate-100 rounded-lg p-3 text-slate-900 outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all">
                                 </div>
-                                <div class="col-span-2 text-sm text-slate-700 flex items-center gap-2 mt-2 bg-white p-3 rounded-lg border border-slate-200">
+                                <div class="col-span-2 text-sm text-slate-700 flex items-center gap-2 mt-2 bg-white p-3 rounded-lg border border-slate-100">
                                     <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     Total Luas: <span class="font-bold text-primary-600" x-text="area + ' m²'"></span>
                                 </div>
@@ -173,18 +173,18 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Jumlah</label>
                             <div class="flex items-center w-full">
-                                <button type="button" @click="if(quantity > 1) quantity--" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-l-xl bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">
+                                <button type="button" @click="if(quantity > 1) quantity--" class="w-12 h-12 flex items-center justify-center border border-slate-100 rounded-l-xl bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
                                 </button>
-                                <input type="number" name="quantity" x-model="quantity" readonly class="flex-1 h-12 border-y border-x-0 border-slate-200 text-center font-bold text-slate-900 bg-white focus:ring-0 outline-none">
-                                <button type="button" @click="quantity++" class="w-12 h-12 flex items-center justify-center border border-slate-200 rounded-r-xl bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">
+                                <input type="number" name="quantity" x-model="quantity" readonly class="flex-1 h-12 border-y border-x-0 border-slate-100 text-center font-bold text-slate-900 bg-white focus:ring-0 outline-none">
+                                <button type="button" @click="quantity++" class="w-12 h-12 flex items-center justify-center border border-slate-100 rounded-r-xl bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 </button>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Catatan (Opsional)</label>
-                            <input type="text" name="notes" placeholder="Misal: Finishing mata ayam" class="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-3 outline-none transition-colors h-12">
+                            <input type="text" name="notes" placeholder="Misal: Finishing mata ayam" class="w-full bg-slate-50 border border-slate-100 text-slate-900 rounded-xl focus:ring-primary-500 focus:border-primary-500 block p-3 outline-none transition-colors h-12">
                         </div>
                     </div>
 
@@ -215,7 +215,7 @@
                 
                 {{-- Shipping Info --}}
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="bg-white rounded-2xl border border-slate-200 flex-1 p-5 flex items-center gap-4 shadow-sm">
+                    <div class="bg-white rounded-3xl border border-slate-100 flex-1 p-5 flex items-center gap-4 shadow-sm">
                         <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
@@ -224,7 +224,7 @@
                             <p class="text-xs text-slate-500 mt-1">Estimasi 1-2 hari kerja</p>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl border border-slate-200 flex-1 p-5 flex items-center gap-4 shadow-sm">
+                    <div class="bg-white rounded-3xl border border-slate-100 flex-1 p-5 flex items-center gap-4 shadow-sm">
                         <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
@@ -239,8 +239,8 @@
         </div>
 
         <!-- Tabs section -->
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-12">
-            <div class="flex border-b border-slate-200 overflow-x-auto hide-scrollbar">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-12">
+            <div class="flex border-b border-slate-100 overflow-x-auto hide-scrollbar">
                 <button @click="activeTab = 'deskripsi'" :class="{'text-primary-600 border-b-2 border-primary-600': activeTab === 'deskripsi', 'text-slate-500 hover:bg-slate-50': activeTab !== 'deskripsi'}" class="px-8 py-5 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-all flex-1 text-center">
                     Deskripsi
                 </button>

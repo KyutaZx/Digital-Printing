@@ -7,4 +7,6 @@ type Repository interface {
 	FindAll(ctx context.Context) ([]Material, error)
 	FindByID(ctx context.Context, id int) (*Material, error)
 	AdjustStock(ctx context.Context, materialID int, changeType string, quantity float64, reference string) error
+	Update(ctx context.Context, m *Material) error
+	Delete(ctx context.Context, id int) error
 }

@@ -69,7 +69,24 @@ func (u *PaymentUsecase) UploadProof(
 		return 0, errors.New("status pesanan saat ini tidak mengizinkan unggah bukti")
 	}
 
-	// 3. Simpan Transaksi Pembayaran [cite: 1259 16710]
+	// Wajib upload desain untuk semua item sebelum pembayaran (kecuali re-upload setelah reject bayar)
+	if o.Status == "waiting_payment" {
+		ok, err := u.orderRepo.AllItemsHaveDesign(ctx, orderID)
+		if err != nil {
+			return 0, err
+		}
+		if !ok {
+			return 0, errors.New("upload desain untuk semua produk terlebih dahulu sebelum melakukan pembayaran")
+		}
+	}
+
+	// 3. Hapus payment lama yang sudah di-reject agar tidak terkena UNIQUE constraint
+	// ketika customer mengupload ulang bukti pembayaran
+	if err := u.repo.DeleteRejectedByOrderID(ctx, orderID); err != nil {
+		return 0, errors.New("gagal membersihkan data pembayaran lama: " + err.Error())
+	}
+
+	// 4. Simpan Transaksi Pembayaran [cite: 1259 16710]
 	p := &payment.Payment{
 		OrderID:         orderID,
 		MethodID:        methodID,
@@ -118,8 +135,8 @@ func (u *PaymentUsecase) Approve(ctx context.Context, id int, adminID int, ip st
 	}
 
 	// 2. Jalankan Update Status (Payment & Order dalam satu Transaksi DB) [cite: 1259 16710]
-	// Menyetujui Pembayaran -> Status Order jadi 'paid'
-	err = u.repo.UpdateStatus(ctx, id, "approved", adminID, p.OrderID, "paid")
+	// Pembayaran disetujui -> verifikasi desain (banner "lunas" di UI customer)
+	err = u.repo.UpdateStatus(ctx, id, "approved", adminID, p.OrderID, "design_review")
 	if err != nil {
 		return err
 	}
@@ -141,8 +158,8 @@ func (u *PaymentUsecase) Approve(ctx context.Context, id int, adminID int, ip st
 			"type":       "ORDER_STATUS_UPDATE",
 			"order_id":   o.ID,
 			"order_code": o.OrderCode,
-			"new_status": "paid",
-			"message":    "Pembayaran Anda berhasil diverifikasi. Pesanan akan segera diproses!",
+			"new_status": "design_review",
+			"message":    "Pembayaran Anda berhasil diverifikasi. Desain akan segera direview tim kami.",
 		})
 	}
 
@@ -164,8 +181,8 @@ func (u *PaymentUsecase) Reject(ctx context.Context, id int, adminID int, ip str
 	}
 
 	// 1. Jalankan Update Status (Payment & Order dalam satu Transaksi DB) [cite: 1259 16710]
-	// Menolak Pembayaran -> Kembalikan Status Order ke 'waiting_payment' agar user bisa upload ulang
-	err = u.repo.UpdateStatus(ctx, id, "rejected", adminID, p.OrderID, "waiting_payment")
+	// Tetap di payment_verification; customer unggah ulang bukti (flag dari payment_status = rejected)
+	err = u.repo.UpdateStatus(ctx, id, "rejected", adminID, p.OrderID, "payment_verification")
 	if err != nil {
 		return err
 	}

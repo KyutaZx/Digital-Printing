@@ -77,3 +77,53 @@ func (h *MaterialHandler) AdjustStock(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Stok material berhasil disesuaikan"})
 }
+
+// Update handler untuk mengubah nama dan/atau unit material
+func (h *MaterialHandler) Update(c *gin.Context) {
+	idStr := c.Param("id")
+	materialID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID material tidak valid"})
+		return
+	}
+
+	var req material.MaterialRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	adminID := c.GetInt("user_id")
+	ip := c.ClientIP()
+	ua := c.Request.UserAgent()
+
+	err = h.materialUsecase.UpdateMaterial(c.Request.Context(), materialID, req, adminID, ip, ua)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Material berhasil diperbarui"})
+}
+
+// Delete handler untuk menghapus material
+func (h *MaterialHandler) Delete(c *gin.Context) {
+	idStr := c.Param("id")
+	materialID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID material tidak valid"})
+		return
+	}
+
+	adminID := c.GetInt("user_id")
+	ip := c.ClientIP()
+	ua := c.Request.UserAgent()
+
+	err = h.materialUsecase.DeleteMaterial(c.Request.Context(), materialID, adminID, ip, ua)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Material berhasil dihapus"})
+}

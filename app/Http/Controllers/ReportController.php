@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\LaporanExcelExporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -31,12 +32,11 @@ class ReportController extends Controller
         $startDate = $request->query('start_date', now()->subDays(30)->format('Y-m-d'));
         $endDate = $request->query('end_date', now()->format('Y-m-d'));
 
-        // Fetch reports
         $revenue = $this->apiGet("/api/admin/reports/revenue?start_date={$startDate}&end_date={$endDate}");
         $topProducts = $this->apiGet("/api/admin/reports/products?limit=10");
-        $auditLogs = $this->apiGet("/api/admin/logs/audit?limit=50");
-        $loginLogs = $this->apiGet("/api/admin/logs/login?limit=50");
-        $productionLogs = $this->apiGet("/api/admin/logs/production?limit=50");
+        $auditLogs = $this->apiGet('/api/admin/logs/audit?limit=50');
+        $loginLogs = $this->apiGet('/api/admin/logs/login?limit=50');
+        $productionLogs = $this->apiGet('/api/admin/logs/production?limit=50');
 
         return view('manager.laporan', compact(
             'revenue',
@@ -47,5 +47,23 @@ class ReportController extends Controller
             'startDate',
             'endDate'
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $startDate = $request->query('start_date', now()->subDays(30)->format('Y-m-d'));
+        $endDate = $request->query('end_date', now()->format('Y-m-d'));
+
+        $revenue = $this->apiGet("/api/admin/reports/revenue?start_date={$startDate}&end_date={$endDate}");
+        $topProducts = $this->apiGet("/api/admin/reports/products?limit=10");
+
+        $exporter = new LaporanExcelExporter(
+            $startDate,
+            $endDate,
+            is_array($revenue) ? $revenue : [],
+            is_array($topProducts) ? $topProducts : [],
+        );
+
+        return $exporter->download();
     }
 }

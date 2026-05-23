@@ -3,41 +3,49 @@
 @section('page_title', 'Review Desain Customer')
 
 @section('content')
+@php
+    $pendingList = is_array($pending) ? $pending : [];
+    $historyList = is_array($history) ? $history : [];
+@endphp
 
-{{-- Flash Messages --}}
-@if(session('success'))
-<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-     class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-2xl shadow-sm text-sm font-medium">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    {{ session('success') }}
-</div>
-@endif
-@if(session('error'))
-<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-     class="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl shadow-sm text-sm font-medium">
-    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-    {{ session('error') }}
-</div>
-@endif
+<div class="space-y-6 fade-in pb-8" x-data="{ tab: 'pending' }">
 
-<div x-data="{ tab: 'pending' }">
-    {{-- Page Header --}}
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div>
-            <h1 class="text-xl font-bold text-slate-900">Review Desain Customer</h1>
-            <p class="text-sm text-slate-500 mt-0.5">Kelola antrian review dan riwayat persetujuan desain</p>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Review Desain Customer</h1>
+            <p class="text-xs text-slate-500 mt-1">Kelola antrian review dan riwayat persetujuan desain</p>
         </div>
-        
-        <div class="flex items-center p-1 bg-slate-100 rounded-xl">
-            <button @click="tab = 'pending'" 
-                    class="font-bold text-sm px-4 py-2 rounded-lg transition-all flex items-center gap-2"
-                    :class="tab === 'pending' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'">
+        @if(count($pendingList) > 0)
+        <div class="flex items-center gap-2 bg-purple-50 px-4 py-2.5 rounded-2xl border border-purple-100 shrink-0">
+            <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-purple-700">{{ count($pendingList) }} perlu direview</span>
+        </div>
+        @endif
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 border-l-4 border-l-purple-400">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Antrian Review</p>
+            <h3 class="text-2xl font-black text-purple-600 mt-2">{{ count($pendingList) }}</h3>
+        </div>
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 border-l-4 border-l-emerald-400">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Riwayat Review</p>
+            <h3 class="text-2xl font-black text-emerald-600 mt-2">{{ count($historyList) }}</h3>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-2">
+        <div class="bg-slate-50 p-1.5 rounded-2xl flex gap-1">
+            <button @click="tab = 'pending'"
+                    :class="tab === 'pending' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:bg-white'"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                 Antrian Review
-                <span class="text-[10px] px-2 py-0.5 rounded-full" :class="tab === 'pending' ? 'bg-purple-100' : 'bg-slate-200'">{{ count($pending) }}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black" :class="tab === 'pending' ? 'bg-white/20' : 'bg-purple-100 text-purple-700'">{{ count($pendingList) }}</span>
             </button>
-            <button @click="tab = 'history'" 
-                    class="font-bold text-sm px-4 py-2 rounded-lg transition-all"
-                    :class="tab === 'history' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'">
+            <button @click="tab = 'history'"
+                    :class="tab === 'history' ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-500 hover:bg-white'"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
                 Riwayat Review
             </button>
         </div>
@@ -45,7 +53,7 @@
 
     <!-- TAB PENDING -->
     <div x-show="tab === 'pending'">
-        @forelse($pending as $order)
+        @forelse($pendingList as $order)
         @php
             $hasAnyDesign = false;
             foreach ($order['items'] ?? [] as $item) {
@@ -53,7 +61,7 @@
             }
         @endphp
 
-        <div x-data="{ open: false }" class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-4 overflow-hidden hover:shadow-md transition-shadow">
+        <div x-data="{ open: false }" class="bg-white rounded-3xl border border-slate-100 shadow-sm mb-4 overflow-hidden hover:shadow-md transition-shadow">
             {{-- Order Header (clickable) --}}
             <button @click="open = !open" class="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {{ $hasAnyDesign ? 'bg-purple-100 text-purple-600' : 'bg-amber-100 text-amber-600' }}">
@@ -226,8 +234,8 @@
             </div>
         </div>
         @empty
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-20 text-center">
-            <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm py-20 text-center">
+            <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                 </svg>
@@ -240,8 +248,8 @@
 
     <!-- TAB HISTORY -->
     <div x-show="tab === 'history'" x-cloak>
-        @forelse($history as $order)
-        <div x-data="{ open: false }" class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-4 overflow-hidden hover:shadow-md transition-shadow">
+        @forelse($historyList as $order)
+        <div x-data="{ open: false }" class="bg-white rounded-3xl border border-slate-100 shadow-sm mb-4 overflow-hidden hover:shadow-md transition-shadow">
             <button @click="open = !open" class="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-green-100 text-green-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -298,7 +306,7 @@
             </div>
         </div>
         @empty
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-20 text-center">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm py-20 text-center">
             <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -311,4 +319,5 @@
     </div>
 </div>
 
+</div>
 @endsection

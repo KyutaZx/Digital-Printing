@@ -92,6 +92,15 @@ func (r *paymentRepository) UpdateStatus(ctx context.Context, id int, status str
 }
 
 // =========================================================================
+// DELETE REJECTED PAYMENTS BY ORDER ID
+// =========================================================================
+func (r *paymentRepository) DeleteRejectedByOrderID(ctx context.Context, orderID int) error {
+	query := `DELETE FROM payment_transactions WHERE order_id = $1 AND payment_status = 'rejected'`
+	_, err := r.db.ExecContext(ctx, query, orderID)
+	return err
+}
+
+// =========================================================================
 // FIND BY ID
 // =========================================================================
 func (r *paymentRepository) FindByID(ctx context.Context, id int) (*payment.Payment, error) {

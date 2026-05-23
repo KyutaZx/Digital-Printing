@@ -42,4 +42,10 @@ type Repository interface {
 
 	// FindUnpaidOrdersOlderThan mencari ID pesanan yang sudah lebih dari batas waktu (contoh interval: '24 HOURS')
 	FindUnpaidOrdersOlderThan(ctx context.Context, duration string) ([]int, error)
+
+	// AllItemsHaveDesign: setiap order_item punya minimal 1 file desain
+	AllItemsHaveDesign(ctx context.Context, orderID int) (bool, error)
+
+	// AllItemsHaveApprovedDesign: setiap item punya desain terbaru berstatus approved
+	AllItemsHaveApprovedDesign(ctx context.Context, orderID int) (bool, error)
 }

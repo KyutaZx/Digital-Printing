@@ -164,3 +164,14 @@ func (r *designRepository) VerifyOrderItemOwnership(ctx context.Context, orderIt
 	}
 	return count > 0, nil
 }
+
+func (r *designRepository) GetOrderIDByDesignFileID(ctx context.Context, designFileID int) (int, error) {
+	var orderID int
+	query := `
+		SELECT oi.order_id FROM design_files df
+		JOIN order_items oi ON oi.id = df.order_item_id
+		WHERE df.id = $1
+	`
+	err := r.db.QueryRowContext(ctx, query, designFileID).Scan(&orderID)
+	return orderID, err
+}

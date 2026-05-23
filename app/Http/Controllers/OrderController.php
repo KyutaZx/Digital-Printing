@@ -132,6 +132,31 @@ class OrderController extends Controller
             abort(403);
         }
 
+        $status = $order['status'] ?? '';
+        $paymentRejected = (bool)($order['payment_rejected'] ?? false);
+
+        if ($status === 'waiting_payment') {
+            $allUploaded = true;
+            foreach ($order['items'] ?? [] as $item) {
+                if (empty($item['designs'])) {
+                    $allUploaded = false;
+                    break;
+                }
+            }
+            if (!$allUploaded) {
+                return redirect("/pesanan/{$id}/upload-desain")
+                    ->with('error', 'Upload desain untuk semua produk terlebih dahulu sebelum melakukan pembayaran.');
+            }
+        } elseif ($status === 'payment_verification') {
+            if (!$paymentRejected) {
+                return redirect("/pesanan/{$id}")
+                    ->with('error', 'Pembayaran Anda sedang diverifikasi. Tidak perlu mengunggah ulang kecuali ditolak.');
+            }
+        } else {
+            return redirect("/pesanan/{$id}")
+                ->with('error', 'Halaman pembayaran tidak tersedia untuk status pesanan saat ini.');
+        }
+
         // Ambil list metode pembayaran
         $methods = $this->api('get', '/api/payments/methods') ?? [];
         

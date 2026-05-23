@@ -94,4 +94,8 @@ type OrderDetail struct {
 
 	// Info Pembayaran (bisa nil jika belum bayar)
 	Payment *PaymentInfo `json:"payment"`
+
+	// Flag: pembayaran ditolak saat order masih payment_verification
+	PaymentRejected    bool   `json:"payment_rejected"`
+	PaymentRejectNotes string `json:"payment_reject_notes,omitempty"`
 }

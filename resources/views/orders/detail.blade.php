@@ -1,32 +1,43 @@
 @extends('layouts.app')
 @section('title', 'Detail Pesanan ' . ($order['order_code'] ?? '') . ' — Jaya Mandiri')
 @section('content')
-<div class="pt-24 min-h-screen bg-slate-50 pb-20">
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
 
 @php
     $s = $order['status'] ?? '';
     $badge = match($s) {
-        'waiting_payment'      => ['cls'=>'bg-slate-100 text-slate-600',   'label'=>'Menunggu Pembayaran'],
-        'payment_verification' => ['cls'=>'bg-yellow-100 text-yellow-700', 'label'=>'Menunggu Verifikasi'],
-        'paid'                 => ['cls'=>'bg-blue-100 text-blue-700',     'label'=>'Lunas'],
-        'printing'             => ['cls'=>'bg-purple-100 text-purple-700', 'label'=>'Sedang Dicetak'],
+        'waiting_payment'      => ['cls'=>'bg-slate-100 text-slate-600',   'label'=>'Memesan'],
+        'payment_verification' => ['cls'=>'bg-yellow-100 text-yellow-700', 'label'=>'Verifikasi Pembayaran'],
+        'design_review'        => ['cls'=>'bg-blue-100 text-blue-700',     'label'=>'Verifikasi Desain'],
+        'paid'                 => ['cls'=>'bg-blue-100 text-blue-700',     'label'=>'Verifikasi Desain'],
+        'printing'             => ['cls'=>'bg-purple-100 text-purple-700', 'label'=>'Produksi'],
         'ready'                => ['cls'=>'bg-green-100 text-green-700',   'label'=>'Siap Diambil'],
         'completed'            => ['cls'=>'bg-green-100 text-green-700',   'label'=>'Selesai'],
         'cancelled'            => ['cls'=>'bg-red-100 text-red-600',       'label'=>'Dibatalkan'],
         default                => ['cls'=>'bg-slate-100 text-slate-500',   'label'=>ucfirst($s)],
     };
     $steps = [
-        ['id'=>'waiting_payment',      'label'=>'Dibuat'],
-        ['id'=>'payment_verification', 'label'=>'Verifikasi'],
-        ['id'=>'paid',                 'label'=>'Lunas'],
-        ['id'=>'printing',             'label'=>'Produksi'],
-        ['id'=>'ready',                'label'=>'Siap Ambil'],
-        ['id'=>'completed',            'label'=>'Selesai'],
+        ['label'=>'Memesan'],
+        ['label'=>'Verifikasi Pembayaran'],
+        ['label'=>'Verifikasi Desain'],
+        ['label'=>'Produksi'],
+        ['label'=>'Siap Ambil'],
+        ['label'=>'Selesai'],
     ];
-    $currentIdx = collect($steps)->search(fn($step) => $step['id'] === $s) ?? 0;
+    $stepIndexMap = [
+        'waiting_payment' => 0,
+        'payment_verification' => 1,
+        'paid' => 2,
+        'design_review' => 2,
+        'printing' => 3,
+        'ready' => 4,
+        'completed' => 5,
+    ];
+    $currentIdx = $stepIndexMap[$s] ?? 0;
+    $paymentRejected = (bool)($order['payment_rejected'] ?? false);
+    $paymentApproved = in_array($order['payment']['payment_status'] ?? '', ['approved', 'success']);
+    $showLunasBanner = $paymentApproved && in_array($s, ['design_review','paid','printing','ready','completed']);
 
-    // Design status summary
     $allApproved = true; $hasRevision = false; $hasPending = false; $hasNoDesign = false;
     foreach($order['items'] ?? [] as $item) {
         $designs = $item['designs'] ?? [];
@@ -36,23 +47,8 @@
         elseif($ls === 'revision_requested' || $ls === 'rejected')   { $hasRevision = true; $allApproved = false; }
         elseif($ls !== 'approved')                                   { $hasPending  = true; $allApproved = false; }
     }
+    $allDesignsUploaded = !$hasNoDesign;
 @endphp
-
-{{-- Flash --}}
-@if(session('success'))
-<div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,4000)"
-     class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-2xl text-sm font-medium">
-    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    {{ session('success') }}
-</div>
-@endif
-@if(session('error'))
-<div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,5000)"
-     class="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-medium">
-    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-    {{ session('error') }}
-</div>
-@endif
 
 {{-- Top Bar --}}
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -97,7 +93,7 @@
 
 {{-- Progress Stepper --}}
 @if($s !== 'cancelled')
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6 hidden md:block">
+<div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-6 hidden md:block">
     <div class="relative flex items-start justify-between px-6">
         <div class="absolute top-5 left-[3.5rem] right-[3.5rem] h-[2px] bg-slate-100 z-0">
             <div class="h-full bg-gradient-to-r from-primary-500 to-blue-500 transition-all duration-700"
@@ -121,6 +117,37 @@
             </p>
         </div>
         @endforeach
+    </div>
+</div>
+@endif
+
+{{-- Banner: Pembayaran ditolak (tetap di verifikasi pembayaran) --}}
+@if($paymentRejected)
+<div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5 flex items-start gap-3">
+    <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    <div class="flex-1">
+        <p class="font-bold text-red-800">Bukti Pembayaran Ditolak</p>
+        <p class="text-sm text-red-700 mt-1">Silakan unggah ulang bukti transfer yang valid. Pesanan Anda tetap dalam tahap verifikasi pembayaran.</p>
+        @if(!empty($order['payment_reject_notes']))
+        <p class="text-xs text-red-600 mt-2 italic">Catatan: {{ $order['payment_reject_notes'] }}</p>
+        @endif
+        <a href="/pesanan/{{ $order['id'] }}/pembayaran"
+           class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">
+            Unggah Ulang Bukti Bayar
+        </a>
+    </div>
+</div>
+@endif
+
+{{-- Banner: Lunas (bukan langkah stepper) --}}
+@if($showLunasBanner)
+<div class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl px-5 py-4 text-white shadow-md shadow-green-500/20 flex items-center gap-3">
+    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div>
+        <p class="font-black text-base">Pembayaran Lunas</p>
+        <p class="text-sm text-white/90">Terima kasih! Tim kami sedang memverifikasi desain cetak Anda.</p>
     </div>
 </div>
 @endif
@@ -165,19 +192,27 @@
                 </a>
             </div>
             @else
-            {{-- All uploaded pending review --}}
-            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-500 mt-0.5 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{-- Semua desain terupload — lanjut bayar --}}
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
+                <svg class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <div>
-                    <p class="font-bold text-blue-800 text-sm">Desain Terupload — Menunggu Review Staff</p>
-                    <p class="text-xs text-blue-600 mt-0.5">Sambil menunggu, Anda bisa langsung melanjutkan ke pembayaran.</p>
-                    <a href="/pesanan/{{ $order['id'] }}/pembayaran" class="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-blue-700 hover:underline">
+                    <p class="font-bold text-emerald-800 text-sm">Desain Terupload</p>
+                    <p class="text-xs text-emerald-700 mt-0.5">Semua file desain sudah lengkap. Lanjutkan ke pembayaran untuk memproses pesanan.</p>
+                    <a href="/pesanan/{{ $order['id'] }}/pembayaran" class="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-800 hover:underline">
                         Lanjut ke Pembayaran →
                     </a>
                 </div>
             </div>
             @endif
-        @elseif($hasRevision && in_array($s, ['paid','payment_verification']))
+        @elseif($s === 'payment_verification' && !$paymentRejected)
+        <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-yellow-600 mt-0.5 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+                <p class="font-bold text-yellow-800 text-sm">Bukti Pembayaran Sedang Diverifikasi</p>
+                <p class="text-xs text-yellow-700 mt-0.5">Tim kami akan memverifikasi transfer Anda dalam 1×24 jam kerja.</p>
+            </div>
+        </div>
+        @elseif(in_array($s, ['design_review','paid']) && $hasRevision)
         <div class="bg-amber-50 border border-amber-300 rounded-2xl p-5">
             <div class="flex items-start gap-3 mb-3">
                 <svg class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
@@ -191,10 +226,18 @@
                 Upload Ulang Desain
             </a>
         </div>
+        @elseif(in_array($s, ['design_review','paid']) && !$hasRevision && !$allApproved)
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 mt-0.5 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+                <p class="font-bold text-blue-800 text-sm">Desain Sedang Direview Tim Kami</p>
+                <p class="text-xs text-blue-600 mt-0.5">Pembayaran sudah lunas. Mohon tunggu konfirmasi desain sebelum produksi dimulai.</p>
+            </div>
+        </div>
         @endif
 
         {{-- Items List --}}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100">
                 <h2 class="font-bold text-slate-800 text-sm">Daftar Produk</h2>
             </div>
@@ -308,7 +351,7 @@
 
         {{-- Order Notes --}}
         @if(!empty($order['notes']))
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Catatan Pesanan</p>
             <p class="text-sm text-slate-600">{{ $order['notes'] }}</p>
         </div>
@@ -320,8 +363,8 @@
     <div class="space-y-5 lg:sticky lg:top-24 lg:self-start">
 
         {{-- Design Review Status --}}
-        @if(in_array($s, ['paid','payment_verification','printing','ready']))
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        @if(in_array($s, ['design_review','paid','printing','ready']))
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
             <h3 class="font-bold text-slate-800 text-sm mb-4">Status Desain</h3>
             @if($allApproved)
                 <div class="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
@@ -352,7 +395,7 @@
         @endif
 
         {{-- Payment Info --}}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
             <h3 class="font-bold text-slate-800 text-sm mb-4">Ringkasan Pembayaran</h3>
             <div class="space-y-2.5 text-sm">
                 <div class="flex justify-between">
@@ -391,18 +434,25 @@
             @endif
 
             {{-- Proceed to pay CTA --}}
-            @if($s === 'waiting_payment')
+            @if($s === 'waiting_payment' && $allDesignsUploaded)
             <a href="/pesanan/{{ $order['id'] }}/pembayaran"
                class="mt-4 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors w-full">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                 Konfirmasi Pembayaran
             </a>
+            @elseif($s === 'waiting_payment')
+            <a href="/pesanan/{{ $order['id'] }}/upload-desain"
+               class="mt-4 flex items-center justify-center gap-2 border-2 border-primary-200 text-primary-700 font-bold text-sm px-5 py-3 rounded-xl hover:bg-primary-50 transition-colors w-full">
+                Upload Desain Dulu
+            </a>
+            @elseif($paymentRejected)
+            <a href="/pesanan/{{ $order['id'] }}/pembayaran"
+               class="mt-4 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors w-full">
+                Unggah Ulang Bukti Bayar
+            </a>
             @endif
         </div>
 
     </div>
-</div>
-
-</div>
 </div>
 @endsection

@@ -10,4 +10,8 @@ type Repository interface {
 	UpdateStatus(ctx context.Context, id int, status string, verifiedBy int, orderID int, orderStatus string) error
 
 	FindByID(ctx context.Context, id int) (*Payment, error)
+
+	// Hapus semua payment berstatus 'rejected' untuk order tertentu
+	// agar customer bisa upload ulang tanpa terkena UNIQUE constraint
+	DeleteRejectedByOrderID(ctx context.Context, orderID int) error
 }

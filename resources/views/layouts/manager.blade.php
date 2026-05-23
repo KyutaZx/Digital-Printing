@@ -70,12 +70,19 @@
         }
     </style>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>body { font-family: 'Inter', sans-serif; } [x-cloak] { display: none !important; }</style>
+    <style>body { font-family: 'Inter', sans-serif; } [x-cloak] { display: none !important; }
+    /* Hide ALL scrollbars on sidebar completely */
+    aside::-webkit-scrollbar { display: none; }
+    aside *::-webkit-scrollbar { display: none; }
+    aside { -ms-overflow-style: none; scrollbar-width: none; }
+    aside * { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body class="bg-slate-50">
 
 <div x-data="{ sidebarOpen: true }" class="flex h-screen overflow-hidden">
-
     {{-- SIDEBAR --}}
     <aside :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-slate-900 flex flex-col transition-all duration-300 shrink-0">
         {{-- Logo --}}
@@ -91,63 +98,126 @@
 
         {{-- Nav --}}
         <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-            <p x-show="sidebarOpen" class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2 mb-2">Menu Utama</p>
 
-            <a href="/manager/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/dashboard*') || request()->is('manager') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            {{-- Dashboard --}}
+            <a href="/manager/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/dashboard*') || request()->is('manager') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/dashboard*') || request()->is('manager') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Dashboard</span>
             </a>
 
-            <a href="/manager/verifikasi" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/verifikasi*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span x-show="sidebarOpen" class="whitespace-nowrap">Verifikasi Pembayaran</span>
+            {{-- Divider: Manajemen Pesanan --}}
+            <div x-show="sidebarOpen" class="pt-4 pb-1">
+                <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3">Manajemen Pesanan</p>
+            </div>
+            <div x-show="!sidebarOpen" class="my-2 border-t border-slate-800"></div>
+
+            <a href="/manager/pesanan" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/pesanan') || request()->is('manager/pesanan?*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/pesanan') || request()->is('manager/pesanan?*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div x-show="sidebarOpen" class="flex items-center justify-between flex-1">
+                    <span class="whitespace-nowrap">Semua Pesanan</span>
+                </div>
             </a>
 
-            <a href="/manager/produk" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/produk*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <a href="/manager/riwayat-pesanan" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/riwayat-pesanan*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/riwayat-pesanan*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                </div>
+                <span x-show="sidebarOpen" class="whitespace-nowrap">Riwayat Pesanan</span>
+            </a>
+
+            <a href="/manager/verifikasi" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/verifikasi*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="relative {{ request()->is('manager/verifikasi*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    @if(isset($pendingVerifikasiCount) && $pendingVerifikasiCount > 0)
+                    <span x-show="!sidebarOpen" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-slate-900 rounded-full"></span>
+                    @endif
+                </div>
+                <div x-show="sidebarOpen" class="flex items-center justify-between flex-1">
+                    <span class="whitespace-nowrap">Verifikasi Pembayaran</span>
+                    @if(isset($pendingVerifikasiCount) && $pendingVerifikasiCount > 0)
+                    <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">{{ $pendingVerifikasiCount }}</span>
+                    @endif
+                </div>
+            </a>
+
+            {{-- Divider: Produk & Inventori --}}
+            <div x-show="sidebarOpen" class="pt-4 pb-1">
+                <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3">Produk & Inventori</p>
+            </div>
+            <div x-show="!sidebarOpen" class="my-2 border-t border-slate-800"></div>
+
+            <a href="/manager/produk" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/produk*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/produk*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Produk</span>
             </a>
 
-            <a href="/manager/material" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/material*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <a href="/manager/material" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/material*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/material*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Material Bahan</span>
             </a>
 
-            <a href="/manager/monitoring" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/monitoring*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            {{-- Divider: Laporan & Analitik --}}
+            <div x-show="sidebarOpen" class="pt-4 pb-1">
+                <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3">Laporan & Analitik</p>
+            </div>
+            <div x-show="!sidebarOpen" class="my-2 border-t border-slate-800"></div>
+
+            <a href="/manager/monitoring" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/monitoring*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/monitoring*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Monitoring Transaksi</span>
             </a>
 
-            <a href="/manager/laporan" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/laporan*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            <a href="/manager/laporan" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/laporan*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/laporan*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Laporan & Audit Logs</span>
             </a>
 
-            <a href="/manager/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/pesanan*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                <span x-show="sidebarOpen" class="whitespace-nowrap">Semua Pesanan</span>
-            </a>
+            {{-- Divider: Pengaturan --}}
+            <div x-show="sidebarOpen" class="pt-4 pb-1">
+                <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3">Pengaturan</p>
+            </div>
+            <div x-show="!sidebarOpen" class="my-2 border-t border-slate-800"></div>
 
-            <a href="/manager/users" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 {{ request()->is('manager/users*') ? 'bg-primary-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <a href="/manager/users" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 group {{ request()->is('manager/users*') ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-900/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="{{ request()->is('manager/users*') ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700' }} w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
                 <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Pengguna</span>
             </a>
+
         </nav>
 
         {{-- Footer --}}
         <div class="p-3 border-t border-slate-800">
-            <div x-show="sidebarOpen" class="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-800 mb-2">
-                <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div x-show="sidebarOpen" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800 mb-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {{ strtoupper(substr(session('user.name', 'M'), 0, 1)) }}
                 </div>
-                <div>
+                <div class="flex-1 overflow-hidden">
                     <p class="text-sm font-semibold text-white truncate">{{ session('user.name', 'Manager') }}</p>
                     <p class="text-xs text-slate-400 capitalize">{{ session('user.role', 'owner') }}</p>
                 </div>
             </div>
+            <div x-show="!sidebarOpen" class="flex justify-center mb-2">
+                <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    {{ strtoupper(substr(session('user.name', 'M'), 0, 1)) }}
+                </div>
+            </div>
             <form method="POST" action="/logout">
                 @csrf
-                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-slate-800 text-sm font-medium transition-colors">
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 text-sm font-medium transition-all duration-150">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     <span x-show="sidebarOpen" class="whitespace-nowrap">Keluar</span>
                 </button>

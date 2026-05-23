@@ -69,7 +69,7 @@ func main() {
 	// 🔥 TAMBAHAN: Inisialisasi Production, Material & Design Usecase
 	productionUsecase := usecase.NewProductionUsecase(productionRepo, auditRepo)
 	materialUsecase := usecase.NewMaterialUsecase(materialRepo, auditRepo)
-	designUsecase := usecase.NewDesignUsecase(designRepo, auditRepo)
+	designUsecase := usecase.NewDesignUsecase(designRepo, orderRepo, auditRepo)
 	reportUsecase := usecase.NewReportUsecase(reportRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, auditRepo)
 
