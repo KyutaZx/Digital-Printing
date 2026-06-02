@@ -3,10 +3,19 @@
 
 ---
 
-**Dokumen** : Use Case Description  
-**Versi** : 1.0.0  
-**Tanggal** : 02 Juni 2026  
-**Referensi** : Use Case Diagram Jaya Mandiri Digital Printing
+| | |
+|---|---|
+| **Dokumen** | Use Case Description |
+| **Versi** | `v1.0.0 — FINAL` |
+| **Status** | ✅ **APPROVED / FINAL** |
+| **Tanggal Dibuat** | 02 Juni 2026 |
+| **Terakhir Diperbarui** | 02 Juni 2026 |
+| **Penulis** | Tim Pengembang Jaya Mandiri |
+| **Referensi** | Use Case Diagram Jaya Mandiri Digital Printing |
+| **Total Use Case** | 43 Use Case |
+
+> [!IMPORTANT]
+> Dokumen ini adalah **versi FINAL** yang telah disetujui. Setiap perubahan wajib melalui proses review dan pembaruan versi.
 
 ---
 
@@ -1053,4 +1062,10 @@
 
 ---
 
-*Jaya Mandiri Digital Printing | Use Case Description v1.0.0 | 02 Juni 2026*
+<div align="center">
+
+*Dibuat oleh Tim Pengembang Jaya Mandiri*  
+*Use Case Description v1.0.0 — FINAL | 02 Juni 2026*  
+*© 2026 Jaya Mandiri. All rights reserved.*
+
+</div>
