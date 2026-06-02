@@ -20,9 +20,7 @@
 
 Terlampir di LAMPIRAN Sequence Diagram – *Register*
 
-Proses *register* dimulai ketika *Customer* memanggil fungsi **registerCustomer(name, email, phone, pass)** pada sistem (objek `:User`). Selanjutnya, objek `:User` akan melakukan validasi mandiri dengan memanggil fungsi **registerValidation(name, email, phone, pass)**. Setelah itu, terdapat percabangan (*alt*) berdasarkan hasil validasi:
-- Jika **[data tidak valid]**, sistem akan menampilkan pesan error (**tampilkan pesan error**) kembali ke *Customer*.
-- Jika **[data valid]**, objek `:User` akan menyimpan data akun baru (**simpan data akun baru**). Kemudian sistem memanggil fungsi **submitAuditLog(new_user_id, "register", "users")** ke objek `:AuditLogs`. Terakhir, sistem akan mengarahkan *Customer* dengan pesan **alihkan ke halaman login**.
+Proses *register* dimulai ketika *Customer* memanggil fungsi **registerCustomer(name, email, phone, pass)** pada sistem (objek `:User`). Selanjutnya, objek `:User` akan melakukan validasi mandiri dengan memanggil fungsi **registerValidation(name, email, phone, pass)**. Setelah itu, terdapat percabangan (*alt*) berdasarkan hasil validasi. Jika data tidak valid, sistem akan menampilkan pesan error (**tampilkan pesan error**) kembali ke *Customer*. Sedangkan jika data valid, objek `:User` akan menyimpan data akun baru (**simpan data akun baru**), kemudian sistem memanggil fungsi **submitAuditLog(new_user_id, "register", "users")** ke objek `:AuditLogs`, dan terakhir sistem akan mengarahkan *Customer* dengan pesan **alihkan ke halaman login**.
 
 ---
 
@@ -30,13 +28,7 @@ Proses *register* dimulai ketika *Customer* memanggil fungsi **registerCustomer(
 
 Terlampir di LAMPIRAN Sequence Diagram – *Login*
 
-Proses *login* dimulai ketika *Customer, Staff, Manager* memanggil fungsi **handleLogin(email, pass)** pada sistem (objek `:User`). Selanjutnya, objek `:User` akan melakukan validasi dengan memanggil fungsi **loginValidation(email, pass)**. Terdapat percabangan (*alt*) berdasarkan hasil validasi:
-- Jika **[email & sandi tidak sesuai]**, sistem akan menampilkan pesan error (**tampilkan pesan error**) kembali ke *user*.
-- Jika **[email & sandi sesuai]**, sistem akan menyimpan sesi *login* (**simpan sesi login**) secara internal pada objek `:User`. Kemudian sistem mencatat aktivitas dengan memanggil **submitSessionLog(user_id, login, ip)** pada objek `:LoginLogs` dan **submitAuditLog(user_id, "login", "users")** pada objek `:AuditLogs`.
-Selanjutnya di dalam proses yang valid, terdapat percabangan (*alt*) untuk mengarahkan halaman berdasarkan *role*:
-- Jika **[role = owner]**, sistem mengarahkan *user* dengan pesan **menuju dashboard Owner**.
-- Jika **[role = staff]**, sistem mengarahkan *user* dengan pesan **menuju dashboard Staff**.
-- Jika **[role = customer]**, sistem mengarahkan *user* dengan pesan **menuju dashboard Customer**.
+Proses *login* dimulai ketika *Customer, Staff, Manager* memanggil fungsi **handleLogin(email, pass)** pada sistem (objek `:User`). Selanjutnya, objek `:User` akan melakukan validasi dengan memanggil fungsi **loginValidation(email, pass)**. Terdapat percabangan (*alt*) berdasarkan hasil validasi. Jika email dan sandi tidak sesuai, sistem akan menampilkan pesan error (**tampilkan pesan error**) kembali ke *user*. Sedangkan jika email dan sandi sesuai, sistem akan menyimpan sesi *login* (**simpan sesi login**) secara internal pada objek `:User`, kemudian sistem mencatat aktivitas dengan memanggil **submitSessionLog(user_id, login, ip)** pada objek `:LoginLogs` dan **submitAuditLog(user_id, "login", "users")** pada objek `:AuditLogs`. Selanjutnya di dalam proses yang valid tersebut, terdapat percabangan (*alt*) lanjutan untuk mengarahkan halaman berdasarkan *role*. Jika *role* adalah *owner*, sistem mengarahkan *user* dengan pesan **menuju dashboard Owner**. Jika *role* adalah *staff*, sistem mengarahkan *user* dengan pesan **menuju dashboard Staff**. Jika *role* adalah *customer*, sistem mengarahkan *user* dengan pesan **menuju dashboard Customer**.
 
 ---
 
@@ -46,12 +38,7 @@ Terlampir di LAMPIRAN Sequence Diagram – *Logout*
 
 *Catatan: Mengacu pada diagram dengan judul "Logout", namun alur proses mendeskripsikan pembaruan profil.*
 
-Proses dimulai ketika *Customer, Staff, Manager* membuka halaman profil (**membuka halaman Profil**) yang diteruskan ke objek `:User`. Objek `:User` kemudian memberikan respon **Menampilkan data profil saat ini**. Selanjutnya terdapat percabangan (*alt*) untuk konfirmasi pembaruan:
-- Jika **[tidak]**, sistem akan merespon dengan **Kembali ke halaman sebelumnya**.
-- Jika **[ya]**, *user* memanggil fungsi **updateProfile(name, email, phone)** pada objek `:User`. Objek `:User` kemudian melakukan validasi dengan memanggil fungsi **profileValidation(name, phone)**.
-Di dalam percabangan "ya", terdapat percabangan (*alt*) validasi tambahan:
-- Jika **[Data tidak valid / kosong]**, objek `:User` akan **Menampilkan pesan error** kepada *user*.
-- Jika **[Data valid]**, objek `:User` akan melakukan proses **Update data akun di Database**. Setelah itu, memanggil fungsi **submitAuditLog(user_id, "update_profile", "users")** ke objek `:AuditLogs`. Terakhir, sistem **Menampilkan pesan "Profil berhasil diperbarui"** kepada *user*.
+Proses dimulai ketika *Customer, Staff, Manager* membuka halaman profil (**membuka halaman Profil**) yang diteruskan ke objek `:User`. Objek `:User` kemudian memberikan respon **Menampilkan data profil saat ini**. Selanjutnya terdapat percabangan (*alt*) untuk konfirmasi pembaruan. Jika pengguna memilih tidak, sistem akan merespon dengan **Kembali ke halaman sebelumnya**. Jika pengguna memilih ya, *user* memanggil fungsi **updateProfile(name, email, phone)** pada objek `:User`. Objek `:User` kemudian melakukan validasi dengan memanggil fungsi **profileValidation(name, phone)**. Di dalam percabangan "ya" ini, terdapat percabangan (*alt*) validasi tambahan. Jika data tidak valid atau kosong, objek `:User` akan **Menampilkan pesan error** kepada *user*. Sedangkan jika data valid, objek `:User` akan melakukan proses **Update data akun di Database**, setelah itu memanggil fungsi **submitAuditLog(user_id, "update_profile", "users")** ke objek `:AuditLogs`, dan terakhir sistem **Menampilkan pesan "Profil berhasil diperbarui"** kepada *user*.
 
 ---
 
@@ -99,9 +86,7 @@ Proses *upload* file desain dimulai ketika *Customer* membuka halaman detail pes
 
 Terlampir di LAMPIRAN Sequence Diagram – *Upload Pembayaran*
 
-Proses *upload* pembayaran dimulai ketika *Customer* melakukan aksi **Menuju halaman Pembayaran** ke objek `:User`, dilanjutkan dengan aksi **Pilih metode & upload bukti transfer**. Objek `:User` kemudian memanggil fungsi **paymentValidation(method, file)** pada dirinya sendiri, dan mengirimkan pesan **itemValidation(product_id, variant_id, qty)** ke objek `:Orders`. Setelah itu, terdapat percabangan (*alt*) berdasarkan hasil validasi:
-- Jika **[File dan input tidak valid]**, objek `:User` akan **Menampilkan pesan error** kepada *Customer*.
-- Jika **[File dan input valid]**, objek `:User` mengirim instruksi **Simpan ke tabel PaymentTransactions (status="Pending")** ke objek `PaymentTransaction`. Objek `PaymentTransaction` memberikan respon **Data pembayaran berhasil disimpan** kembali ke `:User`. Kemudian objek `:User` mengirim pesan **updateOrderStatus(order_id, "Menunggu Verifikasi Pembayaran")** ke objek `:Orders`, lalu memanggil **submitAuditLog(user_id, "create_payment", "payment_transactions")** ke objek `:AuditLogs`. Terakhir, sistem **Menampilkan pesan "Bukti pembayaran berhasil diupload, menunggu verifikasi"** kepada *Customer*.
+Proses *upload* pembayaran dimulai ketika *Customer* melakukan aksi **Menuju halaman Pembayaran** ke objek `:User`, dilanjutkan dengan aksi **Pilih metode & upload bukti transfer**. Objek `:User` kemudian memanggil fungsi **paymentValidation(method, file)** pada dirinya sendiri, dan mengirimkan pesan **itemValidation(product_id, variant_id, qty)** ke objek `:Orders`. Setelah itu, terdapat percabangan (*alt*) berdasarkan hasil validasi. Jika file dan input tidak valid, objek `:User` akan **Menampilkan pesan error** kepada *Customer*. Sedangkan jika file dan input valid, objek `:User` mengirim instruksi **Simpan ke tabel PaymentTransactions (status="Pending")** ke objek `PaymentTransaction`. Objek `PaymentTransaction` kemudian memberikan respon **Data pembayaran berhasil disimpan** kembali ke `:User`. Kemudian objek `:User` mengirim pesan **updateOrderStatus(order_id, "Menunggu Verifikasi Pembayaran")** ke objek `:Orders`, lalu memanggil **submitAuditLog(user_id, "create_payment", "payment_transactions")** ke objek `:AuditLogs`, dan terakhir sistem **Menampilkan pesan "Bukti pembayaran berhasil diupload, menunggu verifikasi"** kepada *Customer*.
 
 ---
 
