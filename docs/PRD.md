@@ -46,7 +46,7 @@
 
 ## 1. Ringkasan Eksekutif
 
-**Jaya Mandiri Digital Printing Management System** adalah platform manajemen percetakan digital berbasis **mobile-first** yang dibangun untuk mengotomasi dan mendigitalisasi seluruh alur operasional bisnis percetakan — mulai dari penerimaan pesanan, verifikasi pembayaran, review desain, proses produksi, hingga penyelesaian dan pelaporan bisnis.
+**Jaya Mandiri Digital Printing Management System** adalah platform manajemen percetakan digital berbasis **web** yang dibangun untuk mengotomasi dan mendigitalisasi seluruh alur operasional bisnis percetakan — mulai dari penerimaan pesanan, verifikasi pembayaran, review desain, proses produksi, hingga penyelesaian dan pelaporan bisnis.
 
 Platform ini menggantikan alur manual (via WhatsApp, kertas bon, dan pencatatan manual) dengan sistem terpadu yang real-time, transparan, dan terukur.
 
@@ -54,11 +54,10 @@ Platform ini menggantikan alur manual (via WhatsApp, kertas bon, dan pencatatan 
 
 | Layer | Teknologi | Peran |
 |-------|-----------|-------|
-| **Web Admin / Frontend** | Laravel 10 (PHP) | Panel web untuk owner & manajemen |
+| **Web Apps / Frontend** | Laravel 10 (PHP) | UI web responsif untuk Customer, Staff, & Owner |
 | **Backend API** | Golang (Gin Framework) | REST API utama, logika bisnis, JWT, WebSocket |
 | **AI Microservice** | Python (FastAPI + TensorFlow) | Deteksi kualitas gambar (blur detection) |
 | **Database** | PostgreSQL 15 | Penyimpanan data persisten |
-| **Mobile Client** | Expo React Native | Aplikasi mobile iOS & Android |
 
 ---
 
@@ -233,8 +232,8 @@ Pak Hendra membuka dashboard, melihat total pesanan hari ini, revenue minggu ini
 │                        CLIENTS                               │
 │                                                              │
 │  ┌──────────────────┐      ┌──────────────────────────────┐ │
-│  │  Expo Mobile App │      │     Laravel Web Panel        │ │
-│  │  (iOS / Android) │      │  (Admin/Owner Dashboard)     │ │
+│  │   Customer Web   │      │     Laravel Web Panel        │ │
+│  │     (Laravel)    │      │  (Admin/Owner Dashboard)     │ │
 │  └────────┬─────────┘      └──────────────┬───────────────┘ │
 │           │ HTTPS + JWT                    │ HTTPS + JWT     │
 └───────────┼────────────────────────────────┼─────────────────┘
@@ -263,8 +262,8 @@ Pak Hendra membuka dashboard, melihat total pesanan hari ini, revenue minggu ini
 
 | Komponen | Port | Teknologi | Tanggung Jawab |
 |----------|------|-----------|----------------|
-| **Mobile App** | — | Expo React Native | UI utama untuk semua role |
-| **Web Panel** | 80/443 | Laravel 10 | Dashboard owner, manajemen produk |
+| **Customer Web** | 80/443 | Laravel 10 | UI utama untuk customer memesan produk |
+| **Web Panel** | 80/443 | Laravel 10 | Dashboard owner & manajemen untuk staff |
 | **Golang API** | `8080` | Go + Gin | REST API, Auth JWT, Business Logic, WebSocket |
 | **PostgreSQL** | `5432` | PostgreSQL 15 | Data persisten, transaksi |
 | **Python AI** | `5000` | FastAPI + TensorFlow | Deteksi blur gambar |
@@ -922,7 +921,7 @@ Jika AI service tidak tersedia atau model tidak dimuat:
 - **Secret**: Minimal 32 karakter, disimpan di `.env`
 - **Payload**: `user_id`, `role`, `exp`
 - **Expire**: Configurable (default: 24 jam)
-- **Storage Client**: `expo-secure-store` (mobile), `httpOnly cookie` (web)
+- **Storage Client**: `httpOnly cookie` (web)
 
 ### 12.2 RBAC (Role-Based Access Control)
 
@@ -940,7 +939,7 @@ Request → CORS → RateLimit → AuthMiddleware → RoleCheck → Handler
 
 | Middleware | Fungsi |
 |------------|--------|
-| CORS | Mengizinkan request dari Expo dev & web panel |
+| CORS | Mengizinkan request dari domain web frontend |
 | Rate Limiting | Mencegah brute force login |
 | AuthMiddleware | Validasi JWT, cek `is_active` |
 | StaffOnly | Hanya staff & owner |
@@ -1081,8 +1080,8 @@ Semua aksi sensitif dicatat di `audit_logs`:
 - ✅ Manajemen user & staff
 - ✅ Auto-cancel cron job
 
-### Phase 4 — Mobile App & Web Panel (Dalam Pengembangan)
-- 🔄 Expo React Native Mobile App
+### Phase 4 — Frontend Web & Web Panel (Dalam Pengembangan)
+- 🔄 Customer Web Portal (Laravel)
 - 🔄 Laravel Web Admin Panel
 - 🔄 UI/UX testing & refinement
 
@@ -1099,7 +1098,7 @@ Semua aksi sensitif dicatat di `audit_logs`:
 - ⏳ Payment gateway (Midtrans/Xendit)
 - ⏳ Estimasi waktu produksi otomatis (AI)
 - ⏳ Multi-cabang / multi-tenant support
-- ⏳ Mobile push notifications (FCM)
+- ⏳ Web push notifications
 
 ---
 
@@ -1110,8 +1109,7 @@ Semua aksi sensitif dicatat di `audit_logs`:
 | **Product Manager** | Menjaga visi produk, prioritas fitur, komunikasi stakeholder | Dokumen ini (PRD) |
 | **Backend Engineer (Go)** | Implementasi REST API, business logic, WebSocket, cron | `golang-api/internal/` |
 | **Backend Engineer (Python)** | Pengembangan & training model AI blur detection | `python-ai/` |
-| **Frontend Engineer (Expo)** | Implementasi mobile app iOS & Android | `docs/MOBILE-EXPO.md` |
-| **Frontend Engineer (Laravel)** | Panel web admin untuk owner | `app/`, `resources/` |
+| **Frontend Engineer (Laravel)** | Implementasi web app customer & panel admin owner | `app/`, `resources/` |
 | **Database Admin** | Schema design, migrasi, backup, optimasi query | `database/database_setup.sql`, `database/migrations/` |
 | **UI/UX Designer** | Wireframe, prototyping, user testing | Figma (external) |
 | **QA Engineer** | Test case, testing API (Postman), regression testing | `Digital_Printing_API.postman_collection.json` |
@@ -1380,7 +1378,7 @@ APP_HOST=0.0.0.0
 | **Product Manager / Owner** | Hendra Wijaya | ✅ Approved | 28 Mei 2026 | Visi & scope sesuai kebutuhan bisnis |
 | **Tech Lead / Backend (Go)** | *(nama tech lead)* | ✅ Approved | 28 Mei 2026 | Arsitektur dan API spec layak implementasi |
 | **Backend Engineer (Python AI)** | *(nama engineer)* | ✅ Approved | 28 Mei 2026 | Spesifikasi AI service dan model sudah sesuai |
-| **Frontend Engineer (Expo)** | *(nama engineer)* | ✅ Approved | 28 Mei 2026 | Alur customer dan endpoint tersedia |
+| **Frontend Engineer (Web)** | *(nama engineer)* | ✅ Approved | 28 Mei 2026 | Alur customer dan endpoint tersedia |
 | **Database Admin** | *(nama DBA)* | ✅ Approved | 28 Mei 2026 | Skema dan relasi database valid |
 | **QA Engineer** | *(nama QA)* | ✅ Approved | 28 Mei 2026 | Test scenario dan kriteria keberhasilan terukur |
 
@@ -1399,7 +1397,6 @@ Setelah dokumen ini **FINAL**, perubahan hanya diperbolehkan melalui proses beri
 | Dokumen | Lokasi | Keterangan |
 |---------|--------|------------|
 | System Flow Documentation | [`docs/ALUR-SISTEM.md`](./ALUR-SISTEM.md) | Detail alur bisnis dan diagram sequence |
-| Mobile Integration Guide | [`docs/MOBILE-EXPO.md`](./MOBILE-EXPO.md) | Panduan integrasi Expo React Native |
 | Database Schema | [`database/database_setup.sql`](../database/database_setup.sql) | Skema + seed data PostgreSQL |
 | API Collection | [`Digital_Printing_API.postman_collection.json`](../Digital_Printing_API.postman_collection.json) | Koleksi Postman untuk testing API |
 | AI Service Docs | [`python-ai/README.md`](../python-ai/README.md) | Dokumentasi layanan blur detection |
