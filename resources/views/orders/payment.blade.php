@@ -6,9 +6,9 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
 
         <div>
-            <a href="/pesanan/{{ $order['id'] }}" class="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold text-xs mb-3 transition-colors">
+            <a href="/pesanan/{{ $order['id'] }}/upload-desain" class="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold text-xs mb-3 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Kembali
+                Kembali ke Upload Desain
             </a>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">Upload Bukti Pembayaran</h1>
             <p class="text-xs text-slate-500 mt-1">Selesaikan pembayaran setelah semua desain terupload</p>

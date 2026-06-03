@@ -4,37 +4,7 @@
 
 @section('content')
 <div class="relative min-h-screen w-full">
-    {{-- Animated White and Dark Blue Background --}}
-    <style>
-        @keyframes blob-bounce-1 {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-        @keyframes blob-bounce-2 {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-40px, 40px) scale(0.95); }
-            66% { transform: translate(30px, -30px) scale(1.05); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-        @keyframes blob-bounce-3 {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(40px, 30px) scale(1.05); }
-            66% { transform: translate(-30px, -40px) scale(0.95); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-    </style>
-    <div class="fixed inset-0 -z-10 bg-slate-50 overflow-hidden">
-        <div class="absolute top-0 left-0 w-[800px] h-[800px] rounded-full opacity-40 blur-[120px]" 
-             style="background: radial-gradient(circle, rgba(30,58,138,0.7), transparent 60%); animation: blob-bounce-1 15s infinite alternate ease-in-out;"></div>
-        
-        <div class="absolute top-[20%] right-[-10%] w-[700px] h-[700px] rounded-full opacity-30 blur-[100px]" 
-             style="background: radial-gradient(circle, rgba(29,78,216,0.6), transparent 60%); animation: blob-bounce-2 18s infinite alternate ease-in-out;"></div>
-        
-        <div class="absolute bottom-[-10%] left-[10%] w-[900px] h-[900px] rounded-full opacity-35 blur-[130px]" 
-             style="background: radial-gradient(circle, rgba(37,99,235,0.5), transparent 60%); animation: blob-bounce-3 20s infinite alternate ease-in-out;"></div>
-    </div>
+
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-16 fade-in relative z-10">
 
@@ -80,48 +50,6 @@
     </div>
     @endif
 
-    {{-- Alur Pesanan Horizontal --}}
-    <div class="mt-6 bg-white rounded-[14px] border border-slate-200 p-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4 relative">
-            <div class="hidden sm:block absolute top-4 left-[10%] right-[10%] h-[2px] bg-slate-100 -z-0"></div>
-            
-            {{-- Step 1 --}}
-            <div class="flex flex-col items-center relative z-10 bg-white px-2 sm:px-4 w-full sm:w-1/4">
-                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0 mb-2 sm:mb-3">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <p class="font-bold text-sm text-slate-900 text-center">Pilih produk</p>
-                <p class="text-xs text-slate-500 text-center mt-0.5">Selesai</p>
-            </div>
-            
-            {{-- Step 2 --}}
-            <div class="flex flex-col items-center relative z-10 bg-white px-2 sm:px-4 w-full sm:w-1/4">
-                <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white shrink-0 mb-2 sm:mb-3">
-                    <span class="text-sm font-bold">2</span>
-                </div>
-                <p class="font-bold text-sm text-slate-900 text-center">Upload desain</p>
-                <p class="text-xs text-slate-500 text-center mt-0.5">Sedang berlangsung</p>
-            </div>
-            
-            {{-- Step 3 --}}
-            <div class="flex flex-col items-center relative z-10 bg-white px-2 sm:px-4 w-full sm:w-1/4 opacity-50">
-                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0 mb-2 sm:mb-3">
-                    <span class="text-sm font-bold">3</span>
-                </div>
-                <p class="font-bold text-sm text-slate-900 text-center">Pembayaran</p>
-                <p class="text-xs text-slate-500 text-center mt-0.5">Menunggu</p>
-            </div>
-            
-            {{-- Step 4 --}}
-            <div class="flex flex-col items-center relative z-10 bg-white px-2 sm:px-4 w-full sm:w-1/4 opacity-50">
-                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0 mb-2 sm:mb-3">
-                    <span class="text-sm font-bold">4</span>
-                </div>
-                <p class="font-bold text-sm text-slate-900 text-center">Produksi</p>
-                <p class="text-xs text-slate-500 text-center mt-0.5">Menunggu</p>
-            </div>
-        </div>
-    </div>
 
     <div class="flex flex-col lg:flex-row gap-8 mt-8 items-start">
         {{-- Main Upload Panel (Left) --}}
@@ -140,16 +68,7 @@
             @endphp
 
             <div class="bg-white rounded-[14px] border border-slate-200 overflow-hidden relative">
-                {{-- Thin 4-step progress bar --}}
-                <div class="absolute top-0 left-0 w-full h-1 flex">
-                    @if($isApproved)
-                        <div class="flex-1 bg-green-500"></div><div class="flex-1 bg-green-500"></div><div class="flex-1 bg-green-500"></div><div class="flex-1 bg-slate-200"></div>
-                    @elseif($hasDesign && !$canReupload)
-                        <div class="flex-1 bg-green-500"></div><div class="flex-1 bg-primary-600"></div><div class="flex-1 bg-slate-200"></div><div class="flex-1 bg-slate-200"></div>
-                    @else
-                        <div class="flex-1 bg-green-500"></div><div class="flex-1 bg-primary-600"></div><div class="flex-1 bg-slate-200"></div><div class="flex-1 bg-slate-200"></div>
-                    @endif
-                </div>
+
 
                 <div class="p-6 pt-7 lg:p-8">
                     {{-- Product Row --}}

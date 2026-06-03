@@ -1,28 +1,49 @@
 @extends('layouts.app')
 @section('title', 'Detail Pesanan ' . ($order['order_code'] ?? '') . ' — Jaya Mandiri')
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-16 space-y-6 fade-in">
+<style>
+    /* Custom CSS variables based on user spec */
+    :root {
+        --color-primary: #185FA5;
+        --color-success-text: #3B6D11;
+        --color-success-bg: #EAF3DE;
+        --color-warning-text: #854F0B;
+        --color-warning-bg: #FAEEDA;
+        --color-danger-text: #A32D2D;
+        --color-danger-border: #E24B4A;
+    }
+    
+    /* Tailwind arbitrary values mapping */
+    .text-primary-custom { color: var(--color-primary); }
+    .bg-primary-custom { background-color: var(--color-primary); }
+    .border-primary-custom { border-color: var(--color-primary); }
+    
+    .text-success-custom { color: var(--color-success-text); }
+    .bg-success-custom { background-color: var(--color-success-bg); }
+    
+    .text-warning-custom { color: var(--color-warning-text); }
+    .bg-warning-custom { background-color: var(--color-warning-bg); }
+    
+    .text-danger-custom { color: var(--color-danger-text); }
+    .border-danger-custom { border-color: var(--color-danger-border); }
+    
+    .flat-card {
+        background: #ffffff;
+        border: 0.5px solid #e5e5e5;
+        border-radius: 12px;
+        box-shadow: none !important;
+    }
+</style>
 
 @php
     $s = $order['status'] ?? '';
-    $badge = match($s) {
-        'waiting_payment'      => ['cls'=>'bg-slate-100 text-slate-600',   'label'=>'Memesan'],
-        'payment_verification' => ['cls'=>'bg-yellow-100 text-yellow-700', 'label'=>'Verifikasi Pembayaran'],
-        'design_review'        => ['cls'=>'bg-blue-100 text-blue-700',     'label'=>'Verifikasi Desain'],
-        'paid'                 => ['cls'=>'bg-blue-100 text-blue-700',     'label'=>'Verifikasi Desain'],
-        'printing'             => ['cls'=>'bg-purple-100 text-purple-700', 'label'=>'Produksi'],
-        'ready'                => ['cls'=>'bg-green-100 text-green-700',   'label'=>'Siap Diambil'],
-        'completed'            => ['cls'=>'bg-green-100 text-green-700',   'label'=>'Selesai'],
-        'cancelled'            => ['cls'=>'bg-red-100 text-red-600',       'label'=>'Dibatalkan'],
-        default                => ['cls'=>'bg-slate-100 text-slate-500',   'label'=>ucfirst($s)],
-    };
+    // Steps mapping
     $steps = [
-        ['label'=>'Memesan'],
-        ['label'=>'Verifikasi Pembayaran'],
-        ['label'=>'Verifikasi Desain'],
-        ['label'=>'Produksi'],
-        ['label'=>'Siap Ambil'],
-        ['label'=>'Selesai'],
+        ['label'=>'Memesan', 'key' => 'waiting_payment'],
+        ['label'=>'Verifikasi Pembayaran', 'key' => 'payment_verification'],
+        ['label'=>'Verifikasi Desain', 'key' => 'design_review'],
+        ['label'=>'Produksi', 'key' => 'printing'],
+        ['label'=>'Selesai', 'key' => 'completed'],
     ];
     $stepIndexMap = [
         'waiting_payment' => 0,
@@ -31,13 +52,14 @@
         'design_review' => 2,
         'printing' => 3,
         'ready' => 4,
-        'completed' => 5,
+        'completed' => 4,
+        'cancelled' => -1,
     ];
     $currentIdx = $stepIndexMap[$s] ?? 0;
+    
     $paymentRejected = (bool)($order['payment_rejected'] ?? false);
     $paymentApproved = in_array($order['payment']['payment_status'] ?? '', ['approved', 'success']);
-    $showLunasBanner = $paymentApproved && in_array($s, ['design_review','paid','printing','ready','completed']);
-
+    
     $allApproved = true; $hasRevision = false; $hasPending = false; $hasNoDesign = false;
     foreach($order['items'] ?? [] as $item) {
         $designs = $item['designs'] ?? [];
@@ -50,407 +72,438 @@
     $allDesignsUploaded = !$hasNoDesign;
 @endphp
 
-{{-- Top Bar --}}
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-    <div>
-        <a href="/pesanan" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-primary-600 mb-3 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Kembali ke Pesanan
-        </a>
-        <div class="flex items-center gap-3 flex-wrap">
-            <h1 class="text-2xl font-black text-slate-900 font-mono">{{ $order['order_code'] ?? '-' }}</h1>
-            <span class="text-xs font-bold px-3 py-1 rounded-full {{ $badge['cls'] }}">{{ $badge['label'] }}</span>
-        </div>
-        <p class="text-xs text-slate-400 mt-1">{{ \Carbon\Carbon::parse($order['created_at'] ?? now())->format('d M Y, H:i') }} WIB</p>
-    </div>
-    <div class="flex gap-2 flex-wrap">
-        @if(in_array($s, ['waiting_payment','payment_verification']))
-        <form action="/pesanan/{{ $order['id'] }}/batal" method="POST"
-              onsubmit="return confirm('Batalkan pesanan ini?')">
-            @csrf
-            <button type="submit" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-red-200 text-red-500 hover:bg-red-50 transition-colors bg-white">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                Batalkan
-            </button>
-        </form>
-        @endif
-        <a href="/pesanan/{{ $order['id'] }}/invoice/view"
-           class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors bg-white">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            Invoice
-        </a>
-        @if($s === 'ready')
-        <form action="/pesanan/{{ $order['id'] }}/selesai" method="POST">
-            @csrf
-            <button type="submit" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-green-600 text-white hover:bg-green-700 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Konfirmasi Selesai
-            </button>
-        </form>
-        @endif
-    </div>
-</div>
-
-{{-- Progress Stepper --}}
-@if($s !== 'cancelled')
-<div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-6 hidden md:block">
-    <div class="relative flex items-start justify-between px-6">
-        <div class="absolute top-5 left-[3.5rem] right-[3.5rem] h-[2px] bg-slate-100 z-0">
-            <div class="h-full bg-gradient-to-r from-primary-500 to-blue-500 transition-all duration-700"
-                 style="width:{{ $currentIdx > 0 ? ($currentIdx / (count($steps)-1)) * 100 : 0 }}%"></div>
-        </div>
-        @foreach($steps as $idx => $step)
-        <div class="relative z-10 flex flex-col items-center gap-2 flex-1">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center transition-all font-bold text-sm
-                {{ $idx < $currentIdx  ? 'bg-primary-600 text-white shadow-md shadow-primary-200'
-                 : ($idx == $currentIdx ? 'bg-primary-600 text-white ring-4 ring-primary-100 shadow-lg'
-                 : 'bg-slate-100 text-slate-400') }}">
-                @if($idx < $currentIdx)
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                @else
-                    {{ $idx + 1 }}
+<div class="bg-slate-50 min-h-screen py-8 pt-20">
+    <div class="max-w-[860px] mx-auto px-6">
+        
+        {{-- Topbar --}}
+        <div class="flex justify-between items-center mb-6">
+            <a href="/pesanan" class="text-[13px] font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-2">
+                &larr; Kembali ke daftar pesanan
+            </a>
+            <div class="flex gap-2">
+                @if(in_array($s, ['waiting_payment','payment_verification']))
+                <form action="/pesanan/{{ $order['id'] }}/batal" method="POST" onsubmit="return confirm('Batalkan pesanan ini?')">
+                    @csrf
+                    <button type="submit" class="px-3 py-1.5 rounded text-[13px] font-semibold text-danger-custom border border-danger-custom bg-white hover:bg-red-50">
+                        Batalkan
+                    </button>
+                </form>
                 @endif
-            </div>
-            <p class="text-[10px] font-bold text-center leading-tight
-               {{ $idx == $currentIdx ? 'text-primary-600' : ($idx < $currentIdx ? 'text-slate-700' : 'text-slate-400') }}">
-                {{ $step['label'] }}
-            </p>
-        </div>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- Banner: Pembayaran ditolak (tetap di verifikasi pembayaran) --}}
-@if($paymentRejected)
-<div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5 flex items-start gap-3">
-    <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-    <div class="flex-1">
-        <p class="font-bold text-red-800">Bukti Pembayaran Ditolak</p>
-        <p class="text-sm text-red-700 mt-1">Silakan unggah ulang bukti transfer yang valid. Pesanan Anda tetap dalam tahap verifikasi pembayaran.</p>
-        @if(!empty($order['payment_reject_notes']))
-        <p class="text-xs text-red-600 mt-2 italic">Catatan: {{ $order['payment_reject_notes'] }}</p>
-        @endif
-        <a href="/pesanan/{{ $order['id'] }}/pembayaran"
-           class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">
-            Unggah Ulang Bukti Bayar
-        </a>
-    </div>
-</div>
-@endif
-
-{{-- Banner: Lunas (bukan langkah stepper) --}}
-@if($showLunasBanner)
-<div class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl px-5 py-4 text-white shadow-md shadow-green-500/20 flex items-center gap-3">
-    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    </div>
-    <div>
-        <p class="font-black text-base">Pembayaran Lunas</p>
-        <p class="text-sm text-white/90">Terima kasih! Tim kami sedang memverifikasi desain cetak Anda.</p>
-    </div>
-</div>
-@endif
-
-{{-- Main Grid --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    {{-- Left: Items + Design --}}
-    <div class="lg:col-span-2 space-y-5">
-
-        {{-- Design Upload CTA (adapts to status & revision state) --}}
-        @if($s === 'waiting_payment')
-            @if($hasRevision)
-            {{-- Has revision: show amber warning, embed form inline below --}}
-            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                    </div>
-                    <div>
-                        <p class="font-bold text-amber-800">Desain Perlu Direvisi</p>
-                        <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">Staff kami meminta perbaikan pada desain Anda. Silakan upload ulang file yang sudah diperbaiki pada item di bawah, kemudian lanjutkan ke pembayaran.</p>
-                    </div>
-                </div>
-            </div>
-            @elseif($hasNoDesign)
-            {{-- No design at all: show blue upload CTA --}}
-            <div class="bg-gradient-to-br from-primary-600 to-blue-700 rounded-2xl p-5 text-white shadow-lg shadow-primary-500/20">
-                <div class="flex items-start gap-4">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-bold text-base mb-1">Langkah Berikutnya: Upload Desain & Bayar</p>
-                        <p class="text-white/80 text-xs leading-relaxed">Upload file desain cetak Anda, kemudian lakukan pembayaran. Desain dicek kualitasnya oleh AI kami secara otomatis.</p>
-                    </div>
-                </div>
-                <a href="/pesanan/{{ $order['id'] }}/upload-desain"
-                   class="mt-4 flex items-center justify-center gap-2 bg-white text-primary-700 font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-primary-50 transition-colors w-full">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    Unggah Desain & Lanjut Bayar
+                <a href="/pesanan/{{ $order['id'] }}/invoice/view" class="px-3 py-1.5 rounded text-[13px] font-semibold text-slate-700 border border-slate-300 bg-white hover:bg-slate-50">
+                    Invoice
                 </a>
             </div>
-            @else
-            {{-- Semua desain terupload — lanjut bayar --}}
-            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
-                <svg class="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <div>
-                    <p class="font-bold text-emerald-800 text-sm">Desain Terupload</p>
-                    <p class="text-xs text-emerald-700 mt-0.5">Semua file desain sudah lengkap. Lanjutkan ke pembayaran untuk memproses pesanan.</p>
-                    <a href="/pesanan/{{ $order['id'] }}/pembayaran" class="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-800 hover:underline">
-                        Lanjut ke Pembayaran →
-                    </a>
+        </div>
+
+        {{-- Header Order Info --}}
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">{{ $order['order_code'] ?? '-' }}</h1>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-blue-100 text-primary-custom">{{ str_replace('_', ' ', $s) }}</span>
+                <span class="text-[13px] text-slate-500">{{ \Carbon\Carbon::parse($order['created_at'] ?? now())->format('d M Y, H:i') }} WIB</span>
+            </div>
+        </div>
+
+        {{-- 1. Status Stepper (Full Width Card) --}}
+        @if($s !== 'cancelled')
+        <div class="flat-card p-6 mb-6 overflow-hidden hidden sm:block">
+            <div class="relative flex items-start justify-between px-2">
+                <!-- Lines -->
+                <div class="absolute top-3 left-[10%] right-[10%] h-[2px] bg-slate-200 z-0">
+                    <div class="h-full bg-primary-custom transition-all duration-700"
+                         style="width:{{ $currentIdx > 0 ? ($currentIdx / (count($steps)-1)) * 100 : 0 }}%"></div>
                 </div>
-            </div>
-            @endif
-        @elseif($s === 'payment_verification' && !$paymentRejected)
-        <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 flex items-start gap-3">
-            <svg class="w-5 h-5 text-yellow-600 mt-0.5 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <div>
-                <p class="font-bold text-yellow-800 text-sm">Bukti Pembayaran Sedang Diverifikasi</p>
-                <p class="text-xs text-yellow-700 mt-0.5">Tim kami akan memverifikasi transfer Anda dalam 1×24 jam kerja.</p>
-            </div>
-        </div>
-        @elseif(in_array($s, ['design_review','paid']) && $hasRevision)
-        <div class="bg-amber-50 border border-amber-300 rounded-2xl p-5">
-            <div class="flex items-start gap-3 mb-3">
-                <svg class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                <div>
-                    <p class="font-bold text-amber-800 text-sm">Desain Perlu Direvisi</p>
-                    <p class="text-xs text-amber-700 mt-0.5">Staff meminta revisi. Periksa catatan pada setiap item lalu upload ulang.</p>
-                </div>
-            </div>
-            <a href="/pesanan/{{ $order['id'] }}/upload-desain"
-               class="flex items-center justify-center gap-2 bg-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-amber-700 transition-colors">
-                Upload Ulang Desain
-            </a>
-        </div>
-        @elseif(in_array($s, ['design_review','paid']) && !$hasRevision && !$allApproved)
-        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-3">
-            <svg class="w-5 h-5 text-blue-600 mt-0.5 animate-pulse shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <div>
-                <p class="font-bold text-blue-800 text-sm">Desain Sedang Direview Tim Kami</p>
-                <p class="text-xs text-blue-600 mt-0.5">Pembayaran sudah lunas. Mohon tunggu konfirmasi desain sebelum produksi dimulai.</p>
-            </div>
-        </div>
-        @endif
-
-        {{-- Items List --}}
-        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100">
-                <h2 class="font-bold text-slate-800 text-sm">Daftar Produk</h2>
-            </div>
-            <div class="divide-y divide-slate-100">
-                @foreach($order['items'] ?? [] as $item)
-                @php
-                    $designs   = $item['designs'] ?? [];
-                    $lastIdx   = count($designs) - 1;
-                    $latest    = $lastIdx >= 0 ? $designs[$lastIdx] : null;
-                    $ls        = $latest['status'] ?? '';
-                    $ln        = $latest['notes'] ?? '';
-                @endphp
-                <div class="px-6 py-5">
-                    <div class="flex gap-4">
-                        {{-- Product thumb --}}
-                        <div class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200">
-                            @if(!empty($item['product_image']))
-                                <img src="{{ config('app.golang_api_url') }}{{ $item['product_image'] }}" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-slate-300">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                            @endif
+                <!-- Steps -->
+                @foreach($steps as $idx => $step)
+                <div class="relative z-10 flex flex-col items-center w-1/5">
+                    @if($idx < $currentIdx || ($idx == 4 && $s == 'completed'))
+                        <div class="w-6 h-6 rounded-full bg-primary-custom flex items-center justify-center text-white ring-4 ring-white">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <h3 class="font-bold text-slate-900 text-sm">{{ $item['product_name'] ?? '-' }}</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">{{ $item['variant_name'] ?? '' }} &bull; Qty: {{ $item['quantity'] ?? 1 }}</p>
-                                </div>
-                                <p class="font-black text-slate-900 text-sm shrink-0">
-                                    Rp {{ number_format(($item['unit_price'] ?? 0) * ($item['quantity'] ?? 1), 0, ',', '.') }}
-                                </p>
-                            </div>
-
-                            {{-- Design status badge per item --}}
-                            @if(!empty($designs))
-                            <div class="mt-3 space-y-3">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    @if($ls === 'approved')
-                                        <span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">✓ Desain Disetujui</span>
-                                    @elseif($ls === 'revision_requested' || $ls === 'rejected')
-                                        <span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">↩ Perlu Revisi</span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">⏳ Menunggu Review</span>
-                                    @endif
-                                    <a href="{{ config('app.golang_api_url') }}{{ $latest['file_path'] }}" target="_blank"
-                                       class="text-xs text-primary-600 hover:underline flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                        Lihat v{{ $latest['version'] ?? 1 }}
-                                    </a>
-                                </div>
-
-                                {{-- Staff notes --}}
-                                @if($ln && ($ls === 'revision_requested' || $ls === 'rejected'))
-                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                                    <p class="text-xs font-semibold text-amber-700 mb-0.5">Catatan Staff:</p>
-                                    <p class="text-xs text-amber-800 italic">"{{ $ln }}"</p>
-                                </div>
-                                @endif
-
-                                {{-- Inline upload form for revision (for all active states) --}}
-                                @if(($ls === 'revision_requested' || $ls === 'rejected') && in_array($s, ['waiting_payment', 'payment_verification', 'paid', 'design_review']))
-                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data"
-                                      x-data="{ loading: false, fileName: '' }" @submit="loading = true"
-                                      class="mt-3">
-                                    @csrf
-                                    <div class="border-2 border-dashed border-amber-300 rounded-xl p-5 text-center bg-amber-50/10 hover:bg-amber-50/20 transition-all cursor-pointer relative"
-                                         :class="fileName ? 'border-primary-400 bg-primary-50/10' : ''">
-                                        <input type="file" name="file" id="file_{{ $item['id'] }}" required
-                                               class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                                               accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,.cdr"
-                                               @change="fileName = $event.target.files[0]?.name ?? ''">
-                                        <div class="relative z-0">
-                                            <svg class="w-8 h-8 mx-auto mb-2 text-amber-500" :class="fileName ? 'text-primary-500 animate-bounce' : ''"
-                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                            </svg>
-                                            <p class="text-xs font-semibold text-slate-700" x-text="fileName ? fileName : 'Pilih file revisi baru untuk diunggah'"></p>
-                                            <p class="text-[10px] text-slate-400 mt-0.5">Format: JPG, PNG, PDF, AI, PSD, CDR &bull; Maks. 10MB</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 flex items-center gap-2">
-                                        <button type="submit" :disabled="!fileName || loading"
-                                                class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition-colors disabled:opacity-40 shrink-0 whitespace-nowrap">
-                                            <span x-show="!loading" class="flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                                Upload Revisi (v{{ ($latest['version'] ?? 0) + 1 }})
-                                            </span>
-                                            <span x-show="loading" class="flex items-center gap-1" style="display:none">
-                                                <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                Mengecek AI...
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <p class="text-[10px] text-slate-400 mt-1">⚡ File akan otomatis diverifikasi resolusinya oleh sistem AI.</p>
-                                </form>
-                                @endif
-                            </div>
-                            @else
-                            <div class="mt-3">
-                                <span class="text-xs text-slate-400 italic">Belum ada desain terupload</span>
-                            </div>
-                            @endif
+                    @elseif($idx == $currentIdx)
+                        <div class="w-6 h-6 rounded-full bg-white border-[2px] border-primary-custom flex items-center justify-center text-primary-custom ring-4 ring-white">
+                            <div class="w-2.5 h-2.5 rounded-full bg-primary-custom"></div>
                         </div>
-                    </div>
+                    @else
+                        <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 text-[11px] font-bold ring-4 ring-white">
+                            {{ $idx + 1 }}
+                        </div>
+                    @endif
+                    <p class="text-[11px] font-semibold text-center mt-3 px-2 {{ $idx <= $currentIdx ? 'text-slate-800' : 'text-slate-400' }} leading-tight">
+                        {{ $step['label'] }}
+                    </p>
                 </div>
                 @endforeach
             </div>
         </div>
-
-        {{-- Order Notes --}}
-        @if(!empty($order['notes']))
-        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Catatan Pesanan</p>
-            <p class="text-sm text-slate-600">{{ $order['notes'] }}</p>
-        </div>
         @endif
 
-    </div>
-
-    {{-- Right Sidebar --}}
-    <div class="space-y-5 lg:sticky lg:top-24 lg:self-start">
-
-        {{-- Design Review Status --}}
-        @if(in_array($s, ['design_review','paid','printing','ready']))
-        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
-            <h3 class="font-bold text-slate-800 text-sm mb-4">Status Desain</h3>
-            @if($allApproved)
-                <div class="flex items-start gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
-                    <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div>
-                        <p class="text-sm font-bold text-green-800">Semua Disetujui ✅</p>
-                        <p class="text-xs text-green-600 mt-0.5">Desain memenuhi standar cetak.</p>
+        {{-- 2. Grid 2 Kolom --}}
+        <div class="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 items-start">
+            
+            {{-- Kolom Kiri --}}
+            <div class="space-y-6">
+                
+                {{-- Card: Detail Pesanan --}}
+                <div class="flat-card">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Detail Pesanan</h2>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        @foreach($order['items'] ?? [] as $item)
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                                @if(!empty($item['product_image']))
+                                    <img src="{{ config('app.golang_api_url') }}{{ $item['product_image'] }}" class="w-full h-full object-cover rounded">
+                                @else
+                                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-bold text-[13px] text-slate-900 leading-tight">{{ $item['product_name'] ?? '-' }}</p>
+                                        <p class="text-[12px] text-slate-500 mt-0.5">{{ $item['variant_name'] ?? '' }} &times; {{ $item['quantity'] ?? 1 }}</p>
+                                        <div class="mt-1.5">
+                                            @php
+                                                $ls = !empty($item['designs']) ? $item['designs'][count($item['designs'])-1]['status'] ?? '' : '';
+                                            @endphp
+                                            @if($ls === 'approved')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-success-custom text-success-custom">Disetujui</span>
+                                            @elseif($ls === 'revision_requested' || $ls === 'rejected')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-warning-custom text-warning-custom">Perlu Revisi</span>
+                                            @elseif(!empty($item['designs']))
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-primary-custom">Menunggu Review</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-warning-custom text-warning-custom">Belum upload desain</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <p class="font-bold text-[13px] text-slate-900 whitespace-nowrap">
+                                        Rp {{ number_format(($item['unit_price'] ?? 0) * ($item['quantity'] ?? 1), 0, ',', '.') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="px-5 pb-5">
+                        <div class="h-[1px] bg-slate-100 w-full mb-4"></div>
+                        <div class="flex justify-between items-center text-[13px] mb-2">
+                            <span class="text-slate-500">Subtotal Produk</span>
+                            <span class="font-semibold text-slate-800">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[13px]">
+                            <span class="text-slate-500">Biaya Layanan</span>
+                            <span class="font-semibold text-success-custom">Gratis</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 p-5 rounded-b-[12px] border-t border-slate-200 flex justify-between items-center">
+                        <span class="font-bold text-[13px] text-slate-700">Total Bayar</span>
+                        <span class="font-black text-[20px] text-primary-custom">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</span>
                     </div>
                 </div>
-            @elseif($hasRevision)
-                <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-                    <div>
-                        <p class="text-sm font-bold text-amber-800">Perlu Revisi</p>
-                        <p class="text-xs text-amber-600 mt-0.5">Ada desain yang ditolak staff.</p>
+
+                {{-- Card: Upload Desain --}}
+                <div class="flat-card">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Upload Desain</h2>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        @foreach($order['items'] ?? [] as $item)
+                        @php
+                            $designs   = $item['designs'] ?? [];
+                            $lastIdx   = count($designs) - 1;
+                            $latest    = $lastIdx >= 0 ? $designs[$lastIdx] : null;
+                            $ls        = $latest['status'] ?? '';
+                            $hasDesign = !empty($designs);
+                        @endphp
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <p class="font-bold text-[13px] text-slate-900">{{ $item['product_name'] ?? '-' }}</p>
+                                @if($hasDesign)
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-success-custom text-success-custom">Terupload</span>
+                                @endif
+                            </div>
+                            
+                            @if($hasDesign)
+                                <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-8 h-8 rounded bg-white border border-slate-200 flex items-center justify-center shrink-0 text-success-custom">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div class="min-w-0">
+                                            @php $fileName = basename($latest['file_path']); @endphp
+                                            <p class="text-[12px] font-semibold text-slate-700 truncate" title="{{ $fileName }}">{{ $fileName }}</p>
+                                            <div class="mt-1 flex items-center gap-2">
+                                                <span class="text-[11px] text-slate-500">Versi {{ $latest['version'] ?? 1 }}</span>
+                                                <span class="text-slate-300">&bull;</span>
+                                                @if($ls === 'approved')
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-custom/10 text-success-custom text-[10px] font-bold uppercase tracking-wider">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                        Accepted
+                                                    </span>
+                                                @else
+                                                    <span class="text-[11px] text-slate-500">
+                                                        {{ $ls === 'revision_requested' ? 'Perlu revisi' : 'Menunggu review' }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <a href="{{ config('app.golang_api_url') }}{{ $latest['file_path'] }}" target="_blank" class="px-2.5 py-1.5 rounded bg-white border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50">
+                                            Lihat
+                                        </a>
+                                        @if(in_array($s, ['waiting_payment', 'payment_verification', 'paid', 'design_review']) && $ls !== 'approved')
+                                        <div x-data="{ open: false }" class="relative">
+                                            <button @click="open = !open" class="px-2.5 py-1.5 rounded bg-white border border-slate-200 text-[11px] font-bold text-primary-custom hover:bg-slate-50">
+                                                Revisi
+                                            </button>
+                                            <div x-show="open" x-cloak class="absolute top-full mt-2 right-0 bg-white border border-slate-200 shadow-xl rounded-lg p-3 z-20 min-w-[280px]">
+                                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
+                                                    @csrf
+                                                    <input type="file" name="file" required class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-slate-100 file:text-slate-700 cursor-pointer">
+                                                    <button type="submit" class="w-full px-3 py-1.5 rounded bg-primary-custom text-white text-[11px] font-bold hover:opacity-90">Upload Revisi</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                @if($ls === 'revision_requested' && !empty($latest['notes']))
+                                    <p class="text-[11px] text-warning-custom mt-2 bg-warning-custom/50 px-2 py-1.5 rounded border border-warning-custom/20">Catatan Revisi: {{ $latest['notes'] }}</p>
+                                @endif
+                            @else
+                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="border border-dashed border-slate-300 rounded-lg p-6 text-center bg-slate-50 relative group">
+                                    @csrf
+                                    <svg class="w-6 h-6 text-slate-400 mx-auto mb-2 group-hover:text-primary-custom transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                    <p class="text-[12px] font-semibold text-slate-600 mb-1">Upload desain untuk item ini</p>
+                                    <p class="text-[11px] text-slate-500 mb-4">Format: JPG, PNG, PDF. Maks 10MB.</p>
+                                    <div class="flex items-center justify-center relative z-10">
+                                        <input type="file" name="file" required class="text-[11px] max-w-[200px] file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary-custom file:text-white hover:file:opacity-90 cursor-pointer text-transparent">
+                                        <button type="submit" class="ml-2 px-3 py-1.5 rounded border border-slate-300 text-slate-700 text-[11px] font-bold hover:bg-slate-200 bg-white shadow-sm">Upload</button>
+                                    </div>
+                                </form>
+                            @endif
+                        </div>
+                        @endforeach
                     </div>
                 </div>
-            @else
-                <div class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                    <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div>
-                        <p class="text-sm font-bold text-blue-800">Sedang Direview</p>
-                        <p class="text-xs text-blue-600 mt-0.5">Tim kami sedang memeriksa desain.</p>
+
+                {{-- Card: Upload Pembayaran --}}
+                <div class="flat-card" x-data="{ showForm: false }">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Upload Pembayaran</h2>
+                    </div>
+                    <div class="p-5">
+                        @if(!empty($order['payment']))
+                            @php 
+                                $ps = strtolower($order['payment']['payment_status'] ?? '');
+                                $rawProofUrl = $order['payment']['payment_proof'] ?? '';
+                                $filename = basename($rawProofUrl) ?: 'bukti_transfer.jpg';
+                                $proofUrl = str_starts_with($rawProofUrl, 'http') ? $rawProofUrl : config('app.golang_api_url', 'http://localhost:8080') . '/' . ltrim($rawProofUrl, '/');
+                            @endphp
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center gap-4">
+                                <div class="flex items-center gap-4 flex-1 min-w-0">
+                                    <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5 text-success-custom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-[13px] font-bold text-slate-700 truncate">{{ $filename }}</p>
+                                        <div class="mt-1">
+                                            @if($ps === 'approved')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-custom/10 text-success-custom text-[10px] font-bold uppercase tracking-wider">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    Accepted
+                                                </span>
+                                            @else
+                                                <p class="text-[11px] text-slate-500">Menunggu verifikasi admin</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                    @if(!empty($rawProofUrl))
+                                        <a href="{{ $proofUrl }}" target="_blank" class="px-4 py-1.5 bg-white border border-slate-300 text-slate-600 font-bold text-[12px] rounded-lg hover:bg-slate-50 transition-colors text-center">Lihat</a>
+                                    @endif
+                                    @if($ps !== 'approved' && !$paymentRejected)
+                                        <button @click="showForm = !showForm" class="px-4 py-1.5 bg-white border border-slate-300 text-primary-custom font-bold text-[12px] rounded-lg hover:bg-blue-50 transition-colors text-center">Revisi</button>
+                                    @endif
+                                </div>
+                            </div>
+                            @if($paymentRejected)
+                                <div class="mt-4 p-3 rounded-lg bg-red-50 border border-danger-custom text-danger-custom text-[12px]">
+                                    <b class="block mb-1">Bukti Ditolak:</b> {{ $order['payment_reject_notes'] ?? 'Silakan upload ulang.' }}
+                                    <button @click="showForm = !showForm" class="block mt-2 font-bold underline">Upload Ulang Bukti</button>
+                                </div>
+                            @endif
+                        @else
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="w-8 h-8 rounded bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-[13px] font-bold text-slate-800 leading-tight">Belum ada bukti pembayaran</p>
+                                    <p class="text-[12px] text-slate-500 mt-0.5">Silakan upload bukti transfer agar pesanan diproses.</p>
+                                </div>
+                            </div>
+                            
+                            @if($allDesignsUploaded)
+                                <button x-show="!showForm" @click="showForm = true" class="w-full py-2.5 bg-primary-custom text-white font-bold text-[13px] rounded-lg hover:opacity-90 transition-opacity">
+                                    Upload bukti pembayaran
+                                </button>
+                            @else
+                                <button disabled class="w-full py-2.5 bg-slate-100 text-slate-400 font-bold text-[13px] rounded-lg cursor-not-allowed border border-slate-200">
+                                    Upload Semua Desain Dulu
+                                </button>
+                            @endif
+                        @endif
+
+                        {{-- Inline Payment Form --}}
+                        <div x-show="showForm" x-cloak class="mt-4 pt-4 border-t border-slate-100">
+                            <form action="/pembayaran/{{ $order['id'] }}/upload" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ bank: '1' }">
+                                @csrf
+                                
+                                {{-- Metode Pembayaran: Bank Selection --}}
+                                <div>
+                                    <label class="block text-[12px] font-bold text-slate-700 mb-2">Pilih Bank Tujuan</label>
+                                    <div class="grid grid-cols-2 gap-3 mb-4">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="method_id" value="1" x-model="bank" class="peer sr-only">
+                                            <div class="p-3 border border-slate-200 rounded-lg text-center peer-checked:border-primary-custom peer-checked:bg-blue-50 transition-colors">
+                                                <p class="font-bold text-[13px] text-slate-900">Bank BCA</p>
+                                            </div>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="method_id" value="2" x-model="bank" class="peer sr-only">
+                                            <div class="p-3 border border-slate-200 rounded-lg text-center peer-checked:border-primary-custom peer-checked:bg-blue-50 transition-colors">
+                                                <p class="font-bold text-[13px] text-slate-900">Bank Mandiri</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    {{-- Account Details Card --}}
+                                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-2">
+                                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Transfer Ke Rekening</p>
+                                        <div x-show="bank === '1'">
+                                            <div class="flex justify-between items-center mt-2">
+                                                <div>
+                                                    <p class="text-2xl font-black text-slate-900 tracking-wider font-mono">1234 567 890</p>
+                                                    <p class="text-[12px] text-slate-500 font-semibold mt-1">a.n. Jaya Mandiri Printing</p>
+                                                </div>
+                                                <div class="font-black text-primary-custom italic text-xl">BCA</div>
+                                            </div>
+                                        </div>
+                                        <div x-show="bank === '2'" x-cloak>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <div>
+                                                    <p class="text-2xl font-black text-slate-900 tracking-wider font-mono">098 7654 321</p>
+                                                    <p class="text-[12px] text-slate-500 font-semibold mt-1">a.n. Jaya Mandiri Printing</p>
+                                                </div>
+                                                <div class="font-black text-blue-700 italic text-xl">Mandiri</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {{-- Nominal Transfer & Hidden Code --}}
+                                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Nominal Transfer</p>
+                                        <input type="hidden" name="amount" value="{{ $order['total_price'] }}">
+                                        <input type="hidden" name="transaction_code" value="AUTO-{{ $order['order_code'] }}-{{ time() }}">
+                                        <p class="text-xl font-black text-primary-custom">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+
+                                {{-- Bukti Transfer --}}
+                                <div>
+                                    <label class="block text-[12px] font-bold text-slate-700 mb-2">Upload Bukti Transfer</label>
+                                    <div class="relative border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 hover:border-primary-custom transition-colors cursor-pointer group">
+                                        <input type="file" name="proof" required accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="document.getElementById('file-name').textContent = this.files[0].name; document.getElementById('file-icon').classList.add('text-primary-custom');">
+                                        <svg id="file-icon" class="w-8 h-8 text-slate-400 mx-auto mb-2 group-hover:text-primary-custom transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <p id="file-name" class="font-bold text-[13px] text-slate-700 mb-1 group-hover:text-primary-custom">Klik untuk memilih file</p>
+                                        <p class="text-[11px] text-slate-500">Mendukung JPG, PNG, atau PDF</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-2 pt-2">
+                                    <button type="submit" class="flex-1 py-3 bg-primary-custom text-white font-bold text-[13px] rounded-lg hover:opacity-90 shadow-lg shadow-primary-custom/20">Kirim Bukti Pembayaran</button>
+                                    <button type="button" @click="showForm = false" class="px-4 py-3 bg-white border border-slate-300 text-slate-600 font-bold text-[13px] rounded-lg hover:bg-slate-50">Batal</button>
+                                </div>
+                            </form>
+                        </div>
+                        </div>
                     </div>
                 </div>
-            @endif
-        </div>
-        @endif
 
-        {{-- Payment Info --}}
-        <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
-            <h3 class="font-bold text-slate-800 text-sm mb-4">Ringkasan Pembayaran</h3>
-            <div class="space-y-2.5 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Subtotal</span>
-                    <span class="font-semibold text-slate-800">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Biaya Layanan</span>
-                    <span class="font-semibold text-green-600">Gratis</span>
-                </div>
-                <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
-                    <span class="font-bold text-slate-900">Total</span>
-                    <span class="font-black text-primary-700 text-lg">Rp {{ number_format($order['total_price'] ?? 0, 0, ',', '.') }}</span>
-                </div>
+
+
             </div>
 
-            @if(!empty($order['payment']))
-            <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                <div class="flex items-center justify-between">
-                    <p class="text-xs text-slate-500 font-semibold">Status Bayar</p>
-                    @php $ps = strtolower($order['payment']['payment_status'] ?? ''); @endphp
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full
-                        {{ $ps === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                        {{ strtoupper($ps === 'success' ? 'Terverifikasi' : $ps) }}
-                    </span>
+            {{-- Kolom Kanan (Sidebar) --}}
+            <div class="space-y-6">
+                
+                {{-- Card: Info Pesanan --}}
+                <div class="flat-card">
+                    <div class="p-5 border-b border-slate-100">
+                        <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Info Pesanan</h2>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500 mb-0.5">Kode pesanan</p>
+                                <p class="font-bold text-[13px] text-slate-900">{{ $order['order_code'] ?? '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="h-[1px] bg-slate-100 w-full"></div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500 mb-0.5">Pengambilan</p>
+                                <p class="font-bold text-[13px] text-slate-900">Di Toko (Pick-up)</p>
+                            </div>
+                        </div>
+                        <div class="h-[1px] bg-slate-100 w-full"></div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500 mb-0.5">Estimasi selesai</p>
+                                <p class="font-bold text-[13px] text-slate-900">1 - 2 Hari Kerja</p>
+                            </div>
+                        </div>
+                        <div class="h-[1px] bg-slate-100 w-full"></div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-500 mb-0.5">Tanggal pesan</p>
+                                <p class="font-bold text-[13px] text-slate-900">{{ \Carbon\Carbon::parse($order['created_at'] ?? now())->format('d M Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-xs text-slate-600">Metode: <span class="font-semibold text-slate-800">{{ $order['payment']['method_name'] ?? '-' }}</span></p>
-                @if(!empty($order['payment']['transaction_code']))
-                <p class="text-xs text-slate-600">Kode: <span class="font-mono font-semibold text-slate-800">{{ $order['payment']['transaction_code'] }}</span></p>
-                @endif
-            </div>
-            @else
-            <div class="mt-4 p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
-                <p class="text-xs text-slate-400 italic">Belum ada pembayaran</p>
-            </div>
-            @endif
 
-            {{-- Proceed to pay CTA --}}
-            @if($s === 'waiting_payment' && $allDesignsUploaded)
-            <a href="/pesanan/{{ $order['id'] }}/pembayaran"
-               class="mt-4 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors w-full">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                Konfirmasi Pembayaran
-            </a>
-            @elseif($s === 'waiting_payment')
-            <a href="/pesanan/{{ $order['id'] }}/upload-desain"
-               class="mt-4 flex items-center justify-center gap-2 border-2 border-primary-200 text-primary-700 font-bold text-sm px-5 py-3 rounded-xl hover:bg-primary-50 transition-colors w-full">
-                Upload Desain Dulu
-            </a>
-            @elseif($paymentRejected)
-            <a href="/pesanan/{{ $order['id'] }}/pembayaran"
-               class="mt-4 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors w-full">
-                Unggah Ulang Bukti Bayar
-            </a>
-            @endif
+                {{-- Card: Butuh Bantuan? --}}
+                <div class="flat-card p-5">
+                    <h3 class="font-bold text-[13px] text-slate-900 mb-1">Butuh Bantuan?</h3>
+                    <p class="text-[12px] text-slate-500 mb-4">Hubungi kami jika ada kendala pesanan.</p>
+                    <a href="https://wa.me/628123456789" target="_blank" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary-custom text-primary-custom font-bold text-[13px] hover:bg-blue-50 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Hubungi via WhatsApp
+                    </a>
+                </div>
+
+            </div>
         </div>
 
     </div>
