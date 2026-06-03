@@ -42,6 +42,7 @@ class ProductController extends Controller
     public function catalog(Request $request)
     {
         $products = [];
+        $categories = [];
         $search   = $request->query('q', '');
 
         try {
@@ -49,11 +50,28 @@ class ProductController extends Controller
             if ($response->successful()) {
                 $all = $response->json('data') ?? $response->json() ?? [];
 
+                // Extract unique categories
+                $categories = collect($all)
+                    ->pluck('category_name')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->toArray();
+
                 // Filter by search query
                 if ($search) {
                     $all = array_filter($all, fn($p) =>
                         stripos($p['name'] ?? '', $search) !== false ||
                         stripos($p['description'] ?? '', $search) !== false
+                    );
+                }
+
+                // Filter by category
+                if ($request->filled('category')) {
+                    $cat = $request->query('category');
+                    $all = array_filter($all, fn($p) =>
+                        strcasecmp($p['category_name'] ?? '', $cat) === 0 ||
+                        stripos($p['category_name'] ?? '', $cat) !== false
                     );
                 }
 
@@ -64,7 +82,7 @@ class ProductController extends Controller
         }
 
         $apiUrl = $this->apiUrl;
-        return view('catalog', compact('products', 'search', 'apiUrl'));
+        return view('catalog', compact('products', 'categories', 'search', 'apiUrl'));
     }
 
     // =========================================================================

@@ -9,6 +9,10 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
+    --animate-aurora: aurora 60s linear infinite;
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
+
     /* Primary: Blue */
     --color-primary-50: #eff6ff;
     --color-primary-100: #dbeafe;
@@ -32,7 +36,72 @@
     --color-secondary-700: #047857;
 }
 
+/* Aurora background color tokens */
+:root {
+    --white: #ffffff;
+    --black: #000000;
+    --transparent: transparent;
+    --blue-500: #3b82f6;
+    --blue-400: #60a5fa;
+    --blue-300: #93c5fd;
+    --indigo-300: #a5b4fc;
+    --violet-200: #ddd6fe;
+}
+
+@keyframes aurora {
+    from {
+        background-position: 50% 50%, 50% 50%;
+    }
+    to {
+        background-position: 350% 50%, 350% 50%;
+    }
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes gradient-rotate {
+  from { --gradient-angle: 0deg; }
+  to { --gradient-angle: 360deg; }
+}
+
+.gradient-border-auto {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+.gradient-border-hover:hover {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+.gradient-border-stop-hover {
+  animation: gradient-rotate var(--animation-duration, 5s) linear infinite;
+}
+.gradient-border-stop-hover:hover {
+  animation-play-state: paused;
+}
+
 @layer base {
+    :root {
+        --ds-blue-900: oklch(53.18% 0.2399 256.9900584162342);
+        --ds-gray-1000: hsla(0, 0%, 9%, 1);
+    }
+
+    .dark {
+        --ds-blue-900: oklch(71.7% 0.1648 250.79360374054167);
+        --ds-gray-1000: hsla(0, 0%, 93%, 1);
+    }
+
     * {
         @apply scroll-smooth;
     }

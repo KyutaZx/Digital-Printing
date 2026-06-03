@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="20 20 130 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Layer 4 (Darkest Blue) -->
+<path d="M145 55V115C145 160 100 180 55 155L65 125C95 145 115 130 115 110V55H145Z" fill="#1e3a8a" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"/>
+<!-- Layer 3 (Blue) -->
+<path d="M135 45V105C135 150 90 170 45 145L55 115C85 135 105 120 105 100V45H135Z" fill="#2563eb" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"/>
+<!-- Layer 2 (Light Blue) -->
+<path d="M125 35V95C125 140 80 160 35 135L45 105C75 125 95 110 95 90V35H125Z" fill="#38bdf8" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"/>
+<!-- Layer 1 (White) -->
+<path d="M115 25V85C115 130 70 150 25 125L35 95C65 115 85 100 85 80V25H115Z" fill="white" stroke="#0f172a" stroke-width="6" stroke-linejoin="round"/>
+</svg>

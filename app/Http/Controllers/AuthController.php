@@ -23,7 +23,7 @@ class AuthController extends Controller
         if (session('token')) {
             return $this->redirectByRole(session('user.role', 'customer'));
         }
-        return view('auth.login');
+        return view('auth.auth', ['mode' => 'login']);
     }
 
     // =========================================================================
@@ -34,7 +34,7 @@ class AuthController extends Controller
         if (session('token')) {
             return redirect('/');
         }
-        return view('auth.register');
+        return view('auth.auth', ['mode' => 'register']);
     }
 
     // =========================================================================
@@ -101,7 +101,7 @@ class AuthController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email',
             'phone'    => 'required|string',
-            'password' => 'required|min:8',
+            'password' => 'required',
         ]);
 
         try {

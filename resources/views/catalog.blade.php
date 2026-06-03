@@ -7,89 +7,89 @@
 <div class="min-h-screen bg-slate-50">
 
     {{-- Page Header --}}
-    <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 px-4">
-        <div class="max-w-7xl mx-auto text-center fade-in">
-            <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-[10px] font-bold px-3 py-1.5 rounded-full mb-4 uppercase tracking-widest">Katalog</span>
+    <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-[10px] font-bold px-3 py-1.5 rounded-full mb-3 uppercase tracking-widest">Katalog</span>
             <h1 class="text-3xl md:text-4xl font-black text-white mb-2">Katalog Produk</h1>
-            <p class="text-slate-400 text-sm mb-8">Temukan produk cetak yang Anda butuhkan</p>
+            <p class="text-slate-400 text-sm mb-6 max-w-2xl">
+                Temukan produk cetak yang Anda butuhkan. Mulai dari perlengkapan bisnis hingga cetakan kustom.
+            </p>
 
-            {{-- Search --}}
-            <form method="GET" action="/katalog" class="max-w-lg mx-auto">
-                <div class="relative">
+            {{-- Search & Categories --}}
+            <div class="flex flex-col gap-5">
+                {{-- Search Bar --}}
+                <form method="GET" action="/katalog" class="relative w-full max-w-2xl">
+                    @if(request('category'))
+                        <input type="hidden" name="category" value="{{ request('category') }}">
+                    @endif
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" name="q" value="{{ $search ?? '' }}"
                            placeholder="Cari produk (banner, sticker, kaos...)"
-                           class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white/20 transition-all">
-                    @if($search)
-                    <a href="/katalog" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                           class="w-full pl-12 pr-4 py-3 rounded-full bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white/20 transition-all shadow-inner">
+                </form>
+
+                {{-- Categories --}}
+                <div class="flex flex-nowrap md:flex-wrap overflow-x-auto gap-3 hide-scrollbar pb-2 md:pb-0 w-full">
+                    @php
+                        $currentCategory = request('category', '');
+                    @endphp
+
+                    {{-- 'All' category button --}}
+                    <a href="/katalog" 
+                       class="whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-colors {{ $currentCategory == '' ? 'bg-primary-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                        Semua
                     </a>
-                    @endif
+
+                    @php
+                        $presetCategories = ['Banner Outdoor', 'Spanduk', 'Kartu Nama', 'Kalender', 'Kaos Printing', 'Kemasan', 'Kanvas Print'];
+                        
+                        // Merge preset with dynamic ones (if any) and remove duplicates, case-insensitive
+                        $allCats = collect($presetCategories);
+                        if(isset($categories) && is_iterable($categories)) {
+                            foreach($categories as $c) {
+                                if(!$allCats->contains(function ($val) use ($c) {
+                                    return strtolower($val) === strtolower($c);
+                                })) {
+                                    $allCats->push($c);
+                                }
+                            }
+                        }
+                    @endphp
+
+                    {{-- Categories List --}}
+                    @foreach($allCats as $cat)
+                        <a href="/katalog?category={{ urlencode($cat) }}" 
+                           class="whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium transition-colors {{ strcasecmp($currentCategory, $cat) === 0 ? 'bg-primary-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                            {{ $cat }}
+                        </a>
+                    @endforeach
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
     {{-- Products Grid --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
         @if($search)
         <p class="text-slate-600 mb-6 text-sm">
             Hasil pencarian untuk "<span class="font-bold text-primary-600">{{ $search }}</span>" — {{ count($products) }} produk ditemukan
         </p>
         @endif
 
-        @if(count($products) > 0)
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            @foreach($products as $product)
-            <a href="/produk/{{ $product['id'] }}" class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
-                {{-- Product Image --}}
-                <div class="aspect-square bg-slate-100 overflow-hidden">
-                    @if(!empty($product['image']))
-                        <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    @else
-                        <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span class="text-xs">Foto belum ada</span>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Info --}}
-                <div class="p-4">
-                    <span class="badge badge-blue text-xs mb-2">{{ $product['category_name'] ?? 'Printing' }}</span>
-                    <h3 class="font-bold text-slate-900 text-sm mb-2 line-clamp-2 leading-snug group-hover:text-primary-600 transition-colors">
-                        {{ $product['name'] }}
-                    </h3>
-                    <p class="text-xs text-slate-400 line-clamp-2 mb-3">{{ $product['description'] ?? '' }}</p>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400">Mulai dari</span>
-                            <p class="text-primary-600 font-black text-base">
-                                Rp {{ number_format($product['base_price'] ?? 0, 0, ',', '.') }}
-                            </p>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-primary-50 group-hover:bg-primary-600 flex items-center justify-center transition-colors">
-                            <svg class="w-4 h-4 text-primary-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-
-        @else
-        <div class="text-center py-24">
-            <div class="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </div>
-            <h3 class="text-xl font-bold text-slate-900 mb-2">Produk Tidak Ditemukan</h3>
-            <p class="text-slate-500 mb-6">Coba kata kunci yang berbeda atau lihat semua produk kami.</p>
-            <a href="/katalog" class="btn-primary">Lihat Semua Produk</a>
-        </div>
-        @endif
+        {{-- React Entry Point --}}
+        <script type="application/json" id="catalog-data">
+            {!! json_encode($products) !!}
+        </script>
+        <script type="text/plain" id="api-url">
+            {{ $apiUrl ?? '' }}
+        </script>
+        
+        <div id="catalog-grid-root" class="w-full"></div>
 
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/catalog-grid.jsx'])
+@endpush

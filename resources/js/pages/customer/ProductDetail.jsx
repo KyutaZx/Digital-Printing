@@ -151,12 +151,6 @@ export default function ProductDetail() {
             <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">{product.name}</h1>
             
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center text-yellow-400">
-                <Star className="fill-yellow-400 w-5 h-5" />
-                <span className="text-slate-700 font-bold ml-1">4.8</span>
-                <span className="text-slate-500 font-normal ml-1 text-sm">(120 ulasan)</span>
-              </div>
-              <div className="w-1 h-1 rounded-full bg-slate-300"></div>
               {product.stock > 10 ? (
                 <Badge variant="success">Tersedia</Badge>
               ) : (
@@ -263,7 +257,7 @@ export default function ProductDetail() {
         {/* Tabs section */}
         <SlideUp delay={0.2} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="flex border-b border-slate-200 overflow-x-auto hide-scrollbar">
-            {['deskripsi', 'spesifikasi', 'ulasan'].map((tab) => (
+            {['deskripsi', 'spesifikasi'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -309,19 +303,7 @@ export default function ProductDetail() {
                   </div>
                 </m.div>
               )}
-              {activeTab === 'ulasan' && (
-                <m.div
-                  key="ulasan"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="text-center py-12"
-                >
-                  <Star className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada ulasan untuk produk ini</h3>
-                  <p className="text-slate-500">Jadilah yang pertama memberikan ulasan setelah membeli produk ini.</p>
-                </m.div>
-              )}
+
             </AnimatePresence>
           </div>
         </SlideUp>

@@ -19,9 +19,9 @@
         {{-- Content --}}
         <div class="relative z-10 w-full p-12 flex flex-col justify-between h-full">
             <div>
-                <a href="/" class="flex items-center gap-3 w-fit group">
-                    <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <a href="/" class="flex items-center gap-2 w-fit group">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
+                        <img src="{{ asset('images/logo-j.svg') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-sm">
                     </div>
                     <span class="text-2xl font-black text-white tracking-tight">Jaya<span class="text-primary-400">Mandiri</span></span>
                 </a>
@@ -44,9 +44,9 @@
         
         <div class="w-full max-w-md relative z-10 fade-in">
             {{-- Mobile Logo --}}
-            <div class="lg:hidden flex items-center justify-center gap-3 mb-10">
-                <div class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <div class="lg:hidden flex items-center justify-center gap-2 mb-10">
+                <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                    <img src="{{ asset('images/logo-j.svg') }}" alt="Logo" class="w-full h-full object-contain drop-shadow-sm">
                 </div>
                 <span class="text-3xl font-black text-slate-900 tracking-tight">Jaya<span class="text-primary-600">Mandiri</span></span>
             </div>

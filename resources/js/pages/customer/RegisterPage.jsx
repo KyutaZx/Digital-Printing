@@ -64,8 +64,8 @@ export default function RegisterPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary-500/30">
-            J
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <img src="/images/logo-j.svg" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
           </div>
           <span className="font-bold text-2xl text-slate-900 tracking-tight">
             Jaya Mandiri

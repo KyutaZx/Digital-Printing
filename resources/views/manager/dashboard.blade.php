@@ -1,4 +1,4 @@
-@extends('layouts.manager')
+﻿@extends('layouts.manager')
 
 @section('title', 'Manager Dashboard')
 @section('page_title', 'Business Overview')
@@ -31,7 +31,7 @@
                         <div class="mt-3 flex items-center gap-2">
                             @php $trend = $stats['omzet_trend'] ?? 0; @endphp
                             <span class="px-2 py-1 rounded-lg text-[10px] font-black {{ $trend >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400' }}">
-                                {{ $trend >= 0 ? '▲' : '▼' }} {{ abs(round($trend)) }}%
+                                {{ $trend >= 0 ? 'â–²' : 'â–¼' }} {{ abs(round($trend)) }}%
                             </span>
                             <span class="text-[10px] font-medium text-slate-500">vs bulan lalu</span>
                         </div>
