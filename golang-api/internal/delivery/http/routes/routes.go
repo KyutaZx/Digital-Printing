@@ -20,6 +20,7 @@ func SetupRoutes(
 	designHandler *handler.DesignHandler,
 	reportHandler *handler.ReportHandler,
 	userHandler *handler.UserHandler,
+	categoryHandler *handler.CategoryHandler,
 	userRepo user.Repository,
 ) {
 
@@ -50,6 +51,9 @@ func SetupRoutes(
 	// ========================
 	r.GET("/products", productHandler.GetAll)
 	r.GET("/products/:id", productHandler.GetByID)
+	
+	r.GET("/categories", categoryHandler.GetAll)
+	r.GET("/categories/:id", categoryHandler.GetByID)
 
 	// ========================
 	// PROTECTED ROUTES (JWT REQUIRED)
@@ -116,6 +120,12 @@ func SetupRoutes(
 			admin.POST("/products/:id/image", productHandler.UpdateImage) // 🔥 Upload Foto Produk
 			admin.PUT("/products/:id", productHandler.Update)
 			admin.DELETE("/products/:id", productHandler.Delete)
+
+			// 🔥 Category Management (Admin/Owner)
+			admin.POST("/categories", categoryHandler.Create)
+			admin.POST("/categories/:id/image", categoryHandler.UploadImage)
+			admin.PUT("/categories/:id", categoryHandler.Update)
+			admin.DELETE("/categories/:id", categoryHandler.Delete)
 
 			// 🔥 Reports & Monitoring (Owner Only)
 			admin.GET("/reports/revenue", reportHandler.GetRevenueReport)

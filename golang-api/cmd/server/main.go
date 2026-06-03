@@ -50,6 +50,7 @@ func main() {
 	cartRepo := postgresRepo.NewCartRepository(dbConn)
 	paymentRepo := postgresRepo.NewPaymentRepository(dbConn)
 	auditRepo := postgresRepo.NewAuditRepository(dbConn) // Wajib ada untuk logging
+	categoryRepo := postgresRepo.NewCategoryRepository(dbConn)
 
 	// 🔥 TAMBAHAN: Inisialisasi Production, Material & Design Repository
 	productionRepo := postgresRepo.NewProductionRepository(dbConn)
@@ -65,6 +66,7 @@ func main() {
 	orderUsecase := usecase.NewOrderUsecase(orderRepo, auditRepo)
 	cartUsecase := usecase.NewCartUsecase(cartRepo)
 	paymentUsecase := usecase.NewPaymentUsecase(paymentRepo, orderRepo, auditRepo)
+	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
 
 	// 🔥 TAMBAHAN: Inisialisasi Production, Material & Design Usecase
 	productionUsecase := usecase.NewProductionUsecase(productionRepo, auditRepo)
@@ -81,6 +83,7 @@ func main() {
 	orderHandler := handler.NewOrderHandler(orderUsecase)
 	cartHandler := handler.NewCartHandler(cartUsecase)
 	paymentHandler := handler.NewPaymentHandler(paymentUsecase)
+	categoryHandler := handler.NewCategoryHandler(categoryUsecase)
 
 	// 🔥 TAMBAHAN: Inisialisasi Production, Material & Design Handler
 	productionHandler := handler.NewProductionHandler(productionUsecase)
@@ -132,6 +135,7 @@ func main() {
 		designHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		reportHandler,     // 🔥 DIMASUKKAN KE PARAMETER SETUP ROUTES
 		userHandler,       // 🔥 TAMBAHAN UNTUK USER MANAGEMENT
+		categoryHandler,
 		userRepo,          // 🔥 TAMBAHAN UNTUK MIDDLEWARE
 	)
 

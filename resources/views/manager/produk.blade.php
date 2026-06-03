@@ -7,7 +7,7 @@
 <div x-data="{ 
     modalOpen: false, 
     editMode: false, 
-    currentProduct: { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] },
+    currentProduct: { name: '', description: '', base_price: '', category_id: '', estimated_days: 1, variants: [] },
     variants: [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }],
     addVariant() { this.variants.push({ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }); },
     removeVariant(i) { if (this.variants.length > 1) this.variants.splice(i, 1); },
@@ -29,7 +29,7 @@
             }
         } else {
             this.editMode = false;
-            this.currentProduct = { name: '', description: '', base_price: '', category_name: 'Printing Digital', estimated_days: 1, variants: [] };
+            this.currentProduct = { name: '', description: '', base_price: '', category_id: '', estimated_days: 1, variants: [] };
             this.variants = [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }];
         }
         this.modalOpen = true;
@@ -125,16 +125,11 @@
                     </div>
                     <div>
                         <label class="form-label">Kategori</label>
-                        <select name="category_name" x-model="currentProduct.category_name" class="form-input text-sm" required>
-                            <option value="Printing Digital">🖨️ Printing Digital</option>
-                            <option value="Poster & Brosur">📄 Poster &amp; Brosur</option>
-                            <option value="Cetak Buku & Majalah">📚 Cetak Buku &amp; Majalah</option>
-                            <option value="Banner & Spanduk">🏷️ Banner &amp; Spanduk</option>
-                            <option value="Sticker & Label">🔖 Sticker &amp; Label</option>
-                            <option value="Kartu & Undangan">💌 Kartu &amp; Undangan</option>
-                            <option value="Kaos & Merchandise">👕 Kaos &amp; Merchandise</option>
-                            <option value="Outdoor Advertising">📢 Outdoor Advertising</option>
-                            <option value="Packaging & Dus">📦 Packaging &amp; Dus</option>
+                        <select name="category_id" x-model="currentProduct.category_id" class="form-input text-sm" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat['id'] }}">{{ $cat['name'] }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

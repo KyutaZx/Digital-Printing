@@ -11,6 +11,17 @@ function CatalogGrid({ products, apiUrl }) {
     }).format(price);
   };
 
+  const getFallbackImage = (name) => {
+    const initial = name ? name.charAt(0).toUpperCase() : 'P';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#1A56E8"/>
+      <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="sans-serif" font-size="120" font-weight="bold" fill="white" opacity="0.9">
+        ${initial}
+      </text>
+    </svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  };
+
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-24">
@@ -31,7 +42,7 @@ function CatalogGrid({ products, apiUrl }) {
           key={product.id}
           title={product.name}
           pricePerNight={formatPrice(product.base_price || 0)}
-          images={product.image ? [`${apiUrl}${product.image}`] : ['https://placehold.co/400x300?text=No+Image']}
+          images={product.image ? [`${apiUrl}${product.image}`] : [getFallbackImage(product.name)]}
           description={product.description || 'Produk berkualitas tinggi yang dapat disesuaikan dengan kebutuhan cetak Anda.'}
           rating={4.8}
           tags={[product.category_name || 'Printing']}

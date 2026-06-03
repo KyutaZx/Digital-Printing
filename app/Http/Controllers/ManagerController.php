@@ -110,28 +110,20 @@ class ManagerController extends Controller
             $products = [];
         }
 
+        try {
+            $rCat = Http::timeout(10)->get("{$this->apiUrl}/categories");
+            $categories = $rCat->successful() ? ($rCat->json('data') ?? []) : [];
+        } catch (\Exception $e) {
+            $categories = [];
+        }
+
         $materials = $this->apiGet('/api/admin/materials');
 
         $apiUrl = $this->apiUrl;
-        return view('manager.produk', compact('products', 'materials', 'apiUrl'));
+        return view('manager.produk', compact('products', 'materials', 'categories', 'apiUrl'));
     }
 
-    private function mapCategoryNameToId($name)
-    {
-        $map = [
-            'Printing Digital'      => 1,
-            'Printing'              => 1,   // backward compat
-            'Poster & Brosur'       => 9,
-            'Cetak Buku & Majalah'  => 2,
-            'Banner & Spanduk'      => 3,
-            'Sticker & Label'       => 4,
-            'Kartu & Undangan'      => 5,
-            'Kaos & Merchandise'    => 6,
-            'Outdoor Advertising'   => 7,
-            'Packaging & Dus'       => 8,
-        ];
-        return $map[$name] ?? 1;  // Default ke Printing Digital
-    }
+
 
     public function storeProduk(Request $request)
     {
@@ -175,7 +167,7 @@ class ManagerController extends Controller
         }
 
         $payload = [
-            'category_id'    => $this->mapCategoryNameToId($request->category_name ?? 'Printing Digital'),
+            'category_id'    => (int) $request->category_id,
             'name'           => $request->name,
             'description'    => $request->description ?? '',
             'base_price'     => (float) $request->base_price,
@@ -252,7 +244,7 @@ class ManagerController extends Controller
         }
 
         $payload = [
-            'category_id'    => $this->mapCategoryNameToId($request->category_name ?? 'Printing Digital'),
+            'category_id'    => (int) $request->category_id,
             'name'           => $request->name,
             'description'    => $request->description ?? '',
             'base_price'     => (float) $request->base_price,
@@ -457,5 +449,71 @@ class ManagerController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
+    }
+
+    // =========================================================================
+    // Manajemen Kategori
+    // =========================================================================
+    public function kategori()
+    {
+        try {
+            $r = Http::timeout(10)->get("{$this->apiUrl}/categories");
+            $categories = $r->successful() ? ($r->json('data') ?? []) : [];
+        } catch (\Exception $e) {
+            $categories = [];
+        }
+
+        $apiUrl = $this->apiUrl;
+        return view('manager.kategori', compact('categories', 'apiUrl'));
+    }
+
+    public function storeKategori(Request $request)
+    {
+        $payload = [
+            'name'        => $request->name,
+            'description' => $request->description ?? '',
+        ];
+
+        $response = $this->apiPost('/api/admin/categories', $payload);
+
+        if ($response && isset($response['data']['id']) && $request->hasFile('image')) {
+            $this->updateKategoriImage($response['data']['id'], $request->file('image'));
+        }
+
+        return redirect()->back()->with('success', 'Kategori berhasil ditambahkan!');
+    }
+
+    public function updateKategori(Request $request, $id)
+    {
+        $payload = [
+            'name'        => $request->name,
+            'description' => $request->description ?? '',
+        ];
+
+        $this->apiPut("/api/admin/categories/{$id}", $payload);
+
+        if ($request->hasFile('image')) {
+            $this->updateKategoriImage($id, $request->file('image'));
+        }
+
+        return redirect()->back()->with('success', 'Kategori berhasil diupdate!');
+    }
+
+    public function deleteKategori($id)
+    {
+        $this->apiDelete("/api/admin/categories/{$id}");
+        return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
+    }
+
+    private function updateKategoriImage($id, $file)
+    {
+        $token = Session::get('jwt_token');
+        Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->attach(
+            'image',
+            file_get_contents($file->getPathname()),
+            $file->getClientOriginalName()
+        )->post("{$this->apiUrl}/api/admin/categories/{$id}/image");
     }
 }

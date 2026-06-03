@@ -29,21 +29,7 @@
 @section('content')
 @php
     $apiUrl = $apiUrl ?? config('app.golang_api_url', 'http://localhost:8080');
-    $productList = isset($products) && count($products) > 0 ? array_slice($products, 0, 3) : [
-        ['id' => 0, 'name' => 'Brosur A4 Premium', 'category_name' => 'Promosi', 'base_price' => 50000, 'image' => null, 'placeholder' => 'from-violet-500 to-purple-700'],
-        ['id' => 0, 'name' => 'Poster', 'category_name' => 'Indoor', 'base_price' => 5000, 'image' => null, 'placeholder' => 'from-rose-500 to-orange-600'],
-        ['id' => 0, 'name' => 'Banner', 'category_name' => 'Outdoor', 'base_price' => 10000, 'image' => null, 'placeholder' => 'from-primary-600 to-blue-800'],
-    ];
-    $services = [
-        ['label' => 'Sticker Custom', 'desc' => 'Vinyl waterproof untuk branding produk & kendaraan.', 'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
-        ['label' => 'Banner Outdoor', 'desc' => 'Flexi premium tahan cuaca untuk promosi luar ruang.', 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
-        ['label' => 'Spanduk', 'desc' => 'Cetak spanduk event & toko dengan finishing rapi.', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
-        ['label' => 'Kartu Nama', 'desc' => 'Berbagai finishing: matte, glossy, dan spot UV.', 'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
-        ['label' => 'Kalender', 'desc' => 'Kalender meja & dinding custom untuk corporate gift.', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-        ['label' => 'Kaos Printing', 'desc' => 'DTF & sublimasi dengan warna tajam dan awet.', 'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
-        ['label' => 'Kemasan', 'desc' => 'Box & packaging custom untuk produk UMKM.', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
-        ['label' => 'Kanvas Print', 'desc' => 'Cetak foto & artwork premium di media kanvas.', 'icon' => 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z'],
-    ];
+    
     $steps = [
         ['num' => '01', 'title' => 'Pilih Produk', 'desc' => 'Jelajahi katalog kami dan pilih produk sesuai kebutuhan bisnis Anda.'],
         ['num' => '02', 'title' => 'Upload Desain', 'desc' => 'Upload file desain (JPG, PNG, PDF, AI, CDR) langsung dari akun Anda.'],
@@ -51,28 +37,12 @@
         ['num' => '04', 'title' => 'Terima Pesanan', 'desc' => 'Pesanan dicetak berkualitas dan siap diambil atau dikirim.'],
     ];
 
-    $carouselFallbacks = [
-        ['name' => 'Banner Outdoor', 'category_name' => 'Outdoor', 'id' => 0],
-        ['name' => 'Sticker Custom', 'category_name' => 'Promosi', 'id' => 0],
-        ['name' => 'Kartu Nama Premium', 'category_name' => 'Corporate', 'id' => 0],
-        ['name' => 'Spanduk Event', 'category_name' => 'Event', 'id' => 0],
-        ['name' => 'Poster A3', 'category_name' => 'Indoor', 'id' => 0],
-    ];
-    $carouselImages = [
-        'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?w=400&h=500&fit=crop',
-        'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=500&fit=crop',
-        'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=500&fit=crop',
-        'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=500&fit=crop',
-        'https://images.unsplash.com/photo-1542744173-8e7e16109a0e?w=400&h=500&fit=crop',
-    ];
-    $carouselSource = (isset($products) && count($products) > 0)
-        ? array_slice($products, 0, 5)
-        : $carouselFallbacks;
+    $carouselSource = isset($products) ? array_slice($products, 0, 5) : [];
     $heroPrograms = [];
     foreach ($carouselSource as $i => $p) {
         $img = !empty($p['image'])
             ? $apiUrl . $p['image']
-            : $carouselImages[$i % count($carouselImages)];
+            : null;
         $heroPrograms[] = [
             'image' => $img,
             'category' => strtoupper($p['category_name'] ?? 'PRINTING'),
@@ -119,7 +89,8 @@
         {{-- ═══════════════════════════════════════
              LAYANAN — Expanding Cards (React)
              ═══════════════════════════════════════ --}}
-        <section class="py-10 lg:py-12 bg-transparent overflow-hidden relative">
+        @if(isset($categories) && count($categories) > 0)
+        <section id="landing-services-section" class="py-10 lg:py-12 bg-transparent overflow-hidden relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-14 lg:mb-16">
                     <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-3">Layanan Kami</p>
@@ -127,9 +98,12 @@
                     <p class="mt-4 text-slate-600 leading-relaxed">Kami melayani berbagai kebutuhan printing dengan kualitas terbaik dan harga kompetitif.</p>
                 </div>
 
+                <script type="application/json" id="landing-services-data">@json($categories)</script>
                 <div id="landing-services-root" class="w-full flex justify-center relative z-10"></div>
             </div>
         </section>
+        @endif
+
 
 {{-- ═══════════════════════════════════════
      PRODUK PILIHAN — 3-column grid
@@ -148,36 +122,45 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            @foreach($productList as $product)
-            @php
-                $href = !empty($product['id']) ? '/produk/' . $product['id'] : '/katalog';
-                $gradient = $product['placeholder'] ?? 'from-slate-400 to-slate-600';
-            @endphp
-            <a href="{{ $href }}" class="group block bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <div class="aspect-[4/3] overflow-hidden relative">
-                    @if(!empty($product['image']))
-                        <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    @else
-                        <div class="w-full h-full bg-gradient-to-br {{ $gradient }} flex items-center justify-center">
-                            <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        @if(isset($products) && count($products) > 0)
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                @foreach($products as $product)
+                @php
+                    $href = !empty($product['id']) ? '/produk/' . $product['id'] : '/katalog';
+                @endphp
+                <a href="{{ $href }}" class="group block bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="aspect-[4/3] overflow-hidden relative">
+                        @if(!empty($product['image']))
+                            <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        @else
+                            <div class="w-full h-full bg-[#1A56E8] flex items-center justify-center">
+                                <span class="text-6xl font-bold text-white opacity-90">{{ strtoupper(substr($product['name'], 0, 1)) }}</span>
+                            </div>
+                        @endif
+                        <div class="absolute top-3 left-3">
+                            <span class="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur text-[10px] font-bold text-slate-700 uppercase tracking-wide">{{ $product['category_name'] ?? 'Printing' }}</span>
                         </div>
-                    @endif
-                    <div class="absolute top-3 left-3">
-                        <span class="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur text-[10px] font-bold text-slate-700 uppercase tracking-wide">{{ $product['category_name'] ?? 'Printing' }}</span>
                     </div>
+                    <div class="p-5 lg:p-6">
+                        <h3 class="font-display font-bold text-slate-900 text-lg group-hover:text-primary-600 transition-colors">{{ $product['name'] }}</h3>
+                        <p class="mt-3 font-display text-2xl font-extrabold text-slate-900">
+                            Rp {{ number_format($product['base_price'] ?? 0, 0, ',', '.') }}
+                        </p>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">Harga mulai · belum termasuk custom</p>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        @else
+            <div class="flex flex-col items-center justify-center py-20 text-center col-span-1 md:col-span-3">
+                <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 </div>
-                <div class="p-5 lg:p-6">
-                    <h3 class="font-display font-bold text-slate-900 text-lg group-hover:text-primary-600 transition-colors">{{ $product['name'] }}</h3>
-                    <p class="mt-3 font-display text-2xl font-extrabold text-slate-900">
-                        Rp {{ number_format($product['base_price'] ?? 0, 0, ',', '.') }}
-                    </p>
-                    <p class="text-xs text-slate-400 mt-1 font-medium">Harga mulai · belum termasuk custom</p>
-                </div>
-            </a>
-            @endforeach
-        </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Produk belum tersedia.</h3>
+                <p class="text-slate-500">Silakan kunjungi kembali nanti.</p>
+            </div>
+        @endif
     </div>
 </section>
 

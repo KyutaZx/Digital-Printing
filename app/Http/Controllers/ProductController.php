@@ -21,19 +21,47 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = [];
+        $categories = [];
 
         try {
             $response = Http::timeout(10)->get("{$this->apiUrl}/products");
             if ($response->successful()) {
-                $all      = $response->json('data') ?? $response->json() ?? [];
-                $products = array_slice($all, 0, 8); // Tampilkan max 8 di landing
+                $all = $response->json('data') ?? $response->json() ?? [];
+                
+                // Urutkan berdasarkan ID terbaru (asumsi created_at)
+                usort($all, function($a, $b) {
+                    return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
+                });
+                
+                // Filter hanya produk aktif
+                $allActive = array_filter($all, fn($p) => isset($p['is_active']) ? $p['is_active'] == true : true);
+                
+                $products = array_slice($allActive, 0, 6); // Sesuai requirement: top 6
             }
         } catch (\Exception $e) {
             Log::warning('Products API unreachable: ' . $e->getMessage());
         }
 
+        try {
+            $catResponse = Http::timeout(10)->get("{$this->apiUrl}/categories");
+            if ($catResponse->successful()) {
+                $allCats = $catResponse->json('data') ?? [];
+                foreach ($allCats as $cat) {
+                    $categories[] = [
+                        'id' => $cat['id'],
+                        'title' => $cat['name'],
+                        'description' => $cat['description'] ?: 'Layanan cetak ' . $cat['name'] . ' dengan kualitas terbaik dan harga kompetitif.',
+                        'imgSrc' => $cat['image'] ? $this->apiUrl . $cat['image'] : null,
+                        'linkHref' => '/katalog?category=' . urlencode($cat['name']),
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Categories API unreachable: ' . $e->getMessage());
+        }
+
         $apiUrl = $this->apiUrl;
-        return view('landing', compact('products', 'apiUrl'));
+        return view('landing', compact('products', 'categories', 'apiUrl'));
     }
 
     // =========================================================================
@@ -50,8 +78,11 @@ class ProductController extends Controller
             if ($response->successful()) {
                 $all = $response->json('data') ?? $response->json() ?? [];
 
-                // Extract unique categories
-                $categories = collect($all)
+                // Hanya ambil produk yang aktif untuk list filter kategori
+                $allActive = array_filter($all, fn($p) => isset($p['is_active']) ? $p['is_active'] == true : true);
+
+                // Extract unique categories (only from active products)
+                $categories = collect($allActive)
                     ->pluck('category_name')
                     ->filter()
                     ->unique()

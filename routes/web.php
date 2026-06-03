@@ -110,6 +110,11 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::post('/produk', [ManagerController::class, 'storeProduk']);
     Route::put('/produk/{id}', [ManagerController::class, 'updateProduk']);
     Route::delete('/produk/{id}', [ManagerController::class, 'deleteProduk']);
+    
+    Route::get('/kategori', [ManagerController::class, 'kategori']);
+    Route::post('/kategori', [ManagerController::class, 'storeKategori']);
+    Route::put('/kategori/{id}', [ManagerController::class, 'updateKategori']);
+    Route::delete('/kategori/{id}', [ManagerController::class, 'deleteKategori']);
     Route::get('/material', [MaterialController::class, 'index']);
     Route::post('/material', [MaterialController::class, 'store']);
     Route::put('/material/{id}', [MaterialController::class, 'update']);
