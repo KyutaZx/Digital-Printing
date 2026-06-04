@@ -74,6 +74,15 @@ class ProductController extends Controller
         $search   = $request->query('q', '');
 
         try {
+            $catResponse = Http::timeout(10)->get("{$this->apiUrl}/categories");
+            if ($catResponse->successful()) {
+                $categories = collect($catResponse->json('data') ?? [])->pluck('name')->toArray();
+            }
+        } catch (\Exception $e) {
+            Log::warning('Categories API unreachable: ' . $e->getMessage());
+        }
+
+        try {
             $response = Http::timeout(10)->get("{$this->apiUrl}/products");
             if ($response->successful()) {
                 $all = $response->json('data') ?? $response->json() ?? [];
@@ -81,13 +90,6 @@ class ProductController extends Controller
                 // Hanya ambil produk yang aktif untuk list filter kategori
                 $allActive = array_filter($all, fn($p) => isset($p['is_active']) ? $p['is_active'] == true : true);
 
-                // Extract unique categories (only from active products)
-                $categories = collect($allActive)
-                    ->pluck('category_name')
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->toArray();
 
                 // Filter by search query
                 if ($search) {

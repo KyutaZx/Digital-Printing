@@ -41,19 +41,7 @@
                     </a>
 
                     @php
-                        $presetCategories = ['Banner Outdoor', 'Spanduk', 'Kartu Nama', 'Kalender', 'Kaos Printing', 'Kemasan', 'Kanvas Print'];
-                        
-                        // Merge preset with dynamic ones (if any) and remove duplicates, case-insensitive
-                        $allCats = collect($presetCategories);
-                        if(isset($categories) && is_iterable($categories)) {
-                            foreach($categories as $c) {
-                                if(!$allCats->contains(function ($val) use ($c) {
-                                    return strtolower($val) === strtolower($c);
-                                })) {
-                                    $allCats->push($c);
-                                }
-                            }
-                        }
+                        $allCats = isset($categories) && is_iterable($categories) ? collect($categories) : collect();
                     @endphp
 
                     {{-- Categories List --}}
