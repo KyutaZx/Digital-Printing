@@ -81,7 +81,7 @@
             {!! json_encode($products) !!}
         </script>
         <script type="text/plain" id="api-url">
-            {{ $apiUrl ?? '' }}
+            {{ url('/api-proxy') }}
         </script>
         
         <div id="catalog-grid-root" class="w-full"></div>

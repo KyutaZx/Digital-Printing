@@ -8,7 +8,7 @@
     {!! json_encode($product) !!}
 </script>
 <script type="text/plain" id="api-url">
-    {{ $apiUrl ?? '' }}
+    {{ url('/api-proxy') }}
 </script>
 <script type="text/plain" id="csrf-token">
     {{ csrf_token() }}
