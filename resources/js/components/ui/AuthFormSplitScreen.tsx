@@ -92,8 +92,14 @@ export function AuthFormSplitScreen({
     // Set nilai ke input yang ada di form
     const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;
     const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
-    if (emailInput) emailInput.value = values.email;
-    if (passwordInput) passwordInput.value = values.password;
+    if (emailInput) {
+        emailInput.value = values.email;
+        emailInput.removeAttribute('disabled');
+    }
+    if (passwordInput) {
+        passwordInput.value = values.password;
+        passwordInput.removeAttribute('disabled');
+    }
     
     form.submit();
   };
@@ -107,10 +113,22 @@ export function AuthFormSplitScreen({
     const phoneInput = form.querySelector('input[name="phone"]') as HTMLInputElement;
     const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;
     const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
-    if (nameInput) nameInput.value = values.name;
-    if (phoneInput) phoneInput.value = values.phone;
-    if (emailInput) emailInput.value = values.email;
-    if (passwordInput) passwordInput.value = values.password;
+    if (nameInput) {
+        nameInput.value = values.name;
+        nameInput.removeAttribute('disabled');
+    }
+    if (phoneInput) {
+        phoneInput.value = values.phone;
+        phoneInput.removeAttribute('disabled');
+    }
+    if (emailInput) {
+        emailInput.value = values.email;
+        emailInput.removeAttribute('disabled');
+    }
+    if (passwordInput) {
+        passwordInput.value = values.password;
+        passwordInput.removeAttribute('disabled');
+    }
     
     form.submit();
   };
