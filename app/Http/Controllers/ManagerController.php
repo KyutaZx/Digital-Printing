@@ -474,13 +474,20 @@ class ManagerController extends Controller
             'description' => $request->description ?? '',
         ];
 
-        $response = $this->apiPost('/api/admin/categories', $payload);
-
-        if ($response && isset($response['data']['id']) && $request->hasFile('image')) {
-            $this->updateKategoriImage($response['data']['id'], $request->file('image'));
+        try {
+            $response = Http::timeout(10)->withToken(session('token'))->post("{$this->apiUrl}/api/admin/categories", $payload);
+            
+            if ($response->successful()) {
+                $categoryId = $response->json('data.id');
+                if ($categoryId && $request->hasFile('image')) {
+                    $this->updateKategoriImage($categoryId, $request->file('image'));
+                }
+                return redirect()->back()->with('success', 'Kategori berhasil ditambahkan!');
+            }
+            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
     public function updateKategori(Request $request, $id)
@@ -490,30 +497,39 @@ class ManagerController extends Controller
             'description' => $request->description ?? '',
         ];
 
-        $this->apiPut("/api/admin/categories/{$id}", $payload);
-
-        if ($request->hasFile('image')) {
-            $this->updateKategoriImage($id, $request->file('image'));
+        try {
+            $response = Http::timeout(10)->withToken(session('token'))->put("{$this->apiUrl}/api/admin/categories/{$id}", $payload);
+            
+            if ($response->successful()) {
+                if ($request->hasFile('image')) {
+                    $this->updateKategoriImage($id, $request->file('image'));
+                }
+                return redirect()->back()->with('success', 'Kategori berhasil diupdate!');
+            }
+            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('success', 'Kategori berhasil diupdate!');
     }
 
     public function deleteKategori($id)
     {
-        $this->apiDelete("/api/admin/categories/{$id}");
-        return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
+        try {
+            Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/admin/categories/{$id}");
+            return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus kategori.');
+        }
     }
 
     private function updateKategoriImage($id, $file)
     {
-        $token = Session::get('jwt_token');
-        Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->attach(
-            'image',
-            file_get_contents($file->getPathname()),
-            $file->getClientOriginalName()
-        )->post("{$this->apiUrl}/api/admin/categories/{$id}/image");
+        try {
+            Http::timeout(30)->withToken(session('token'))
+                ->attach('image', fopen($file->getRealPath(), 'r'), $file->getClientOriginalName())
+                ->post("{$this->apiUrl}/api/admin/categories/{$id}/image");
+        } catch (\Exception $e) {
+            Log::warning("Gagal upload gambar kategori: " . $e->getMessage());
+        }
     }
 }
