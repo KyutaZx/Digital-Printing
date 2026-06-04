@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
@@ -38,6 +39,16 @@ Route::redirect('/kontak', '/#kontak');
 Route::get('/cara-order', function () { return view('cara-order'); })->name('cara-order');
 Route::get('/syarat-ketentuan', function () { return view('terms'); })->name('terms');
 Route::get('/kebijakan-privasi', function () { return view('privacy'); })->name('privacy');
+
+Route::get('/api-proxy/{path}', function ($path) {
+    $url = rtrim(config('app.golang_api_url', 'http://localhost:8080'), '/') . '/' . ltrim($path, '/');
+    $response = Http::get($url);
+    if ($response->successful()) {
+        return response($response->body(), 200)
+            ->header('Content-Type', $response->header('Content-Type') ?? 'image/jpeg');
+    }
+    return abort(404);
+})->where('path', '.*')->name('api.proxy');
 
 /*
 |--------------------------------------------------------------------------
