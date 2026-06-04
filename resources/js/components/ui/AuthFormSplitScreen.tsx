@@ -84,14 +84,35 @@ export function AuthFormSplitScreen({
     },
   });
 
-  const handleLoginSubmit = async () => {
+  const handleLoginSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
-    formRef.current?.submit();
+    const form = formRef.current;
+    if (!form) return;
+    
+    // Set nilai ke input yang ada di form
+    const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;
+    const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
+    if (emailInput) emailInput.value = values.email;
+    if (passwordInput) passwordInput.value = values.password;
+    
+    form.submit();
   };
 
-  const handleRegisterSubmit = async () => {
+  const handleRegisterSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
-    formRef.current?.submit();
+    const form = formRef.current;
+    if (!form) return;
+    
+    const nameInput = form.querySelector('input[name="name"]') as HTMLInputElement;
+    const phoneInput = form.querySelector('input[name="phone"]') as HTMLInputElement;
+    const emailInput = form.querySelector('input[name="email"]') as HTMLInputElement;
+    const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
+    if (nameInput) nameInput.value = values.name;
+    if (phoneInput) phoneInput.value = values.phone;
+    if (emailInput) emailInput.value = values.email;
+    if (passwordInput) passwordInput.value = values.password;
+    
+    form.submit();
   };
 
   const containerVariants = {
