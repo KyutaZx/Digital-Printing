@@ -284,10 +284,13 @@ class ManagerController extends Controller
     public function deleteProduk(int $id)
     {
         try {
-            Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/products/{$id}");
-            return back()->with('success', 'Produk berhasil dihapus.');
+            $response = Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/admin/products/{$id}");
+            if ($response->successful()) {
+                return back()->with('success', 'Produk berhasil dihapus.');
+            }
+            return back()->with('error', 'Gagal menghapus produk: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal menghapus produk.');
+            return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
     }
 
