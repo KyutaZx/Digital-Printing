@@ -39,7 +39,7 @@
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden group flex flex-col h-full hover:shadow-md transition-shadow">
             <div class="aspect-video bg-slate-100 relative overflow-hidden shrink-0">
                 @if(!empty($cat['image']))
-                    <img src="{{ $apiUrl . $cat['image'] }}" alt="{{ $cat['name'] }}" class="w-full h-full object-cover">
+                    <img src="{{ url('/api-proxy/' . ltrim($cat['image'] ?? '', '/')) }}" alt="{{ $cat['name'] }}" class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-primary-50">
                         <span class="text-3xl font-black text-primary-200 uppercase">{{ substr($cat['name'], 0, 1) }}</span>

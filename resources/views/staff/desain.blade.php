@@ -135,17 +135,18 @@
                                         <div class="absolute top-2 right-2 z-10">
                                             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/40 text-white">v{{ $design['version'] ?? 1 }}</span>
                                         </div>
-                                        @if(in_array($dExt, ['jpg','jpeg','png']))
-                                            <a href="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}" target="_blank">
-                                                <img src="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}" alt="Desain v{{ $design['version'] ?? 1 }}" class="w-44 h-44 object-contain bg-slate-50 p-2">
+                                        <div class="rounded-[14px] overflow-hidden border border-slate-200">
+                                            @php $ext = strtolower(pathinfo($design['file_path'] ?? '', PATHINFO_EXTENSION)); @endphp
+                                            @if(in_array($ext, ['jpg','jpeg','png']))
+                                            <a href="{{ url('/api-proxy/' . ltrim($design['file_path'] ?? '', '/')) }}" target="_blank">
+                                                <img src="{{ url('/api-proxy/' . ltrim($design['file_path'] ?? '', '/')) }}" alt="Desain v{{ $design['version'] ?? 1 }}" class="w-44 h-44 object-contain bg-slate-50 p-2">
                                             </a>
-                                        @else
-                                            <a href="{{ config('app.golang_api_url') }}{{ $design['file_path'] }}" target="_blank" class="flex flex-col items-center justify-center w-44 h-44 bg-slate-50 hover:bg-slate-100 transition-colors p-4 text-center">
-                                                <svg class="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                <span class="text-xs font-semibold text-slate-500 uppercase">{{ $dExt }}</span>
-                                                <span class="text-[10px] text-primary-600 mt-1">Klik untuk buka</span>
+                                            @else
+                                            <a href="{{ url('/api-proxy/' . ltrim($design['file_path'] ?? '', '/')) }}" target="_blank" class="flex flex-col items-center justify-center w-44 h-44 bg-slate-50 hover:bg-slate-100 transition-colors p-4 text-center">
+                                                <span class="text-xs font-bold text-slate-400 mt-2 uppercase">{{ $ext }} Document</span>
                                             </a>
-                                        @endif
+                                            @endif
+                                        </div>
                                         @if($design['notes'] ?? '')
                                             <div class="px-3 py-2 bg-slate-50 border-t border-slate-100 max-w-44">
                                                 <p class="text-[10px] text-slate-500 line-clamp-2 italic">{{ $design['notes'] }}</p>
@@ -281,8 +282,10 @@
                             $latestDesign = !empty($itemDesigns) ? end($itemDesigns) : null;
                         @endphp
                         <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-start gap-3">
-                            @if($latestDesign && in_array(strtolower(pathinfo($latestDesign['file_path'], PATHINFO_EXTENSION)), ['jpg','jpeg','png']))
-                                <img src="{{ config('app.golang_api_url') }}{{ $latestDesign['file_path'] }}" class="w-16 h-16 object-contain bg-slate-50 rounded border">
+                            <div class="flex items-start gap-4">
+                            @php $ext = strtolower(pathinfo($latestDesign['file_path'] ?? '', PATHINFO_EXTENSION)); @endphp
+                            @if(in_array($ext, ['jpg','jpeg','png']))
+                                <img src="{{ url('/api-proxy/' . ltrim($latestDesign['file_path'] ?? '', '/')) }}" class="w-16 h-16 object-contain bg-slate-50 rounded border">
                             @else
                                 <div class="w-16 h-16 bg-slate-100 rounded border flex items-center justify-center text-slate-400">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

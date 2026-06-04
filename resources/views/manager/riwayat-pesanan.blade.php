@@ -276,7 +276,7 @@
                     <span class="text-2xl font-black text-emerald-600" x-text="selectedOrder ? 'Rp ' + Number(selectedOrder.total_price).toLocaleString('id-ID') : 'Rp 0'"></span>
                 </div>
                 <div class="flex gap-2">
-                    <button @click="window.open('{{ config('app.golang_api_url', 'http://localhost:8080') }}/api/orders/' + selectedOrder.id + '/invoice/pdf', '_blank')"
+                    <button @click="window.open('{{ url('/api-proxy/orders') }}/' + selectedOrder.id + '/invoice/pdf', '_blank')"
                             class="flex-1 btn-secondary !py-2.5 !text-xs font-bold flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         Invoice PDF

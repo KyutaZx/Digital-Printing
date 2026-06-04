@@ -77,9 +77,10 @@
                         <p class="font-black text-emerald-700 mt-1">Rp {{ number_format($order['payment']['amount'] ?? 0, 0, ',', '.') }}</p>
                     </div>
                 </div>
-                <div class="rounded-2xl overflow-hidden border border-slate-200">
-                    <img src="{{ config('app.golang_api_url') }}{{ $order['payment']['payment_proof'] }}" alt="Bukti Bayar"
-                         class="w-full max-h-80 object-contain bg-slate-50">
+                <div class="rounded-2xl">
+                    <img src="{{ url('/api-proxy/' . ltrim($order['payment']['payment_proof'] ?? '', '/')) }}" alt="Bukti Bayar"
+                         class="w-full rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:opacity-90 transition-opacity"
+                         onclick="window.open(this.src, '_blank')">
                 </div>
             </div>
             @endif

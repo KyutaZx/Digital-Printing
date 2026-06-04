@@ -41,7 +41,7 @@
     $heroPrograms = [];
     foreach ($carouselSource as $i => $p) {
         $img = !empty($p['image'])
-            ? $apiUrl . $p['image']
+            ? url('/api-proxy/' . ltrim($p['image'], '/'))
             : null;
         $heroPrograms[] = [
             'image' => $img,
@@ -131,7 +131,7 @@
                 <a href="{{ $href }}" class="group block bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div class="aspect-[4/3] overflow-hidden relative">
                         @if(!empty($product['image']))
-                            <img src="{{ $apiUrl . $product['image'] }}" alt="{{ $product['name'] }}"
+                            <img src="{{ url('/api-proxy/' . ltrim($product['image'] ?? '', '/')) }}" alt="{{ $product['name'] }}"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
                             <div class="w-full h-full bg-[#1A56E8] flex items-center justify-center">
