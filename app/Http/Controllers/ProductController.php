@@ -51,7 +51,7 @@ class ProductController extends Controller
                         'id' => $cat['id'],
                         'title' => $cat['name'],
                         'description' => $cat['description'] ?: 'Layanan cetak ' . $cat['name'] . ' dengan kualitas terbaik dan harga kompetitif.',
-                        'imgSrc' => $cat['image'] ? $this->apiUrl . $cat['image'] : null,
+                        'imgSrc' => $cat['image'] ? url('/api-proxy/' . ltrim($cat['image'], '/')) : null,
                         'linkHref' => '/katalog?category=' . urlencode($cat['name']),
                     ];
                 }
