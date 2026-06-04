@@ -113,8 +113,18 @@ class ManagerController extends Controller
         try {
             $rCat = Http::timeout(10)->get("{$this->apiUrl}/categories");
             $categories = $rCat->successful() ? ($rCat->json('data') ?? []) : [];
+            $catMap = collect($categories)->pluck('name', 'id')->toArray();
         } catch (\Exception $e) {
             $categories = [];
+        }
+
+        // Map category_id to category_name if it is missing
+        if (isset($catMap) && isset($products) && is_array($products)) {
+            foreach ($products as &$p) {
+                if (empty($p['category_name']) && !empty($p['category_id']) && isset($catMap[$p['category_id']])) {
+                    $p['category_name'] = $catMap[$p['category_id']];
+                }
+            }
         }
 
         $materials = $this->apiGet('/api/admin/materials');

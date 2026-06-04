@@ -76,7 +76,9 @@ class ProductController extends Controller
         try {
             $catResponse = Http::timeout(10)->get("{$this->apiUrl}/categories");
             if ($catResponse->successful()) {
-                $categories = collect($catResponse->json('data') ?? [])->pluck('name')->toArray();
+                $categoryData = $catResponse->json('data') ?? [];
+                $categories = collect($categoryData)->pluck('name')->toArray();
+                $catMap = collect($categoryData)->pluck('name', 'id')->toArray();
             }
         } catch (\Exception $e) {
             Log::warning('Categories API unreachable: ' . $e->getMessage());
@@ -86,6 +88,15 @@ class ProductController extends Controller
             $response = Http::timeout(10)->get("{$this->apiUrl}/products");
             if ($response->successful()) {
                 $all = $response->json('data') ?? $response->json() ?? [];
+
+                // Inject category_name from catMap if it's missing but we have category_id
+                if (isset($catMap)) {
+                    foreach ($all as &$p) {
+                        if (empty($p['category_name']) && !empty($p['category_id']) && isset($catMap[$p['category_id']])) {
+                            $p['category_name'] = $catMap[$p['category_id']];
+                        }
+                    }
+                }
 
                 // Hanya ambil produk yang aktif untuk list filter kategori
                 $allActive = array_filter($all, fn($p) => isset($p['is_active']) ? $p['is_active'] == true : true);
