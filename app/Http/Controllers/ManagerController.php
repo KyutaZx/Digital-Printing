@@ -528,8 +528,11 @@ class ManagerController extends Controller
     public function deleteKategori($id)
     {
         try {
-            Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/admin/categories/{$id}");
-            return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
+            $response = Http::timeout(10)->withToken(session('token'))->delete("{$this->apiUrl}/api/admin/categories/{$id}");
+            if ($response->successful()) {
+                return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus kategori: ' . ($response->json('message') ?? 'Sedang digunakan atau tidak ditemukan.'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus kategori.');
         }
