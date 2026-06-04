@@ -242,7 +242,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Email Address</FormLabel>
                           <FormControl>
-                            <Input placeholder="email@example.com" {...field} disabled={isLoading} />
+                            <Input placeholder="email@example.com" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -258,7 +258,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••••••" {...field} disabled={isLoading} />
+                            <Input type="password" placeholder="••••••••••••" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -273,7 +273,7 @@ export function AuthFormSplitScreen({
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={isLoading} name="remember" value="1" />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} name="remember" value="1" />
                           </FormControl>
                           <div className="space-y-1 leading-none">
                             <FormLabel className="font-normal cursor-pointer">Remember Me</FormLabel>
@@ -310,7 +310,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} disabled={isLoading} />
+                            <Input placeholder="John Doe" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -326,7 +326,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="08123456789" {...field} disabled={isLoading} />
+                            <Input placeholder="08123456789" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -342,7 +342,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Email Address</FormLabel>
                           <FormControl>
-                            <Input placeholder="email@example.com" {...field} disabled={isLoading} />
+                            <Input placeholder="email@example.com" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -358,7 +358,7 @@ export function AuthFormSplitScreen({
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••••••" {...field} disabled={isLoading} />
+                            <Input type="password" placeholder="••••••••••••" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
