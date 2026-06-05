@@ -78,7 +78,7 @@
                     </div>
                 </div>
                 <div class="rounded-2xl">
-                    <img src="{{ url('/api-proxy/' . ltrim($order['payment']['payment_proof'] ?? '', '/')) }}" alt="Bukti Bayar"
+                    <img src="/api-proxy/{{ ltrim($order['payment']['payment_proof'] ?? '', '/') }}" alt="Bukti Bayar"
                          class="w-full rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:opacity-90 transition-opacity"
                          onclick="window.open(this.src, '_blank')">
                 </div>

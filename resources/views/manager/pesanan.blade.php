@@ -340,7 +340,7 @@
 
                         <div class="pt-2 flex flex-col gap-3">
                             <template x-if="selectedOrder.payment_proof">
-                                <a :href="selectedOrder.payment_proof" target="_blank"
+                                <a :href="'/api-proxy/' + selectedOrder.payment_proof.replace(/^\/+/, '')" target="_blank"
                                    class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-xl hover:bg-slate-100 border border-slate-100 transition-colors">
                                     <span class="text-xs font-bold text-slate-600">Lihat Bukti Pembayaran</span>
                                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
