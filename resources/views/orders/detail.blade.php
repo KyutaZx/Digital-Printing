@@ -300,7 +300,7 @@
                         @if(!empty($order['payment']))
                             @php 
                                 $ps = strtolower($order['payment']['payment_status'] ?? '');
-                                $rawProofUrl = $order['payment']['payment_proof'] ?? '';
+                                $rawProofUrl = $order['payment']['payment_proof'] ?? $order['payment_proof'] ?? '';
                                 $filename = basename($rawProofUrl) ?: 'bukti_transfer.jpg';
                                 $proofUrl = str_starts_with($rawProofUrl, 'http') ? $rawProofUrl : url('/api-proxy/' . ltrim($rawProofUrl, '/'));
                             @endphp
