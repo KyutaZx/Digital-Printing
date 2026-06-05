@@ -261,10 +261,14 @@
                                                 Revisi
                                             </button>
                                             <div x-show="open" x-cloak class="absolute top-full mt-2 right-0 bg-white border border-slate-200 shadow-xl rounded-lg p-3 z-20 min-w-[280px]">
-                                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
+                                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="flex flex-col gap-3" x-data="{ fileName: '' }">
                                                     @csrf
-                                                    <input type="file" name="file" required class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-slate-100 file:text-slate-700 cursor-pointer">
-                                                    <button type="submit" class="w-full px-3 py-1.5 rounded bg-primary-custom text-white text-[11px] font-bold hover:opacity-90">Upload Revisi</button>
+                                                    <div class="relative border border-dashed border-blue-300 bg-blue-50/50 rounded-lg p-4 text-center hover:bg-blue-50 transition-colors">
+                                                        <input type="file" name="file" required accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,.cdr" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" @change="fileName = $event.target.files[0]?.name ?? ''">
+                                                        <svg class="w-6 h-6 text-blue-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                                        <p class="text-[11px] font-semibold text-slate-700 truncate px-2" x-text="fileName ? fileName : 'Pilih file revisi'"></p>
+                                                    </div>
+                                                    <button type="submit" class="relative z-20 w-full px-3 py-2 rounded-lg bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors disabled:opacity-50" :disabled="!fileName">Upload Revisi</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -275,15 +279,24 @@
                                     <p class="text-[11px] text-warning-custom mt-2 bg-warning-custom/50 px-2 py-1.5 rounded border border-warning-custom/20">Catatan Revisi: {{ $latest['notes'] }}</p>
                                 @endif
                             @else
-                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" class="border border-dashed border-slate-300 rounded-lg p-6 text-center bg-slate-50 relative group">
+                                <form action="/desain/{{ $item['id'] }}/upload" method="POST" enctype="multipart/form-data" 
+                                      x-data="{ fileName: '' }"
+                                      class="border border-dashed border-blue-300 bg-blue-50/30 rounded-xl p-6 text-center hover:bg-blue-50/50 transition-colors relative"
+                                      :class="fileName ? 'border-blue-500 bg-blue-50/80' : ''">
                                     @csrf
-                                    <svg class="w-6 h-6 text-slate-400 mx-auto mb-2 group-hover:text-primary-custom transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                    <p class="text-[12px] font-semibold text-slate-600 mb-1">Upload desain untuk item ini</p>
-                                    <p class="text-[11px] text-slate-500 mb-4">Format: JPG, PNG, PDF. Maks 10MB.</p>
-                                    <div class="flex items-center justify-center relative z-10">
-                                        <input type="file" name="file" required class="text-[11px] max-w-[200px] file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary-custom file:text-white hover:file:opacity-90 cursor-pointer text-transparent">
-                                        <button type="submit" class="ml-2 px-3 py-1.5 rounded border border-slate-300 text-slate-700 text-[11px] font-bold hover:bg-slate-200 bg-white shadow-sm">Upload</button>
-                                    </div>
+                                    <input type="file" name="file" required accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,.cdr" 
+                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                           @change="fileName = $event.target.files[0]?.name ?? ''">
+                                           
+                                    <svg class="w-8 h-8 text-blue-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                    <p class="text-sm font-bold text-slate-700 mb-1 px-4 truncate" x-text="fileName ? fileName : 'Upload desain untuk item ini'"></p>
+                                    <p class="text-[11px] text-slate-500 mb-4" x-show="!fileName">Format: JPG, PNG, PDF. Maks 10MB.</p>
+                                    
+                                    <button type="submit" class="relative z-20 mt-2 px-6 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!fileName">
+                                        Upload Sekarang
+                                    </button>
                                 </form>
                             @endif
                         </div>
