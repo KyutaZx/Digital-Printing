@@ -294,7 +294,7 @@
                                     <p class="text-sm font-bold text-slate-700 mb-1 px-4 truncate" x-text="fileName ? fileName : 'Upload desain untuk item ini'"></p>
                                     <p class="text-[11px] text-slate-500 mb-4" x-show="!fileName">Format: JPG, PNG, PDF. Maks 10MB.</p>
                                     
-                                    <button type="submit" class="relative z-20 mt-2 px-6 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!fileName">
+                                    <button type="submit" class="relative z-20 mt-2 w-full py-2.5 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!fileName">
                                         Upload Sekarang
                                     </button>
                                 </form>
