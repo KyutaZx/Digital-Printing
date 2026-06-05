@@ -138,11 +138,11 @@
         </div>
         @endif
 
-        {{-- 2. Grid 2 Kolom --}}
-        <div class="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6 items-start">
+        {{-- 2. Main Content (Full Width) --}}
+        <div class="flex flex-col gap-6">
             
-            {{-- Kolom Kiri --}}
-            <div class="space-y-6">
+            {{-- Kolom Utama --}}
+            <div class="space-y-6 w-full">
                 
                 {{-- Card: Detail Pesanan --}}
                 <div class="flat-card">
@@ -455,11 +455,11 @@
 
             </div>
 
-            {{-- Kolom Kanan (Sidebar) --}}
-            <div class="space-y-6">
+            {{-- Kolom Bawah (Info & Bantuan) --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 
                 {{-- Card: Info Pesanan --}}
-                <div class="flat-card">
+                <div class="flat-card h-full">
                     <div class="p-5 border-b border-slate-100">
                         <h2 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Info Pesanan</h2>
                     </div>
@@ -507,7 +507,7 @@
                 </div>
 
                 {{-- Card: Butuh Bantuan? --}}
-                <div class="flat-card p-5">
+                <div class="flat-card p-5 h-full flex flex-col justify-center">
                     <h3 class="font-bold text-[13px] text-slate-900 mb-1">Butuh Bantuan?</h3>
                     <p class="text-[12px] text-slate-500 mb-4">Hubungi kami jika ada kendala pesanan.</p>
                     <a href="https://wa.me/628123456789" target="_blank" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary-custom text-primary-custom font-bold text-[13px] hover:bg-blue-50 transition-colors">
