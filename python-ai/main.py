@@ -1,4 +1,7 @@
 import os
+# WAJIB diletakkan SEBELUM import tensorflow untuk fix error BatchNormalization Keras 3
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+
 import io
 import uvicorn
 import numpy as np
@@ -113,6 +116,7 @@ async def predict_blur(file: UploadFile = File(...)):
             else:
                 confidence = (1 - score) * 100
                 
+        print(f"DEBUG: score={score:.4f}, laplacian={laplacian_var:.2f}, status={nama_kelas}")
         return {
             "status":     nama_kelas,
             "confidence": round(confidence, 2),
@@ -123,6 +127,7 @@ async def predict_blur(file: UploadFile = File(...)):
         }
         
     except Exception as e:
+        print(f"ERROR: predict_blur failed - {str(e)}")
         raise HTTPException(status_code=500, detail=f"Gagal memproses gambar: {str(e)}")
 
 @app.get("/")
