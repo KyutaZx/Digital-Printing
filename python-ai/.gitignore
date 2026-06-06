@@ -8,8 +8,9 @@ ENV/
 env/
 .env
 
-# AI Models (Usually too large for Git)
-*.h5
+# AI Models (Usually too large for Git, tapi kita butuh model.h5)
+# *.h5
+!model.h5
 *.tflite
 *.pb
 
