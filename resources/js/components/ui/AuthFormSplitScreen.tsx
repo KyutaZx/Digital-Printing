@@ -150,7 +150,7 @@ export function AuthFormSplitScreen({
   return (
     <div className="relative flex min-h-screen w-full flex-col md:flex-row bg-white text-slate-900 overflow-hidden">
       {/* Left Panel: Form */}
-      <div className="relative flex w-full flex-col items-center justify-center p-8 md:w-1/2 pt-20 md:pt-8 bg-background">
+      <div className="relative flex w-full flex-col items-center justify-center p-8 md:w-1/2 pt-24 md:pt-32 bg-background">
         <GridPattern
           squares={[
             [4, 4],
