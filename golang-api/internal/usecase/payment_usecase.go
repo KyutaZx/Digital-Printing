@@ -86,18 +86,39 @@ func (u *PaymentUsecase) UploadProof(
 		return 0, errors.New("gagal membersihkan data pembayaran lama: " + err.Error())
 	}
 
-	// 4. Simpan Transaksi Pembayaran [cite: 1259 16710]
-	p := &payment.Payment{
-		OrderID:         orderID,
-		MethodID:        methodID,
-		TransactionCode: transactionCode,
-		Amount:          amount,
-		Proof:           proof,
-		Status:          "pending",
+	// 4. Cek apakah ada payment yang masih pending
+	pendingPayment, err := u.repo.GetPendingByOrderID(ctx, orderID)
+	if err != nil {
+		return 0, err
 	}
 
-	if err := u.repo.Create(ctx, p); err != nil {
-		return 0, err
+	var paymentID int
+	if pendingPayment != nil {
+		// OVERWRITE pending payment
+		pendingPayment.MethodID = methodID
+		pendingPayment.TransactionCode = transactionCode
+		pendingPayment.Amount = amount
+		pendingPayment.Proof = proof
+		
+		if err := u.repo.Update(ctx, pendingPayment); err != nil {
+			return 0, err
+		}
+		paymentID = pendingPayment.ID
+	} else {
+		// Buat Transaksi Pembayaran Baru
+		p := &payment.Payment{
+			OrderID:         orderID,
+			MethodID:        methodID,
+			TransactionCode: transactionCode,
+			Amount:          amount,
+			Proof:           proof,
+			Status:          "pending",
+		}
+
+		if err := u.repo.Create(ctx, p); err != nil {
+			return 0, err
+		}
+		paymentID = p.ID
 	}
 
 	// 4. Update Status Order ke Verifikasi [cite: 1259 16666]
@@ -111,12 +132,12 @@ func (u *PaymentUsecase) UploadProof(
 		Role:      "customer",
 		Action:    audit.ActionCreatePayment,
 		EntityType:"payment_transactions",
-		EntityID:  p.ID,
+		EntityID:  paymentID,
 		IPAddress: ip,
 		UserAgent: ua,
 	})
 
-	return p.ID, nil
+	return paymentID, nil
 }
 
 // =========================================================================

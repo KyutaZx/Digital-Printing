@@ -41,6 +41,58 @@ func (r *paymentRepository) Create(ctx context.Context, p *payment.Payment) erro
 }
 
 // =========================================================================
+// UPDATE PAYMENT (FOR RE-UPLOAD UNREVIEWED PROOF)
+// =========================================================================
+func (r *paymentRepository) Update(ctx context.Context, p *payment.Payment) error {
+	query := `
+		UPDATE payment_transactions 
+		SET payment_method_id = $1, transaction_code = $2, amount = $3, payment_proof = $4, payment_status = $5
+		WHERE id = $6
+	`
+	_, err := r.db.ExecContext(ctx, query,
+		p.MethodID,
+		p.TransactionCode,
+		p.Amount,
+		p.Proof,
+		p.Status,
+		p.ID,
+	)
+	return err
+}
+
+// =========================================================================
+// GET PENDING BY ORDER ID
+// =========================================================================
+func (r *paymentRepository) GetPendingByOrderID(ctx context.Context, orderID int) (*payment.Payment, error) {
+	var p payment.Payment
+	query := `
+		SELECT id, order_id, payment_method_id, transaction_code, amount, payment_proof, payment_status
+		FROM payment_transactions
+		WHERE order_id = $1 AND payment_status = 'pending'
+		ORDER BY id DESC LIMIT 1
+	`
+	err := r.db.QueryRowContext(ctx, query, orderID).Scan(
+		&p.ID,
+		&p.OrderID,
+		&p.MethodID,
+		&p.TransactionCode,
+		&p.Amount,
+		&p.Proof,
+		&p.Status,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
+}
+
+// =========================================================================
 // UPDATE STATUS (TRANSACTIONAL)
 // =========================================================================
 func (r *paymentRepository) UpdateStatus(ctx context.Context, id int, status string, verifiedBy int, orderID int, orderStatus string) error {

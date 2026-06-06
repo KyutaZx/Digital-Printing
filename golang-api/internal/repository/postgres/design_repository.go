@@ -26,6 +26,16 @@ func (r *designRepository) UploadDesign(ctx context.Context, d *design.DesignFil
 	return err
 }
 
+func (r *designRepository) UpdateDesign(ctx context.Context, d *design.DesignFile) error {
+	query := `
+		UPDATE design_files
+		SET file_path = $1, uploaded_by = $2, created_at = NOW()
+		WHERE id = $3
+	`
+	_, err := r.db.ExecContext(ctx, query, d.FilePath, d.UploadedBy, d.ID)
+	return err
+}
+
 func (r *designRepository) GetLatestVersion(ctx context.Context, orderItemID int) (int, error) {
 	var maxVersion sql.NullInt64
 	query := `SELECT MAX(version) FROM design_files WHERE order_item_id = $1`

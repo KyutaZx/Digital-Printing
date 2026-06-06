@@ -35,30 +35,63 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 		return nil, errors.New("akses ditolak: order item ini bukan milik Anda")
 	}
 
-	// 1. Cari tahu versi terakhir untuk order item ini
-	latestVersion, err := u.designRepo.GetLatestVersion(ctx, orderItemID)
+	// 1. Dapatkan daftar semua desain berdasarkan versi terbaru
+	designs, err := u.designRepo.GetDesignsByOrderItemID(ctx, orderItemID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Batas maksimal upload adalah 3 kali (Versi 1, 2, 3)
-	if latestVersion >= 3 {
-		return nil, errors.New("batas maksimal revisi desain (total 3 kali upload) telah tercapai")
+	var latestDesign *design.DesignFile
+	if len(designs) > 0 {
+		latestDesign = &designs[0]
 	}
-
-	newVersion := latestVersion + 1
 
 	d := &design.DesignFile{
 		OrderItemID: orderItemID,
 		FilePath:    filePath,
-		Version:     newVersion,
 		UploadedBy:  uploadedBy,
 	}
 
-	// 2. Simpan ke database
-	err = u.designRepo.UploadDesign(ctx, d)
-	if err != nil {
-		return nil, err
+	isUpdate := false
+
+	// 2. Tentukan logika versi dan batasan
+	if latestDesign != nil {
+		// Jika desain terbaru belum di-review sama sekali
+		if len(latestDesign.Reviews) == 0 {
+			// OVERWRITE: Timpa data desain terbaru (tidak buat versi baru)
+			latestDesign.FilePath = filePath
+			latestDesign.UploadedBy = uploadedBy
+			
+			err = u.designRepo.UpdateDesign(ctx, latestDesign)
+			if err != nil {
+				return nil, err
+			}
+			d = latestDesign
+			isUpdate = true
+		} else {
+			// Jika desain terbaru sudah direview
+			lastReview := latestDesign.Reviews[len(latestDesign.Reviews)-1]
+			if lastReview.Status == "approved" {
+				return nil, errors.New("desain ini sudah disetujui, tidak dapat diubah lagi")
+			}
+
+			// Cek batasan maksimal (total 3 kali upload = versi ke 3)
+			if latestDesign.Version >= 3 {
+				return nil, errors.New("batas maksimal revisi desain (total 3 kali upload) telah tercapai")
+			}
+			
+			d.Version = latestDesign.Version + 1
+		}
+	} else {
+		d.Version = 1
+	}
+
+	// 2. Simpan ke database jika bukan update
+	if !isUpdate {
+		err = u.designRepo.UploadDesign(ctx, d)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 3. Catat log audit (role diambil dari context JWT, disini kita gunakan "customer")
