@@ -1,7 +1,11 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -98,6 +102,53 @@ func (h *PaymentHandler) Upload(c *gin.Context) {
 	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
 	savePath := filepath.Join(dir, filename)
 	dbPath := "/uploads/payments/" + filename
+
+	// ==========================================
+	// 🔥 INTEGRASI PYTHON AI (BLUR DETECTION) 🔥
+	// ==========================================
+	if ext == ".jpg" || ext == ".jpeg" || ext == ".png" {
+		src, err := file.Open()
+		if err == nil {
+			body := &bytes.Buffer{}
+			writer := multipart.NewWriter(body)
+			part, err := writer.CreateFormFile("file", file.Filename)
+			
+			if err == nil {
+				io.Copy(part, src)
+				writer.Close()
+
+				aiServiceURL := os.Getenv("AI_SERVICE_URL")
+				if aiServiceURL == "" {
+					aiServiceURL = "http://localhost:5000"
+				}
+				req, err := http.NewRequest("POST", aiServiceURL+"/predict-blur", body)
+				if err == nil {
+					req.Header.Set("Content-Type", writer.FormDataContentType())
+					
+					// Timeout 10 detik agar tidak membuat user menunggu lama jika AI mati
+					client := &http.Client{Timeout: 10 * time.Second}
+					resp, err := client.Do(req)
+					if err == nil {
+						defer resp.Body.Close()
+						var aiRes map[string]interface{}
+						if json.NewDecoder(resp.Body).Decode(&aiRes) == nil {
+							if status, ok := aiRes["status"].(string); ok && status == "blur" {
+								src.Close() // Pastikan file ditutup sebelum return
+								c.JSON(http.StatusBadRequest, gin.H{
+									"error": "Mohon maaf, AI kami mendeteksi gambar bukti pembayaran Anda terlalu pecah/blur. Silakan unggah gambar yang lebih jelas agar mudah diverifikasi.",
+								})
+								return
+							}
+						}
+					} else {
+						fmt.Println("WARNING: AI Service Unreachable. Bypassing image check...")
+					}
+				}
+			}
+			src.Close()
+		}
+	}
+	// ==========================================
 
 	if err := c.SaveUploadedFile(file, savePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan file: " + err.Error()})
