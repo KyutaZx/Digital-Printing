@@ -75,9 +75,9 @@ func (u *DesignUsecase) UploadDesign(ctx context.Context, orderItemID int, fileP
 				return nil, errors.New("desain ini sudah disetujui, tidak dapat diubah lagi")
 			}
 
-			// Cek batasan maksimal (total 3 kali upload = versi ke 3)
-			if latestDesign.Version >= 3 {
-				return nil, errors.New("batas maksimal revisi desain (total 3 kali upload) telah tercapai")
+			// Cek batasan maksimal (total 3 kali revisi = versi ke 4)
+			if latestDesign.Version >= 4 {
+				return nil, errors.New("batas maksimal revisi desain (maksimal 3 kali revisi) telah tercapai")
 			}
 			
 			d.Version = latestDesign.Version + 1
