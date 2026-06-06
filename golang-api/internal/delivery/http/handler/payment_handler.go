@@ -125,8 +125,8 @@ func (h *PaymentHandler) Upload(c *gin.Context) {
 				if err == nil {
 					req.Header.Set("Content-Type", writer.FormDataContentType())
 					
-					// Timeout 10 detik agar tidak membuat user menunggu lama jika AI mati
-					client := &http.Client{Timeout: 10 * time.Second}
+					// Timeout 120 detik (Penting untuk VPS spesifikasi rendah saat load AI pertama kali)
+					client := &http.Client{Timeout: 120 * time.Second}
 					resp, err := client.Do(req)
 					if err == nil {
 						defer resp.Body.Close()
