@@ -68,7 +68,7 @@ export default function CartPage() {
                     {/* Item Image */}
                     <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
                       <img 
-                        src={item.image || 'https://placehold.co/200'} 
+                        src={item.image ? (item.image.startsWith('http') ? item.image : '/api-proxy/' + item.image.replace(/^\/+/, '')) : 'https://placehold.co/200'} 
                         alt={item.name} 
                         className="w-full h-full object-cover"
                       />

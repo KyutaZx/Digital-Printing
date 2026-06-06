@@ -200,7 +200,7 @@ export default function OrderDetailPage() {
             {order.items.map((item, idx) => (
               <div key={idx} className="flex gap-4 sm:gap-6 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-slate-100 shrink-0 border border-slate-200 overflow-hidden">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.image ? (item.image.startsWith('http') ? item.image : '/api-proxy/' + item.image.replace(/^\/+/, '')) : 'https://placehold.co/200'} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-grow">
                   <div className="flex justify-between items-start mb-1">

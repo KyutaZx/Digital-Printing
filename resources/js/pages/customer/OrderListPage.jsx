@@ -169,7 +169,7 @@ export default function OrderListPage() {
                     {order.items.slice(0, 2).map((item, idx) => (
                       <div key={idx} className="flex gap-4 mb-4 last:mb-0">
                         <div className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={item.image ? (item.image.startsWith('http') ? item.image : '/api-proxy/' + item.image.replace(/^\/+/, '')) : 'https://placehold.co/200'} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <h4 className="font-medium text-slate-900 line-clamp-1">{item.name}</h4>

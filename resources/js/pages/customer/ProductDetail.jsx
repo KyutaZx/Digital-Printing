@@ -124,7 +124,7 @@ export default function ProductDetail() {
           <SlideUp className="w-full lg:w-1/2 space-y-4">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-200 border border-slate-200">
               <img 
-                src={product.images[activeImage] || 'https://placehold.co/800x600'} 
+                src={product.images[activeImage] ? (product.images[activeImage].startsWith('http') ? product.images[activeImage] : '/api-proxy/' + product.images[activeImage].replace(/^\/+/, '')) : 'https://placehold.co/800x600'} 
                 alt={product.name} 
                 className="w-full h-full object-cover"
               />
@@ -138,7 +138,7 @@ export default function ProductDetail() {
                     onClick={() => setActiveImage(idx)}
                     className={`shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-colors ${activeImage === idx ? 'border-primary-600' : 'border-transparent'}`}
                   >
-                    <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                    <img src={img ? (img.startsWith('http') ? img : '/api-proxy/' + img.replace(/^\/+/, '')) : 'https://placehold.co/100x100'} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

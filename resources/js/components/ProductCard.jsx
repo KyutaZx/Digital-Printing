@@ -50,7 +50,7 @@ export function ProductCard({ product }) {
       {/* Image Container */}
       <Link to={`/produk/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-slate-100">
         <img 
-          src={product.images[0] || 'https://placehold.co/400x300?text=No+Image'} 
+          src={product.images[0] ? (product.images[0].startsWith('http') ? product.images[0] : '/api-proxy/' + product.images[0].replace(/^\/+/, '')) : 'https://placehold.co/400x300?text=No+Image'} 
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
