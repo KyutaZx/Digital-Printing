@@ -100,15 +100,15 @@ async def predict_blur(file: UploadFile = File(...)):
         # AI kita dilatih dengan Gaussian Blur di dataset Bunga. 
         # Ia mungkin kesulitan dengan Motion Blur di jalanan malam hari.
         # Jadi kita gunakan Laplacian Variance sebagai filter pencegah lolos.
-        LAPLACIAN_THRESHOLD = 150.0  # Semakin kecil var = semakin blur
+        LAPLACIAN_THRESHOLD = 500.0  # Ditingkatkan dari 150.0 agar lebih ketat (khusus motion blur/noise)
         
-        if score >= 0.5 and laplacian_var > LAPLACIAN_THRESHOLD:
+        if score >= 0.7 and laplacian_var > LAPLACIAN_THRESHOLD:
             nama_kelas = "sharp"
             confidence = score * 100
         else:
             nama_kelas = "blur"
             # Jika AI salah duga sharp tapi laplacian mendeteksi blur
-            if score >= 0.5:
+            if score >= 0.7:
                 confidence = 85.0 # Kita beri tingkat keyakinan hardcode karena AI gagal
             else:
                 confidence = (1 - score) * 100
