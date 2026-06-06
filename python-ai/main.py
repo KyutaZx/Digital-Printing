@@ -1,7 +1,4 @@
 import os
-# WAJIB diletakkan SEBELUM import tensorflow untuk fix error BatchNormalization Keras 3
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
-
 import io
 import uvicorn
 import numpy as np
@@ -10,9 +7,15 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from tensorflow.keras.layers import BatchNormalization
 
 # Load environment variables from .env file if it exists
 load_dotenv()
+
+# Solusi kompatibilitas mundur untuk model Keras 2 di Keras 3
+class LegacyBatchNormalization(BatchNormalization):
+    def __init__(self, renorm=False, renorm_clipping=None, renorm_momentum=0.99, **kwargs):
+        super().__init__(**kwargs)
 
 # Configuration
 MODEL_PATH = os.getenv("MODEL_PATH", "model.h5")
@@ -34,8 +37,11 @@ async def lifespan(app: FastAPI):
     
     if os.path.exists(MODEL_PATH):
         try:
-            # Load the model
-            model = tf.keras.models.load_model(MODEL_PATH)
+            # Load the model menggunakan custom_objects untuk mengatasi error Keras 3
+            model = tf.keras.models.load_model(
+                MODEL_PATH,
+                custom_objects={'BatchNormalization': LegacyBatchNormalization}
+            )
             print(f"SUCCESS: Berhasil memuat model AI dari {MODEL_PATH}")
         except Exception as e:
             print(f"ERROR: Gagal memuat model AI: {e}")
