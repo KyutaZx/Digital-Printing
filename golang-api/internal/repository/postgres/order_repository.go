@@ -244,7 +244,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 			u.id as customer_id, u.name as customer_name, u.formatted_id as customer_formatted_id,
 			u.email as customer_email, COALESCE(u.phone, '') as customer_phone,
 			oi.id as item_id, oi.product_id,
-			p.name as product_name,
+			p.name as product_name, COALESCE(p.image, '') as product_image,
 			COALESCE(oi.variant_id, 0) as variant_id,
 			COALESCE(pv.variant_name, '-') as variant_name,
 			COALESCE(pv.sku, '-') as sku,
@@ -276,7 +276,7 @@ func (r *orderRepository) FindDetailByID(ctx context.Context, orderID int) (*ord
 			&d.ID, &d.OrderCode, &d.Status, &d.TotalPrice,
 			&d.EstimatedFinishDate, &d.CreatedAt, &d.UpdatedAt,
 			&d.CustomerID, &d.CustomerName, &d.CustomerFormattedID, &d.CustomerEmail, &d.CustomerPhone,
-			&item.ID, &item.ProductID, &item.ProductName,
+			&item.ID, &item.ProductID, &item.ProductName, &item.ProductImage,
 			&item.VariantID, &item.VariantName, &item.SKU,
 			&item.Quantity, &item.UnitPrice, &item.Subtotal, &item.Notes,
 		)

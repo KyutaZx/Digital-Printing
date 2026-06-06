@@ -35,9 +35,10 @@ type OrderItem struct {
 // OrderItemDetail adalah item pesanan yang sudah dilengkapi nama produk & variant
 type OrderItemDetail struct {
 	ID          int     `json:"id"`
-	ProductID   int     `json:"product_id"`
-	ProductName string  `json:"product_name"`  // JOIN dari tabel products
-	VariantID   int     `json:"variant_id"`
+	ProductID    int     `json:"product_id"`
+	ProductName  string  `json:"product_name"`  // JOIN dari tabel products
+	ProductImage string  `json:"product_image"` // JOIN dari tabel products
+	VariantID    int     `json:"variant_id"`
 	VariantName string  `json:"variant_name"`  // JOIN dari tabel product_variants (nama finishing)
 	SKU         string  `json:"sku"`
 	Quantity    int     `json:"quantity"`
