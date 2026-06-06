@@ -19,7 +19,14 @@ class ManagerController extends Controller
     {
         try {
             $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}{$path}");
-            return $r->successful() ? ($r->json('data') ?? $r->json() ?? []) : [];
+            if ($r->successful()) {
+                $json = $r->json();
+                if (array_key_exists('data', $json)) {
+                    return $json['data'] ?? [];
+                }
+                return is_array($json) ? $json : [];
+            }
+            return [];
         } catch (\Exception $e) {
             Log::warning("API GET {$path} failed: " . $e->getMessage());
             return [];

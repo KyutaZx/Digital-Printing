@@ -15,7 +15,14 @@ class OrderController extends Controller
     {
         try {
             $r = Http::timeout(10)->withToken(session('token'))->{$method}("{$this->apiUrl}{$path}", $data);
-            return $r->successful() ? ($r->json('data') ?? $r->json()) : null;
+            if ($r->successful()) {
+                $json = $r->json();
+                if (array_key_exists('data', $json)) {
+                    return $json['data'] ?? [];
+                }
+                return $json;
+            }
+            return null;
         } catch (\Exception $e) { Log::warning("Order API {$path}: ".$e->getMessage()); return null; }
     }
 
