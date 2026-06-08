@@ -26,6 +26,11 @@ type OrderItem struct {
 	Quantity  int     `json:"quantity"`
 	Price     float64 `json:"price"`
 	Notes     string  `json:"notes"`
+
+	// Additional fields for list view
+	ProductName  string `json:"product_name,omitempty"`
+	ProductImage string `json:"product_image,omitempty"`
+	VariantName  string `json:"variant_name,omitempty"`
 }
 
 // =========================================================================

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/lib/pq"
 	"golang-api/internal/domain/order"
 )
 
@@ -584,16 +585,58 @@ func (r *orderRepository) scanOrders(ctx context.Context, query string, args ...
 	defer rows.Close()
 
 	var orders []order.Order
+	var orderIDs []int
+	orderMap := make(map[int]*order.Order)
+
 	for rows.Next() {
 		var o order.Order
 		if err := rows.Scan(&o.ID, &o.UserID, &o.CustomerName, &o.CustomerFormattedID, &o.OrderCode, &o.TotalPrice, &o.Status, &o.CreatedAt); err != nil {
 			return nil, err
 		}
+		o.Items = []order.OrderItem{} // initialize empty
 		orders = append(orders, o)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+
+	for i := range orders {
+		orderIDs = append(orderIDs, orders[i].ID)
+		orderMap[orders[i].ID] = &orders[i]
+	}
+
+	if len(orderIDs) > 0 {
+		// Populate items
+		itemQuery := `
+			SELECT oi.id, oi.order_id, oi.product_id, oi.variant_id, oi.quantity, oi.price, oi.notes,
+			       p.name, COALESCE(p.image, ''), COALESCE(pv.variant_name, '')
+			FROM order_items oi
+			JOIN products p ON oi.product_id = p.id
+			LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+			WHERE oi.order_id = ANY($1)
+		`
+		itemRows, err := r.db.QueryContext(ctx, itemQuery, pq.Array(orderIDs))
+		if err == nil {
+			defer itemRows.Close()
+			for itemRows.Next() {
+				var i order.OrderItem
+				var vID sql.NullInt64
+				var notes sql.NullString
+				if err := itemRows.Scan(&i.ID, &i.OrderID, &i.ProductID, &vID, &i.Quantity, &i.Price, &notes, &i.ProductName, &i.ProductImage, &i.VariantName); err == nil {
+					if vID.Valid {
+						i.VariantID = int(vID.Int64)
+					}
+					if notes.Valid {
+						i.Notes = notes.String
+					}
+					if ord, exists := orderMap[i.OrderID]; exists {
+						ord.Items = append(ord.Items, i)
+					}
+				}
+			}
+		}
+	}
+
 	return orders, nil
 }
 
