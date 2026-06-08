@@ -69,7 +69,7 @@
                 <h3 class="text-2xl font-black text-emerald-600">{{ $activeCount }}</h3>
                 <span class="text-xs text-slate-400 font-bold">aktif</span>
                 @if($bannedCount > 0)
-                <span class="text-xs text-red-500 font-bold">/ {{ $bannedCount }} banned</span>
+                <span class="text-xs text-red-500 font-bold">/ {{ $bannedCount }} nonaktif</span>
                 @endif
             </div>
         </div>
@@ -121,7 +121,7 @@
         <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between gap-4">
             <div>
                 <h3 class="font-black text-slate-900 text-sm">Daftar Akun Terdaftar</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5">Klik Ban/Unban untuk menonaktifkan akses pengguna</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Klik Nonaktifkan/Aktifkan untuk mengelola akses pengguna</p>
             </div>
             @if($adminCount > 0)
             <span class="shrink-0 px-3 py-1 rounded-full bg-red-50 text-red-600 text-[10px] font-black uppercase">{{ $adminCount }} Admin</span>
@@ -195,9 +195,9 @@
                                     Aktif
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 text-[10px] font-black uppercase ring-1 ring-red-100">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                    Banned
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 text-red-700 text-[10px] font-black tracking-wider uppercase ring-1 ring-red-100/50">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                    Nonaktif
                                 </span>
                             @endif
                         </td>
@@ -216,13 +216,13 @@
                                     <button type="submit"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-[10px] font-black uppercase transition-colors ring-1 ring-red-100">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                                        Ban
+                                        Nonaktifkan
                                     </button>
                                     @else
                                     <button type="submit"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 text-[10px] font-black uppercase transition-colors ring-1 ring-emerald-100">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Unban
+                                        Aktifkan
                                     </button>
                                     @endif
                                 </form>
