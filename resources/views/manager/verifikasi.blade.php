@@ -2,31 +2,29 @@
 
 @section('title', 'Verifikasi Pembayaran')
 @section('page_title', 'Verifikasi Pembayaran')
+@section('page_description', 'Periksa bukti transfer dan setujui atau tolak pembayaran pelanggan')
 
-@section('content')
 @php
     $pendingList = is_array($pending) ? $pending : [];
     $historyList = is_array($history) ? $history : [];
     $pendingTotal = collect($pendingList)->sum(fn ($o) => (float) ($o['total_price'] ?? 0));
 @endphp
 
+@section('page_actions')
+@if(count($pendingList) > 0)
+<div class="flex items-center gap-2 bg-amber-50 px-4 py-2.5 rounded-2xl border border-amber-100 shrink-0">
+    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+    <span class="text-xs font-bold text-amber-700">{{ count($pendingList) }} menunggu verifikasi</span>
+</div>
+@endif
+@endsection
+
+@section('content')
+
 <div class="space-y-6 fade-in pb-8" x-data="{ tab: 'pending' }">
 
     @include('manager.partials.flash')
 
-    {{-- Page Header --}}
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Verifikasi Pembayaran</h1>
-            <p class="text-xs text-slate-500 mt-1">Periksa bukti transfer dan setujui atau tolak pembayaran pelanggan</p>
-        </div>
-        @if(count($pendingList) > 0)
-        <div class="flex items-center gap-2 bg-amber-50 px-4 py-2.5 rounded-2xl border border-amber-100 shrink-0">
-            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-amber-700">{{ count($pendingList) }} menunggu verifikasi</span>
-        </div>
-        @endif
-    </div>
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

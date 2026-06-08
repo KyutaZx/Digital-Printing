@@ -1,22 +1,19 @@
 @extends('layouts.manager')
 
-@section('title', 'Monitoring & Laporan')
+@section('title', 'Monitoring Transaksi')
 @section('page_title', 'Monitoring Transaksi')
+@section('page_description', 'Pantau alur pesanan dan performa bisnis secara menyeluruh')
+
+@section('page_actions')
+<div class="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100 shrink-0">
+    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+    <span class="text-[10px] font-bold uppercase tracking-widest">Real-time</span>
+</div>
+@endsection
 
 @section('content')
 <div class="space-y-6 fade-in pb-8">
 
-    {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Monitoring Transaksi</h1>
-            <p class="text-xs text-slate-500 mt-1">Pantau alur pesanan dan performa bisnis secara menyeluruh</p>
-        </div>
-        <div class="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl border border-emerald-100">
-            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
-            <span class="text-[10px] font-bold uppercase tracking-widest">Real-time</span>
-        </div>
-    </div>
 
     {{-- Status Flow Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

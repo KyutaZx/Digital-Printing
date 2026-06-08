@@ -1,9 +1,9 @@
 @extends('layouts.manager')
 
-@section('title', 'Manajemen Pengguna')
-@section('page_title', 'Kelola Pengguna & Staf')
+@section('title', 'Pengguna Sistem')
+@section('page_title', 'Pengguna Sistem')
+@section('page_description', 'Kelola akun pelanggan, staf, serta hak akses mereka')
 
-@section('content')
 @php
     $userList = is_array($users) ? $users : [];
     $totalUsers = count($userList);
@@ -19,6 +19,16 @@
         default => 'Semua Pengguna',
     };
 @endphp
+
+@section('page_actions')
+<button @click="modalOpen = true"
+        class="btn-primary !text-sm !py-2.5 !px-5 shrink-0 self-start lg:self-auto">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+    Daftarkan Staf Baru
+</button>
+@endsection
+
+@section('content')
 
 <div class="space-y-6 fade-in pb-8"
      x-data="{
@@ -37,18 +47,6 @@
 
     @include('manager.partials.flash')
 
-    {{-- Page Header --}}
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Pengguna Sistem</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola akun pelanggan, staf, serta hak akses mereka</p>
-        </div>
-        <button @click="modalOpen = true"
-                class="btn-primary !text-sm !py-2.5 !px-5 shrink-0 self-start lg:self-auto">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-            Daftarkan Staf Baru
-        </button>
-    </div>
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -2,13 +2,22 @@
 
 @section('title', 'Riwayat Pesanan')
 @section('page_title', 'Riwayat Pesanan')
+@section('page_description', 'Arsip transaksi digital printing yang telah diselesaikan')
 
-@section('content')
+@section('page_actions')
+<a href="/manager/pesanan" class="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 text-xs font-bold text-slate-600 hover:text-primary-600 transition-colors shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    Semua Pesanan
+</a>
+@endsection
+
 @php
     $orderList = is_array($orders) ? $orders : [];
     $pageCount = count($orderList);
     $pageRevenue = collect($orderList)->sum(fn ($o) => (float) ($o['total_price'] ?? 0));
 @endphp
+
+@section('content')
 
 <div class="space-y-6 fade-in pb-8"
      x-data="{
@@ -34,17 +43,6 @@
      }"
      x-init="checkVisible()">
 
-    {{-- Page Header --}}
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Riwayat Pesanan Selesai</h1>
-            <p class="text-xs text-slate-500 mt-1">Arsip transaksi digital printing yang telah diselesaikan</p>
-        </div>
-        <a href="/manager/pesanan" class="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 text-xs font-bold text-slate-600 hover:text-primary-600 transition-colors shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Semua Pesanan
-        </a>
-    </div>
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

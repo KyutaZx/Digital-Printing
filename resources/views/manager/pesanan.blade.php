@@ -1,9 +1,9 @@
 @extends('layouts.manager')
 
 @section('title', 'Semua Pesanan')
-@section('page_title', 'Kelola & Monitoring Pesanan')
+@section('page_title', 'Semua Pesanan')
+@section('page_description', 'Pantau status transaksi pelanggan di seluruh sistem')
 
-@section('content')
 @php
     $orderList = is_array($orders) ? $orders : [];
     $pageCount = count($orderList);
@@ -45,6 +45,15 @@
     $activeFilterLabel = $statusLabels[$status] ?? 'Semua Status';
 @endphp
 
+@section('page_actions')
+<div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
+    <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
+    <span class="text-xs font-bold text-slate-600">Filter: <span class="text-primary-600">{{ $activeFilterLabel }}</span></span>
+</div>
+@endsection
+
+@section('content')
+
 <div class="space-y-6 fade-in pb-8"
      x-data="{
         selectedOrder: null,
@@ -71,17 +80,6 @@
 
     @include('manager.partials.flash')
 
-    {{-- Page Header --}}
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Semua Pesanan</h1>
-            <p class="text-xs text-slate-500 mt-1">Pantau status transaksi pelanggan di seluruh sistem</p>
-        </div>
-        <div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
-            <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-slate-600">Filter: <span class="text-primary-600">{{ $activeFilterLabel }}</span></span>
-        </div>
-    </div>
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

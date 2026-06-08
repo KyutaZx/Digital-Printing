@@ -1,7 +1,15 @@
 @extends('layouts.manager')
 
-@section('title', 'Manajemen Produk')
-@section('page_title', 'Kelola Produk & Varian')
+@section('title', 'Katalog Produk')
+@section('page_title', 'Katalog Produk')
+@section('page_description', 'Kelola produk, varian, dan harga jual toko')
+
+@section('page_actions')
+<button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    Tambah Produk Baru
+</button>
+@endsection
 
 @section('content')
 <div x-data="{ 
@@ -38,16 +46,6 @@
 
     @include('manager.partials.flash')
 
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Katalog Produk</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola produk, varian, dan harga jual toko</p>
-        </div>
-        <button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Tambah Produk Baru
-        </button>
-    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">

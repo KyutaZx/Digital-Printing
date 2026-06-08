@@ -1,22 +1,19 @@
-﻿@extends('layouts.manager')
+@extends('layouts.manager')
 
-@section('title', 'Manager Dashboard')
-@section('page_title', 'Business Overview')
+@section('title', 'Dashboard')
+@section('page_title', 'Dashboard')
+@section('page_description', 'Pantau performa bisnis Anda secara real-time')
+
+@section('page_actions')
+<div class="hidden md:flex bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 items-center gap-2 shrink-0">
+    <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    <span class="text-xs font-bold text-slate-600">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+</div>
+@endsection
 
 @section('content')
 <div class="space-y-6 fade-in pb-8">
     
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-2">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Dashboard Ringkasan</h1>
-            <p class="text-xs text-slate-500 mt-1">Pantau performa bisnis Anda secara real-time</p>
-        </div>
-        <div class="hidden md:flex bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 items-center gap-2">
-            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="text-xs font-bold text-slate-600">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
-        </div>
-    </div>
 
     {{-- Top Stats Highlight --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

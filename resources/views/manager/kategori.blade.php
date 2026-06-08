@@ -1,7 +1,15 @@
 @extends('layouts.manager')
 
-@section('title', 'Manajemen Kategori')
-@section('page_title', 'Kelola Kategori & Layanan')
+@section('title', 'Kategori Layanan')
+@section('page_title', 'Kategori Layanan')
+@section('page_description', 'Kelola kategori yang akan tampil di halaman depan "Layanan Kami"')
+
+@section('page_actions')
+<button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    Tambah Kategori Baru
+</button>
+@endsection
 
 @section('content')
 <div x-data="{ 
@@ -22,16 +30,6 @@
 
     @include('manager.partials.flash')
 
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Kategori Layanan</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola kategori yang akan tampil di halaman depan "Layanan Kami"</p>
-        </div>
-        <button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Tambah Kategori Baru
-        </button>
-    </div>
 
     {{-- Grid Kategori --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
