@@ -1,6 +1,16 @@
 @extends('layouts.staff')
 @section('title', 'Review Desain')
-@section('page_title', 'Review Desain Customer')
+@section('page_title', 'Review Desain')
+@section('page_description', 'Kelola antrean review dan riwayat persetujuan desain')
+
+@section('page_actions')
+@if(count(is_array($pending) ? $pending : []) > 0)
+<div class="flex items-center gap-2 bg-purple-50 px-4 py-2.5 rounded-2xl border border-purple-100 shrink-0">
+    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+    <span class="text-xs font-bold text-purple-700">{{ count(is_array($pending) ? $pending : []) }} perlu direview</span>
+</div>
+@endif
+@endsection
 
 @section('content')
 @php
@@ -10,18 +20,6 @@
 
 <div class="space-y-6 fade-in pb-8" x-data="{ tab: 'pending' }">
 
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Review Desain Customer</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola antrian review dan riwayat persetujuan desain</p>
-        </div>
-        @if(count($pendingList) > 0)
-        <div class="flex items-center gap-2 bg-purple-50 px-4 py-2.5 rounded-2xl border border-purple-100 shrink-0">
-            <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-purple-700">{{ count($pendingList) }} perlu direview</span>
-        </div>
-        @endif
-    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 border-l-4 border-l-purple-400">

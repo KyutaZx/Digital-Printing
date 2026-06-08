@@ -1,21 +1,19 @@
 @extends('layouts.staff')
 
-@section('title', 'Dashboard Staff')
-@section('page_title', 'Dashboard Staff')
+@section('title', 'Dashboard')
+@section('page_title', 'Dashboard')
+@section('page_description', 'Pantau antrean desain dan produksi cetak hari ini')
+
+@section('page_actions')
+<div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
+    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+    <span class="text-xs font-bold text-slate-600">{{ now()->translatedFormat('l, d F Y') }}</span>
+</div>
+@endsection
 
 @section('content')
 <div class="space-y-6 fade-in pb-8">
 
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Ringkasan Operasional</h1>
-            <p class="text-xs text-slate-500 mt-1">Pantau antrian desain dan produksi cetak hari ini</p>
-        </div>
-        <div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-xs font-bold text-slate-600">{{ now()->translatedFormat('l, d F Y') }}</span>
-        </div>
-    </div>
 
     {{-- Stat Cards --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

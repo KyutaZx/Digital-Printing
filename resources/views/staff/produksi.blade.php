@@ -2,6 +2,13 @@
 
 @section('title', 'Antrean Produksi')
 @section('page_title', 'Antrean Produksi')
+@section('page_description', 'Kelola proses cetak dari siap cetak hingga siap diambil')
+
+@section('page_actions')
+<div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
+    <span class="text-xs font-bold text-slate-600">Filter: <span class="text-primary-600">{{ request('status') === 'paid' ? 'Siap Cetak' : (request('status') === 'printing' ? 'Sedang Cetak' : (request('status') === 'ready' ? 'Siap Ambil' : (request('status') === 'design_review' ? 'Review Desain' : 'Semua'))) }}</span></span>
+</div>
+@endsection
 
 @section('content')
 @php
@@ -27,15 +34,6 @@
 
 <div class="space-y-6 fade-in pb-8">
 
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Antrean Produksi Cetak</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola proses cetak dari siap cetak hingga siap diambil</p>
-        </div>
-        <div class="flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
-            <span class="text-xs font-bold text-slate-600">Filter: <span class="text-primary-600">{{ $statusFilter[$currentStatus] ?? 'Semua' }}</span></span>
-        </div>
-    </div>
 
     {{-- Summary --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
