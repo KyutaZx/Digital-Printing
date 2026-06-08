@@ -150,8 +150,8 @@ func (u *OrderUsecase) GetOrderDetail(ctx context.Context, orderID int, userID i
 // =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
-func (u *OrderUsecase) GetAllOrders(ctx context.Context, limit int, offset int) ([]order.Order, error) {
-	return u.repo.GetAllOrders(ctx, limit, offset)
+func (u *OrderUsecase) GetAllOrders(ctx context.Context, limit int, offset int, status string) ([]order.Order, error) {
+	return u.repo.GetAllOrders(ctx, limit, offset, status)
 }
 
 // =========================================================================

@@ -35,7 +35,7 @@ type Repository interface {
 	GetOrdersByUserID(ctx context.Context, userID int) ([]Order, error)
 
 	// GetAllOrders mengembalikan semua pesanan (untuk dashboard owner/admin) dengan pagination
-	GetAllOrders(ctx context.Context, limit int, offset int) ([]Order, error)
+	GetAllOrders(ctx context.Context, limit int, offset int, status string) ([]Order, error)
 
 	// CompleteOrder menandai pesanan selesai (hanya jika statusnya ready)
 	CompleteOrder(ctx context.Context, orderID int, userID int) error

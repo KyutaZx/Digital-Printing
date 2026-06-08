@@ -204,24 +204,9 @@ func (h *OrderHandler) GetAllOrders(c *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	orders, err := h.usecase.GetAllOrders(c.Request.Context(), limit, offset)
+	orders, err := h.usecase.GetAllOrders(c.Request.Context(), limit, offset, statusFilter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
-	// Filter by status if query param provided
-	if statusFilter != "" {
-		var filtered []order.Order
-		for _, o := range orders {
-			if o.Status == statusFilter {
-				filtered = append(filtered, o)
-			}
-		}
-		if filtered == nil {
-			filtered = []order.Order{}
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "Semua pesanan", "data": filtered})
 		return
 	}
 

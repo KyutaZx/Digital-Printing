@@ -522,7 +522,20 @@ func (r *orderRepository) GetOrdersByUserID(ctx context.Context, userID int) ([]
 // =========================================================================
 // GET ALL ORDERS (Owner/Admin Dashboard)
 // =========================================================================
-func (r *orderRepository) GetAllOrders(ctx context.Context, limit int, offset int) ([]order.Order, error) {
+func (r *orderRepository) GetAllOrders(ctx context.Context, limit int, offset int, status string) ([]order.Order, error) {
+	if status != "" {
+		query := `
+			SELECT o.id, o.user_id, u.name as customer_name, u.formatted_id as customer_formatted_id,
+			       o.order_code, o.total_price, o.status, o.created_at
+			FROM orders o
+			JOIN v_users u ON u.id = o.user_id
+			WHERE o.status = $3
+			ORDER BY o.created_at DESC
+			LIMIT $1 OFFSET $2
+		`
+		return r.scanOrders(ctx, query, limit, offset, status)
+	}
+
 	query := `
 		SELECT o.id, o.user_id, u.name as customer_name, u.formatted_id as customer_formatted_id,
 		       o.order_code, o.total_price, o.status, o.created_at
