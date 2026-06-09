@@ -456,7 +456,7 @@
             </div>
 
             {{-- Kolom Bawah (Info & Bantuan) --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            <div class="grid grid-cols-1 w-full">
                 
                 {{-- Card: Info Pesanan --}}
                 <div class="flat-card h-full">
