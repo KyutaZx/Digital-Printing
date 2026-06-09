@@ -172,33 +172,7 @@
     @vite('resources/js/landing-cara-order.jsx')
 @endpush
 
-{{-- ═══════════════════════════════════════
-     KONTAK
-     ═══════════════════════════════════════ --}}
-@php
-    $waDisplay = '0812-3456-7890';
-    $waLink    = '6281234567890';
-    $email     = 'halo@jayamandiri.com';
-@endphp
-<section id="kontak" class="py-10 lg:py-12 scroll-mt-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-        <div id="landing-contact-root" class="w-full max-w-4xl"></div>
-        <script type="application/json" id="landing-contact-props">
-            {
-                "imageUrl": "https://cdn-icons-png.freepik.com/512/5968/5968534.png",
-                "title": "Hubungi Kami",
-                "description": "Punya pertanyaan atau ingin konsultasi desain? Tim kami siap membantu Anda.",
-                "primaryHref": "https://wa.me/{{ $waLink }}?text={{ urlencode('Halo Jaya Mandiri, saya ingin bertanya tentang layanan cetak.') }}",
-                "secondaryHref": "mailto:{{ $email }}"
-            }
-        </script>
-    </div>
-</section>
-
     </div>
 </div>
-@push('scripts')
-    @vite('resources/js/landing-contact.jsx')
-@endpush
 
 @endsection
