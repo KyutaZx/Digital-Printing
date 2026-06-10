@@ -20,7 +20,14 @@ class ReportController extends Controller
     {
         try {
             $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}{$path}");
-            return $r->successful() ? ($r->json('data') ?? $r->json() ?? []) : [];
+            if ($r->successful()) {
+                $body = $r->json();
+                if (is_array($body) && array_key_exists('data', $body)) {
+                    return is_array($body['data']) ? $body['data'] : [];
+                }
+                return is_array($body) ? $body : [];
+            }
+            return [];
         } catch (\Exception $e) {
             Log::warning("API GET {$path} failed: " . $e->getMessage());
             return [];

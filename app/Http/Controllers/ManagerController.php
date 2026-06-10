@@ -20,11 +20,11 @@ class ManagerController extends Controller
         try {
             $r = Http::timeout(10)->withToken(session('token'))->get("{$this->apiUrl}{$path}");
             if ($r->successful()) {
-                $json = $r->json();
-                if (array_key_exists('data', $json)) {
-                    return $json['data'] ?? [];
+                $body = $r->json();
+                if (array_key_exists('data', $body)) {
+                    return is_array($body['data']) ? $body['data'] : [];
                 }
-                return is_array($json) ? $json : [];
+                return is_array($body) ? $body : [];
             }
             return [];
         } catch (\Exception $e) {

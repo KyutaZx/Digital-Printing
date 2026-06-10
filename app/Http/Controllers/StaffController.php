@@ -29,8 +29,8 @@ class StaffController extends Controller
 
             $body = $response->json();
             // Golang API membungkus data dalam key 'data', ambil isinya
-            if (isset($body['data']) && is_array($body['data'])) {
-                return $body['data'];
+            if (array_key_exists('data', $body)) {
+                return is_array($body['data']) ? $body['data'] : [];
             }
             // Fallback jika response langsung array
             return is_array($body) ? $body : [];
