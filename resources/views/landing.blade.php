@@ -172,6 +172,22 @@
     @vite('resources/js/landing-cara-order.jsx')
 @endpush
 
+{{-- ═══════════════════════════════════════
+     LOKASI KAMI — Maps
+     ═══════════════════════════════════════ --}}
+<section id="lokasi" class="py-10 lg:py-12 bg-transparent scroll-mt-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <p class="text-xs font-bold uppercase tracking-widest text-primary-600 mb-3">Kunjungi Kami</p>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Lokasi Toko</h2>
+            <p class="mt-4 text-slate-600 leading-relaxed">Kunjungi workshop kami untuk konsultasi langsung atau mengambil pesanan Anda.</p>
+        </div>
+        <div class="w-full bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden p-2">
+            <iframe class="w-full h-[400px] sm:h-[500px] rounded-2xl" src="https://maps.google.com/maps?q=-7.2741731,112.7171708&t=&z=16&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+        </div>
+    </div>
+</section>
+
     </div>
 </div>
 
