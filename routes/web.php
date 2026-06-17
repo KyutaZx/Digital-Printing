@@ -141,6 +141,25 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::get('/users', [ManagerController::class, 'users']);
     Route::post('/users/staff', [ManagerController::class, 'registerStaff']);
     Route::post('/users/{id}/status', [ManagerController::class, 'updateUserStatus']);
+    
+    Route::get('/test-api', function() {
+        $apiUrl = config('app.golang_api_url', 'http://localhost:8080');
+        $token = session('token');
+        
+        $payload = [
+            'name' => 'Test Kategori API',
+            'description' => 'Test'
+        ];
+        
+        $response = Illuminate\Support\Facades\Http::timeout(10)->withToken($token)->post("{$apiUrl}/api/admin/categories", $payload);
+        
+        return response()->json([
+            'status' => $response->status(),
+            'body' => $response->json() ?? $response->body(),
+            'api_url' => $apiUrl,
+            'token_exists' => !empty($token)
+        ]);
+    });
 });
 
 /*
