@@ -139,7 +139,30 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
     Route::get('/laporan', [ReportController::class, 'index']);
     Route::get('/laporan/export', [ReportController::class, 'export']);
     Route::get('/users', [ManagerController::class, 'users']);
-    Route::post('/users/staff', [ManagerController::class, 'registerStaff']);
+    Route::get('/debug-logs', function() {
+        try {
+            $logPath = storage_path('logs/laravel.log');
+            $logs = file_exists($logPath) ? shell_exec("tail -n 50 " . escapeshellarg($logPath)) : "No log file found.";
+            
+            $dbTest = [];
+            try {
+                $categories = Illuminate\Support\Facades\DB::select("SELECT MAX(id) as max_id FROM categories");
+                $seq = Illuminate\Support\Facades\DB::select("SELECT last_value FROM categories_id_seq");
+                $dbTest['categories'] = ['max_id' => $categories[0]->max_id ?? 0, 'seq' => $seq[0]->last_value ?? 0];
+            } catch (\Exception $e) {
+                $dbTest['error'] = $e->getMessage();
+            }
+
+            return response()->json([
+                'laravel_logs' => $logs,
+                'db_test' => $dbTest,
+                'golang_api_url' => config('app.golang_api_url')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    });
+
     Route::post('/users/{id}/status', [ManagerController::class, 'updateUserStatus']);
     
     Route::get('/test-api', function() {
