@@ -148,6 +148,20 @@ Route::prefix('manager')->middleware(['auth.session:owner,admin'])->group(functi
 | REACT FRONTEND (Fallback Route)
 |--------------------------------------------------------------------------
 */
+Route::get('/fix-db', function () {
+    try {
+        Illuminate\Support\Facades\DB::statement("SELECT setval('categories_id_seq', COALESCE((SELECT MAX(id)+1 FROM categories), 1), false)");
+        Illuminate\Support\Facades\DB::statement("SELECT setval('products_id_seq', COALESCE((SELECT MAX(id)+1 FROM products), 1), false)");
+        Illuminate\Support\Facades\DB::statement("SELECT setval('product_variants_id_seq', COALESCE((SELECT MAX(id)+1 FROM product_variants), 1), false)");
+        Illuminate\Support\Facades\DB::statement("SELECT setval('materials_id_seq', COALESCE((SELECT MAX(id)+1 FROM materials), 1), false)");
+        Illuminate\Support\Facades\DB::statement("SELECT setval('orders_id_seq', COALESCE((SELECT MAX(id)+1 FROM orders), 1), false)");
+        Illuminate\Support\Facades\DB::statement("SELECT setval('order_items_id_seq', COALESCE((SELECT MAX(id)+1 FROM order_items), 1), false)");
+        return 'Sequence ID database berhasil diperbaiki! Silakan kembali ke halaman admin dan coba tambah kategori/produk lagi.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
 Route::fallback(function () {
     return view('index');
 });
