@@ -5,7 +5,7 @@
 @section('page_description', 'Kelola produk, varian, dan harga jual toko')
 
 @section('page_actions')
-<button @click="openModal()" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
+<button @click="$dispatch('open-modal')" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     Tambah Produk Baru
 </button>
@@ -42,7 +42,7 @@
         }
         this.modalOpen = true;
     }
-}" class="space-y-6 fade-in pb-8">
+}" @open-modal.window="openModal()" class="space-y-6 fade-in pb-8">
 
     @include('manager.partials.flash')
 

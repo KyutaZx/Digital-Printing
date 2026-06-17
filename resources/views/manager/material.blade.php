@@ -5,7 +5,7 @@
 @section('page_description', 'Pantau dan update ketersediaan bahan cetak')
 
 @section('page_actions')
-<button @click="addModal = true" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
+<button @click="$dispatch('open-add-modal')" class="btn-primary !text-sm !py-2.5 !px-5 shrink-0">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     Material Baru
 </button>
@@ -30,7 +30,7 @@
         this.selectedMaterial = material;
         this.deleteModal = true;
     }
-}" class="space-y-6 fade-in pb-8">
+}" @open-add-modal.window="addModal = true" class="space-y-6 fade-in pb-8">
 
     @php
         $materialList = is_array($materials) ? $materials : [];
