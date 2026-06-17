@@ -16,8 +16,8 @@ func OwnerOnly() gin.HandlerFunc {
 		}
 
 		role, ok := roleInterface.(string)
-		if !ok || role != "owner" {
-			c.JSON(403, gin.H{"message": "hanya owner yang dapat mengakses endpoint ini"})
+		if !ok || (role != "owner" && role != "admin") {
+			c.JSON(403, gin.H{"message": "hanya owner/admin yang dapat mengakses endpoint ini"})
 			c.Abort()
 			return
 		}

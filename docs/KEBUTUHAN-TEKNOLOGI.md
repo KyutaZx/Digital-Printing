@@ -1,0 +1,23 @@
+### 4.1.1.3 Kebutuhan Teknologi
+
+Untuk merealisasikan seluruh fungsionalitas sistem OMS Jaya Mandiri dan menjamin performa yang optimal pada arsitektur multi-service, proyek ini memanfaatkan kombinasi berbagai teknologi modern yang tangguh. Pemilihan tumpukan teknologi (tech stack) ini didasarkan pada kebutuhan akan skalabilitas, keamanan transaksi, dan kecepatan pemrosesan data. Berikut adalah rincian teknologi yang digunakan beserta justifikasi peranannya di dalam sistem:
+
+**Bahasa Pemrograman**
+
+*   **PHP:** Berperan sebagai bahasa pemrograman utama di sisi peladen (server-side). PHP dipilih karena keandalannya dalam membangun kerangka kerja logika bisnis yang kompleks, manajemen sesi pengguna, serta penanganan rute (routing) utama aplikasi. Fleksibilitas PHP memungkinkannya untuk mengelola alur data transaksional dari antarmuka pengguna ke basis data dengan sangat efisien.
+*   **Golang (Go):** Digunakan secara spesifik untuk membangun layanan Application Programming Interface (API) terdistribusi (microservice). Golang dipilih karena memiliki manajemen konkurensi (goroutines) yang sangat baik dan eksekusi kompilasi yang sangat cepat. Dalam sistem ini, Golang menangani tugas-tugas komputasi asinkron yang berat, seperti men-generate dokumen Invoice berformat PDF dalam waktu singkat tanpa memblokir (blocking) proses pada peladen utama PHP.
+*   **Python:** Merupakan bahasa pemrograman yang didedikasikan untuk microservice Kecerdasan Buatan (AI). Ekosistem Python yang kaya akan pustaka (library) pemrosesan citra digital (Image Processing) dan Machine Learning menjadikannya pilihan mutlak. Skrip Python pada sistem ini bertugas mengeksekusi algoritma blur/noise detection untuk mengukur ketajaman dan resolusi file desain yang diunggah pelanggan sebelum pesanan diteruskan ke antrean mesin cetak.
+
+**Framework dan Library**
+
+*   **Laravel:** Merupakan framework PHP berskala enterprise yang digunakan untuk membangun arsitektur MVC (Model-View-Controller) sistem. Laravel memfasilitasi implementasi fitur keamanan tingkat lanjut, khususnya middleware Role-Based Access Control (RBAC) yang memastikan isolasi hak akses antara Customer, Staff, dan Owner. Selain itu, Eloquent ORM dari Laravel mempermudah dan mengamankan manipulasi data relasional yang kompleks.
+*   **React.js:** Digunakan sebagai library utama untuk membangun antarmuka pengguna (front-end) sisi klien. Dengan pendekatan component-based architecture dan Virtual DOM, React.js memungkinkan pembuatan antarmuka tingkat lanjut yang sangat reaktif dan interaktif tanpa perlu memuat ulang seluruh halaman (Single Page Application). Hal ini sangat krusial untuk fitur-fitur dinamis seperti manajemen keranjang belanja, dashboard staf, dan pemantauan omzet secara real-time.
+*   **Tailwind CSS:** Merupakan framework CSS berbasis utilitas (utility-first) yang digunakan untuk mendesain tata letak visual (layout) aplikasi. Tailwind memungkinkan pengembang untuk merancang antarmuka bergaya premium secara konsisten dan responsif di berbagai ukuran layar (desktop maupun mobile), sehingga mempercepat proses styling tanpa menghasilkan ukuran berkas CSS yang membengkak.
+
+**Manajemen Basis Data**
+
+*   **PostgreSQL:** Digunakan sebagai Relational Database Management System (RDBMS) utama. PostgreSQL dipilih karena merupakan sistem basis data open-source tingkat lanjut yang sangat patuh terhadap standar ACID (Atomicity, Consistency, Isolation, Durability). Keandalan ini merupakan syarat mutlak bagi OMS Jaya Mandiri untuk menjaga integritas data kritikal, seperti mutasi stok material, rekam jejak status pesanan, dan pencatatan transaksi finansial.
+
+**Infrastruktur Cloud dan Hosting**
+
+*   **Virtual Private Server (VPS):** Digunakan sebagai infrastruktur komputasi awan (*cloud computing*) utama untuk mendeploy seluruh ekosistem aplikasi. Alih-alih menggunakan *shared hosting* konvensional, VPS berbasis Linux dipilih karena memberikan kebebasan akses *root* secara penuh untuk mengonfigurasi *environment* arsitektur *multi-service*. Seluruh komponen sistem—mulai dari aplikasi *front-end* dan *back-end* utama (Laravel), layanan API (Golang), *microservice* AI (Python), hingga instans basis data (PostgreSQL)—di-hosting secara terintegrasi di dalam satu peladen yang sama. Untuk menjamin seluruh *microservice* (Golang dan Python) berjalan secara asinkron tanpa henti di latar belakang (*background*), sistem memanfaatkan **PM2** sebagai *Process Manager*. Pendekatan terpusat dalam satu *private network* ini secara signifikan menekan angka latensi komunikasi antar-layanan (*inter-service communication*) sekaligus memudahkan manajemen *scaling* jika terjadi lonjakan lalu lintas pesanan di kemudian hari.
