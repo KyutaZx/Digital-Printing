@@ -209,7 +209,7 @@ class ManagerController extends Controller
 
                 return back()->with('success', 'Produk berhasil ditambahkan.');
             }
-            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Cek format data.'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -282,7 +282,7 @@ class ManagerController extends Controller
                 }
                 return back()->with('success', 'Produk berhasil diperbarui.');
             }
-            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek format data.'));
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Cek format data.'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -295,7 +295,7 @@ class ManagerController extends Controller
             if ($response->successful()) {
                 return back()->with('success', 'Produk berhasil dihapus.');
             }
-            return back()->with('error', 'Gagal menghapus produk: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
+            return back()->with('error', 'Gagal menghapus produk: ' . ($response->json('message') ?? $response->json('error') ?? 'Terjadi kesalahan.'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -386,7 +386,7 @@ class ManagerController extends Controller
             if ($r->successful()) {
                 return back()->with('success', 'Status pesanan berhasil diperbarui.');
             }
-            return back()->with('error', $r->json('message') ?? 'Gagal memperbarui status pesanan.');
+            return back()->with('error', $r->json('message') ?? $r->json('error') ?? 'Gagal memperbarui status pesanan.');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan saat menghubungi server.');
         }
@@ -445,7 +445,7 @@ class ManagerController extends Controller
             if ($response->successful()) {
                 return back()->with('success', 'Staff baru berhasil didaftarkan.');
             }
-            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Cek data input.'));
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Cek data input.'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -465,7 +465,7 @@ class ManagerController extends Controller
             if ($response->successful()) {
                 return back()->with('success', $response->json('message') ?? 'Status pengguna berhasil diperbarui.');
             }
-            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Gagal memperbarui status.'));
+            return back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Gagal memperbarui status.'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -504,7 +504,7 @@ class ManagerController extends Controller
                 }
                 return redirect()->back()->with('success', 'Kategori berhasil ditambahkan!');
             }
-            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
+            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Terjadi kesalahan.'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -526,7 +526,7 @@ class ManagerController extends Controller
                 }
                 return redirect()->back()->with('success', 'Kategori berhasil diupdate!');
             }
-            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? 'Terjadi kesalahan.'));
+            return redirect()->back()->with('error', 'Gagal API: ' . ($response->json('message') ?? $response->json('error') ?? 'Terjadi kesalahan.'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghubungi server: ' . $e->getMessage());
         }
@@ -539,7 +539,7 @@ class ManagerController extends Controller
             if ($response->successful()) {
                 return redirect()->back()->with('success', 'Kategori berhasil dihapus!');
             }
-            return redirect()->back()->with('error', 'Gagal menghapus kategori: ' . ($response->json('message') ?? 'Sedang digunakan atau tidak ditemukan.'));
+            return redirect()->back()->with('error', 'Gagal menghapus kategori: ' . ($response->json('message') ?? $response->json('error') ?? 'Sedang digunakan atau tidak ditemukan.'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus kategori.');
         }
