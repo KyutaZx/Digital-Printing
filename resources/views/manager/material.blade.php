@@ -18,15 +18,15 @@
     editModal: false,
     deleteModal: false,
     selectedMaterial: { id: 0, name: '', stock: 0, unit: '' },
-    openRestock(material) {
+    openRestock: function(material) {
         this.selectedMaterial = material;
         this.restockModal = true;
     },
-    openEdit(material) {
+    openEdit: function(material) {
         this.selectedMaterial = { ...material };
         this.editModal = true;
     },
-    openDelete(material) {
+    openDelete: function(material) {
         this.selectedMaterial = material;
         this.deleteModal = true;
     }

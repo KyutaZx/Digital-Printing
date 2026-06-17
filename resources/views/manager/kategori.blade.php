@@ -16,7 +16,7 @@
     modalOpen: false, 
     editMode: false, 
     currentCategory: { id: '', name: '', description: '', image: '' },
-    openModal(category = null) {
+    openModal: function(category) {
         if(category) {
             this.editMode = true;
             this.currentCategory = JSON.parse(JSON.stringify(category));

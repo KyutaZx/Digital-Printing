@@ -35,11 +35,11 @@
         modalOpen: false,
         searchQuery: '',
         noSearchResults: false,
-        checkVisible() {
+        checkVisible: function() {
             this.$nextTick(() => {
-                const rows = this.$refs.tableBody?.querySelectorAll('[data-user-row]') ?? [];
+                const rows = this.$refs.tableBody ? this.$refs.tableBody.querySelectorAll('[data-user-row]') : [];
                 this.noSearchResults = this.searchQuery.trim() !== '' &&
-                    [...rows].every(r => r.offsetParent === null);
+                    Array.from(rows).every(r => r.offsetParent === null);
             });
         }
      }"

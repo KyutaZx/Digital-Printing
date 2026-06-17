@@ -17,9 +17,9 @@
     editMode: false, 
     currentProduct: { name: '', description: '', base_price: '', category_id: '', estimated_days: 1, variants: [] },
     variants: [{ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }],
-    addVariant() { this.variants.push({ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }); },
-    removeVariant(i) { if (this.variants.length > 1) this.variants.splice(i, 1); },
-    openModal(product = null) {
+    addVariant: function() { this.variants.push({ id: 0, name: '', price: '', stock: '', material_id: '', material_usage: '' }); },
+    removeVariant: function(i) { if (this.variants.length > 1) this.variants.splice(i, 1); },
+    openModal: function(product) {
         if(product) {
             this.editMode = true;
             this.currentProduct = JSON.parse(JSON.stringify(product));
